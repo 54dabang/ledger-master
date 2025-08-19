@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 public class SecurityConfig {
 
     public static final List<String> whiteList = Stream.of(
-            //"/api/**",
+
             "/api/white/**"
             //, "/**"
     ).collect(Collectors.toList());

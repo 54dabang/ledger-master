@@ -217,6 +217,12 @@
                 <artifactId>ledger-common</artifactId>
                 <version>${ledger.version}</version>
             </dependency>
+            <!-- 引入业务管理模块-->
+            <dependency>
+                <groupId>com.ledger</groupId>
+                <artifactId>ledger-business</artifactId>
+                <version>${ledger.version}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
@@ -228,6 +234,7 @@
         <module>ledger-quartz</module>
         <module>ledger-generator</module>
         <module>ledger-common</module>
+        <module>ledger-business</module>
     </modules>
     <packaging>pom</packaging>
 
