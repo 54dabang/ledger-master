@@ -1,0 +1,276 @@
+{
+    "id": 306247538,
+    "billCode": "10012025060860",
+    "createTime": "2025-06-04 20:23:45",
+    "title": "类兴邦报销2024-09-30至2024-10-08到北京、日照差旅费",
+    "handler": {
+        "id": 123773445,
+        "loginName": "qin_wei2",
+        "name": "秦伟",
+        "sex": "男",
+        "company": {
+            "name": "中国长江三峡集团有限公司"
+        },
+        "department": {
+            "id": 8178416,
+            "updateDate": "2024-01-24 03:41:59",
+            "name": "科学技术研究院信息技术研究中心",
+            "departmentType": "2",
+            "companyId": 1
+        },
+        "postLevel": "F",
+        "job": "副专业师",
+        "identityNum": "371102199611027119"
+    },
+    "company": {
+        "id": 1,
+        "name": "中国长江三峡集团有限公司"
+    },
+    "department": {
+        "id": 8178416,
+        "name": "科学技术研究院信息技术研究中心"
+    },
+    "billRobot": null,
+    "businessTypeId": 45,
+    "businessType": {
+        "id": 45,
+        "billName": "差旅费报销单",
+        "code": "0045",
+        "name": "差旅费",
+        "ncCode": "20H9004",
+        "processClass": "biz-icon Travelling",
+        "sort": 32,
+        "classifyCode": "0003",
+        "classifyName": "差旅路费",
+        "enName": "BusinessTrip",
+        "classifyEnName": "Travel expenses",
+        "path": "BusinessTrip",
+        "groupCode": "31",
+        "categoryCode": "45",
+        "select": null
+    },
+    "expenseTypeInfoList": [
+        {
+            "id": 310306091,
+            "billId": 306247538,
+            "expenseTypeId": 38,
+            "expenseTypeCode": "EXPT018",
+            "expenseTypeName": "差旅费"
+        }
+    ],
+    "budgetInfoList": [
+        {
+            "id": 310306092,
+            "budgetCode": "249  -2025-3038",
+            "budgetDesc": "10MW级多源蓄热式压缩空气储能电站集成技术研究及工程示范",
+            "budgetAvailableAmount": 1574382.35
+        }
+    ],
+    "claimantList": [
+        {
+            "id": 310306093,
+            "insertUser": 123773445,
+            "insertDate": "2025-06-18 16:50:26",
+            "updateUser": 123773445,
+            "updateDate": "2025-06-18 16:50:26",
+            "billId": 306247538,
+            "userId": 230391549,
+            "userName": "类兴邦",
+            "sex": "男",
+            "user": {
+                "id": 230391549,
+                "insertUser": 0,
+                "insertDate": "2024-09-03 00:04:01",
+                "updateUser": 0,
+                "updateDate": "2024-11-16 20:37:54",
+                "ehrcode": "370982198906165279",
+                "ehrpkid": "2080751126471770113",
+                "enable": "Y",
+                "loginName": "lei_xingbang",
+                "name": "类兴邦",
+                "password": null,
+                "sex": "男",
+                "status": null,
+                "defaultVersion": "V3",
+                "email": "bGVpX3hpbmdiYW5nQGN0Zy5jb20uY24=",
+                "roleList": [
+
+                ],
+                "birth": null,
+                "company": {
+                    "id": 1,
+                    "insertUser": null,
+                    "insertDate": null,
+                    "updateUser": 19508158,
+                    "updateDate": "2025-01-06 19:18:56",
+                    "ehrCode": "1",
+                    "ehrPKID": "1001",
+                    "name": "中国长江三峡集团有限公司",
+                    "isCustomTitle": "N",
+                    "isManualEditing": null,
+                    "isOptionalDept": null,
+                    "enName": null,
+                    "isEnableInvoice": "Y",
+                    "fatherId": 0,
+                    "enable": "Y",
+                    "currency": {
+                        "id": 7,
+                        "insertUser": null,
+                        "insertDate": null,
+                        "updateUser": null,
+                        "updateDate": null,
+                        "code": "CNY",
+                        "name": "人民币",
+                        "ncCode": null,
+                        "symbol": "￥"
+                    },
+                    "enableVersionChange": "Y",
+                    "enableTravelInterface": "Y",
+                    "ctripAccountType": "2",
+                    "enableStrongControl": "N",
+                    "enableRobot": "N",
+                    "enableBd": null,
+                    "enableArchivedFile": null,
+                    "deptLinkSize": null
+                },
+                "department": {
+                    "id": 8178416,
+                    "name": "科学技术研究院信息技术研究中心",
+                    "departmentType": "2",
+                    "processGroupId": 125321720,
+                    "companyId": 1
+                },
+                "postLevel": "F",
+                "job": "专业师",
+                "workTime": 1467734400000,
+                "minusSeniority": null,
+                "identityNum": "370982198906165279",
+                "shortName": "lxb leixingbang",
+                "issendremind": null,
+                "grouprelationList": null,
+                "roleIdList": [
+
+                ],
+                "rbsCompany": null,
+                "rbsDepartment": null,
+                "userRoleRelationStr": null,
+                "relation": null,
+                "relationName": null,
+                "relationIdcard": null
+            },
+            "csort": null
+        }
+    ],
+    "deductibleInfoList": [
+
+    ],
+    "isV3Create": "Y",
+    "mediaType": "NP",
+    "travelRestBaseInfo": {
+        "id": 306247546,
+        "billId": 306247538,
+        "startingLocation": {
+            "id": 1,
+            "updateDate": "2021-07-09 19:34:13",
+            "type": "First",
+            "typeDesc": null,
+            "cnName": "北京",
+            "enName": "beijing",
+            "shortName": "bj"
+        },
+        "arrivalPlaceList": [
+            {
+                "id": 310306095,
+                "insertUser": 123773445,
+                "insertDate": "2025-06-18 16:50:26",
+                "updateUser": 123773445,
+                "updateDate": "2025-06-18 16:50:26",
+                "travelRestBaseInfoId": 306247546,
+                "terminalLocation": {
+                    "id": 1,
+                    "updateUser": 0,
+                    "updateDate": "2021-07-09 19:34:13",
+                    "type": "First",
+                    "typeDesc": null,
+                    "cnName": "北京",
+                    "enName": "beijing",
+                    "shortName": "bj"
+                }
+            },
+            {
+                "id": 310306096,
+                "insertUser": 123773445,
+                "insertDate": "2025-06-18 16:50:26",
+                "updateUser": 123773445,
+                "updateDate": "2025-06-18 16:50:26",
+                "travelRestBaseInfoId": 306247546,
+                "terminalLocation": {
+                    "id": 418,
+                    "insertUser": null,
+                    "insertDate": null,
+                    "updateUser": 0,
+                    "updateDate": "2021-07-09 19:35:25",
+                    "type": "Second",
+                    "typeDesc": null,
+                    "cnName": "日照",
+                    "enName": "rizhao",
+                    "shortName": "rz",
+                    "parentId": null,
+                    "tag": null
+                }
+            }
+        ],
+        "startingTime": "2024-09-30",
+        "terminalTime": "2024-10-08",
+        "reasons": "年休假一天。 年休假一天。"
+    },
+    "rsiContractData": {
+        "id": "306247955",
+        "projectName": "大坝工程智能建造信息管理平台",
+        "projectCode": "wwxm-2017-0007",
+        "billId": 306247538
+    },
+    "businessTripProjectBasicInfo": null,
+    "travellingAllowanceInfoGroupList": null,
+    "travelOrderList": null,
+    "billBudgetList": [
+        {
+            "billId": 306247538,
+            "budgetBillId": 237788144,
+            "budgetBillCode": "10442024091147",
+            "budgetBillTitle": "秦伟申请2024-09-30至2024-09-30到日照休假",
+            "budgetBillBusinessTypeId": 44,
+            "budgetBillBusinessType": {
+                "id": 44,
+                "billName": "休假申请单",
+                "code": "0044",
+                "name": "休假申请",
+                "ncCode": "20H9002",
+                "processClass": "biz-icon Rest",
+                "sort": 25,
+                "classifyCode": "0003",
+                "classifyName": "差旅路费",
+                "enName": "RestApplication",
+                "classifyEnName": "Travel expenses",
+                "path": "RestApplication",
+                "groupCode": "24",
+                "categoryCode": null,
+                "select": null
+            }
+        },
+        {
+            "billId": 306247538,
+            "budgetBillId": 238981169,
+            "budgetBillCode": "10442024100022",
+            "budgetBillTitle": "秦伟申请2024-10-08至2024-10-08到北京休假",
+            "budgetBillBusinessTypeId": 44,
+            "budgetBillBusinessType": {
+                "id": 44,
+                "billName": "休假申请单",
+                "name": "休假申请",
+                "classifyCode": "0003",
+                "classifyName": "差旅路费"
+            }
+        }
+    ]
+}
