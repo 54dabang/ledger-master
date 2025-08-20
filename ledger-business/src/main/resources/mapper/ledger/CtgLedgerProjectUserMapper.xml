@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ledger.business.mapper.CtgLedgerProjectUserMapper">
+    
+    <resultMap type="CtgLedgerProjectUser" id="CtgLedgerProjectUserResult">
+        <result property="id"    column="id"    />
+        <result property="ctgLedgerProjectId"    column="ctg_ledger_project_id"    />
+        <result property="sysUserId"    column="sys_user_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectCtgLedgerProjectUserVo">
+        select id, ctg_ledger_project_id, sys_user_id, create_by, create_time, update_by, update_time from ctg_ledger_project_user
+    </sql>
+
+    <select id="selectCtgLedgerProjectUserList" parameterType="CtgLedgerProjectUser" resultMap="CtgLedgerProjectUserResult">
+        <include refid="selectCtgLedgerProjectUserVo"/>
+        <where>  
+            <if test="ctgLedgerProjectId != null "> and ctg_ledger_project_id = #{ctgLedgerProjectId}</if>
+            <if test="sysUserId != null "> and sys_user_id = #{sysUserId}</if>
+        </where>
+    </select>
+    
+    <select id="selectCtgLedgerProjectUserById" parameterType="Long" resultMap="CtgLedgerProjectUserResult">
+        <include refid="selectCtgLedgerProjectUserVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertCtgLedgerProjectUser" parameterType="CtgLedgerProjectUser" useGeneratedKeys="true" keyProperty="id">
+        insert into ctg_ledger_project_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="ctgLedgerProjectId != null">ctg_ledger_project_id,</if>
+            <if test="sysUserId != null">sys_user_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="ctgLedgerProjectId != null">#{ctgLedgerProjectId},</if>
+            <if test="sysUserId != null">#{sysUserId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCtgLedgerProjectUser" parameterType="CtgLedgerProjectUser">
+        update ctg_ledger_project_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="ctgLedgerProjectId != null">ctg_ledger_project_id = #{ctgLedgerProjectId},</if>
+            <if test="sysUserId != null">sys_user_id = #{sysUserId},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCtgLedgerProjectUserById" parameterType="Long">
+        delete from ctg_ledger_project_user where id = #{id}
+    </delete>
+
+    <delete id="deleteCtgLedgerProjectUserByIds" parameterType="String">
+        delete from ctg_ledger_project_user where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

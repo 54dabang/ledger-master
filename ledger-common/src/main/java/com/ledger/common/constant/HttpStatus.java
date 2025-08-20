@@ -91,4 +91,13 @@ public class HttpStatus
      * 系统警告消息
      */
     public static final int WARN = 601;
+    /**
+     * 同步的数据已经存在
+     */
+    public static final int DATA_DUPLICATE = 701;
+
+    /**
+     * 同步项目缺失
+     */
+    public static final int DATA_PROJECT_MISSING = 702;
 }

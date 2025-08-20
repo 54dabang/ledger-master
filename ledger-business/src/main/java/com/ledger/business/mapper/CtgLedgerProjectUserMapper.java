@@ -1,0 +1,61 @@
+package com.ledger.business.mapper;
+
+import java.util.List;
+import com.ledger.business.domain.CtgLedgerProjectUser;
+
+/**
+ * 项目用户Mapper接口
+ * 
+ * @author ledger
+ * @date 2025-08-20
+ */
+public interface CtgLedgerProjectUserMapper 
+{
+    /**
+     * 查询项目用户
+     * 
+     * @param id 项目用户主键
+     * @return 项目用户
+     */
+    public CtgLedgerProjectUser selectCtgLedgerProjectUserById(Long id);
+
+    /**
+     * 查询项目用户列表
+     * 
+     * @param ctgLedgerProjectUser 项目用户
+     * @return 项目用户集合
+     */
+    public List<CtgLedgerProjectUser> selectCtgLedgerProjectUserList(CtgLedgerProjectUser ctgLedgerProjectUser);
+
+    /**
+     * 新增项目用户
+     * 
+     * @param ctgLedgerProjectUser 项目用户
+     * @return 结果
+     */
+    public int insertCtgLedgerProjectUser(CtgLedgerProjectUser ctgLedgerProjectUser);
+
+    /**
+     * 修改项目用户
+     * 
+     * @param ctgLedgerProjectUser 项目用户
+     * @return 结果
+     */
+    public int updateCtgLedgerProjectUser(CtgLedgerProjectUser ctgLedgerProjectUser);
+
+    /**
+     * 删除项目用户
+     * 
+     * @param id 项目用户主键
+     * @return 结果
+     */
+    public int deleteCtgLedgerProjectUserById(Long id);
+
+    /**
+     * 批量删除项目用户
+     * 
+     * @param ids 需要删除的数据主键集合
+     * @return 结果
+     */
+    public int deleteCtgLedgerProjectUserByIds(Long[] ids);
+}

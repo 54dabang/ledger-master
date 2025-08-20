@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ledger.business.mapper.CtgLedgerAnnualBudgetMapper">
+    
+    <resultMap type="CtgLedgerAnnualBudget" id="CtgLedgerAnnualBudgetResult">
+        <result property="id"    column="id"    />
+        <result property="year"    column="year"    />
+        <result property="equipPurchaseFee"    column="equip_purchase_fee"    />
+        <result property="protoEquipFee"    column="proto_equip_fee"    />
+        <result property="equipRenovFee"    column="equip_renov_fee"    />
+        <result property="equipRentFee"    column="equip_rent_fee"    />
+        <result property="materialCost"    column="material_cost"    />
+        <result property="testProcFee"    column="test_proc_fee"    />
+        <result property="fuelPowerCost"    column="fuel_power_cost"    />
+        <result property="pubDocIpFee"    column="pub_doc_ip_fee"    />
+        <result property="travelConfCoopFee"    column="travel_conf_coop_fee"    />
+        <result property="laborCost"    column="labor_cost"    />
+        <result property="serviceCost"    column="service_cost"    />
+        <result property="expertConsultFee"    column="expert_consult_fee"    />
+        <result property="mgmtFee"    column="mgmt_fee"    />
+        <result property="taxFee"    column="tax_fee"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectCtgLedgerAnnualBudgetVo">
+        select id, year, equip_purchase_fee, proto_equip_fee, equip_renov_fee, equip_rent_fee, material_cost, test_proc_fee, fuel_power_cost, pub_doc_ip_fee, travel_conf_coop_fee, labor_cost, service_cost, expert_consult_fee, mgmt_fee, tax_fee, create_by, create_time, update_by, update_time from ctg_ledger_annual_budget
+    </sql>
+
+    <select id="selectCtgLedgerAnnualBudgetList" parameterType="CtgLedgerAnnualBudget" resultMap="CtgLedgerAnnualBudgetResult">
+        <include refid="selectCtgLedgerAnnualBudgetVo"/>
+        <where>  
+            <if test="year != null "> and year = #{year}</if>
+            <if test="equipPurchaseFee != null "> and equip_purchase_fee = #{equipPurchaseFee}</if>
+            <if test="protoEquipFee != null "> and proto_equip_fee = #{protoEquipFee}</if>
+            <if test="equipRenovFee != null "> and equip_renov_fee = #{equipRenovFee}</if>
+            <if test="equipRentFee != null "> and equip_rent_fee = #{equipRentFee}</if>
+            <if test="materialCost != null "> and material_cost = #{materialCost}</if>
+            <if test="testProcFee != null "> and test_proc_fee = #{testProcFee}</if>
+            <if test="fuelPowerCost != null "> and fuel_power_cost = #{fuelPowerCost}</if>
+            <if test="pubDocIpFee != null "> and pub_doc_ip_fee = #{pubDocIpFee}</if>
+            <if test="travelConfCoopFee != null "> and travel_conf_coop_fee = #{travelConfCoopFee}</if>
+            <if test="laborCost != null "> and labor_cost = #{laborCost}</if>
+            <if test="serviceCost != null "> and service_cost = #{serviceCost}</if>
+            <if test="expertConsultFee != null "> and expert_consult_fee = #{expertConsultFee}</if>
+            <if test="mgmtFee != null "> and mgmt_fee = #{mgmtFee}</if>
+            <if test="taxFee != null "> and tax_fee = #{taxFee}</if>
+        </where>
+    </select>
+    
+    <select id="selectCtgLedgerAnnualBudgetById" parameterType="Long" resultMap="CtgLedgerAnnualBudgetResult">
+        <include refid="selectCtgLedgerAnnualBudgetVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertCtgLedgerAnnualBudget" parameterType="CtgLedgerAnnualBudget" useGeneratedKeys="true" keyProperty="id">
+        insert into ctg_ledger_annual_budget
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="year != null">year,</if>
+            <if test="equipPurchaseFee != null">equip_purchase_fee,</if>
+            <if test="protoEquipFee != null">proto_equip_fee,</if>
+            <if test="equipRenovFee != null">equip_renov_fee,</if>
+            <if test="equipRentFee != null">equip_rent_fee,</if>
+            <if test="materialCost != null">material_cost,</if>
+            <if test="testProcFee != null">test_proc_fee,</if>
+            <if test="fuelPowerCost != null">fuel_power_cost,</if>
+            <if test="pubDocIpFee != null">pub_doc_ip_fee,</if>
+            <if test="travelConfCoopFee != null">travel_conf_coop_fee,</if>
+            <if test="laborCost != null">labor_cost,</if>
+            <if test="serviceCost != null">service_cost,</if>
+            <if test="expertConsultFee != null">expert_consult_fee,</if>
+            <if test="mgmtFee != null">mgmt_fee,</if>
+            <if test="taxFee != null">tax_fee,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="year != null">#{year},</if>
+            <if test="equipPurchaseFee != null">#{equipPurchaseFee},</if>
+            <if test="protoEquipFee != null">#{protoEquipFee},</if>
+            <if test="equipRenovFee != null">#{equipRenovFee},</if>
+            <if test="equipRentFee != null">#{equipRentFee},</if>
+            <if test="materialCost != null">#{materialCost},</if>
+            <if test="testProcFee != null">#{testProcFee},</if>
+            <if test="fuelPowerCost != null">#{fuelPowerCost},</if>
+            <if test="pubDocIpFee != null">#{pubDocIpFee},</if>
+            <if test="travelConfCoopFee != null">#{travelConfCoopFee},</if>
+            <if test="laborCost != null">#{laborCost},</if>
+            <if test="serviceCost != null">#{serviceCost},</if>
+            <if test="expertConsultFee != null">#{expertConsultFee},</if>
+            <if test="mgmtFee != null">#{mgmtFee},</if>
+            <if test="taxFee != null">#{taxFee},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCtgLedgerAnnualBudget" parameterType="CtgLedgerAnnualBudget">
+        update ctg_ledger_annual_budget
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="year != null">year = #{year},</if>
+            <if test="equipPurchaseFee != null">equip_purchase_fee = #{equipPurchaseFee},</if>
+            <if test="protoEquipFee != null">proto_equip_fee = #{protoEquipFee},</if>
+            <if test="equipRenovFee != null">equip_renov_fee = #{equipRenovFee},</if>
+            <if test="equipRentFee != null">equip_rent_fee = #{equipRentFee},</if>
+            <if test="materialCost != null">material_cost = #{materialCost},</if>
+            <if test="testProcFee != null">test_proc_fee = #{testProcFee},</if>
+            <if test="fuelPowerCost != null">fuel_power_cost = #{fuelPowerCost},</if>
+            <if test="pubDocIpFee != null">pub_doc_ip_fee = #{pubDocIpFee},</if>
+            <if test="travelConfCoopFee != null">travel_conf_coop_fee = #{travelConfCoopFee},</if>
+            <if test="laborCost != null">labor_cost = #{laborCost},</if>
+            <if test="serviceCost != null">service_cost = #{serviceCost},</if>
+            <if test="expertConsultFee != null">expert_consult_fee = #{expertConsultFee},</if>
+            <if test="mgmtFee != null">mgmt_fee = #{mgmtFee},</if>
+            <if test="taxFee != null">tax_fee = #{taxFee},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCtgLedgerAnnualBudgetById" parameterType="Long">
+        delete from ctg_ledger_annual_budget where id = #{id}
+    </delete>
+
+    <delete id="deleteCtgLedgerAnnualBudgetByIds" parameterType="String">
+        delete from ctg_ledger_annual_budget where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

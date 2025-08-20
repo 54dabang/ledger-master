@@ -1,4 +1,4 @@
-package com.ledger.dto;
+package com.ledger.business.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
@@ -32,6 +32,9 @@ public class ClaimantDTO {
         @ApiModelProperty(value = "登录名称 eg:lei_xingbang")
         private String loginName;
 
+        @ApiModelProperty(value = "真实姓名 eg:类兴邦")
+        private String name;
+
         @ApiModelProperty(value = "职位名称 eg:专业师")
         private String job;
 
@@ -43,6 +46,9 @@ public class ClaimantDTO {
 
         @ApiModelProperty(value = "部门信息")
         private Department department;
+
+        @ApiModelProperty(value = "性别")
+        private String sex;
     }
 
     @Data

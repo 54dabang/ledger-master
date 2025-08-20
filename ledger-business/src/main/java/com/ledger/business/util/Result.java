@@ -1,4 +1,4 @@
-package com.ledger.util;
+package com.ledger.business.util;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
