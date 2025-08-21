@@ -1,0 +1,104 @@
+package com.ledger.business.controller;
+
+import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.ledger.common.annotation.Log;
+import com.ledger.common.core.controller.BaseController;
+import com.ledger.common.core.domain.AjaxResult;
+import com.ledger.common.enums.BusinessType;
+import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
+import com.ledger.business.service.ICtgLedgerProjectExpenseDetailService;
+import com.ledger.common.utils.poi.ExcelUtil;
+import com.ledger.common.core.page.TableDataInfo;
+
+/**
+ * 项目支出明细Controller
+ * 
+ * @author ledger
+ * @date 2025-08-21
+ */
+@RestController
+@RequestMapping("/api/expenseDetail")
+public class CtgLedgerProjectExpenseDetailController extends BaseController
+{
+    @Autowired
+    private ICtgLedgerProjectExpenseDetailService ctgLedgerProjectExpenseDetailService;
+
+    /**
+     * 查询项目支出明细列表
+     */
+    //@PreAuthorize("@ss.hasPermi('business:detail:list')")
+    @GetMapping("/list")
+    public TableDataInfo list(CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail)
+    {
+        startPage();
+        List<CtgLedgerProjectExpenseDetail> list = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(ctgLedgerProjectExpenseDetail);
+        return getDataTable(list);
+    }
+
+    /**
+     * 导出项目支出明细列表
+     */
+    @PreAuthorize("@ss.hasPermi('business:detail:export')")
+    @Log(title = "项目支出明细", businessType = BusinessType.EXPORT)
+    @PostMapping("/export")
+    public void export(HttpServletResponse response, CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail)
+    {
+        List<CtgLedgerProjectExpenseDetail> list = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(ctgLedgerProjectExpenseDetail);
+        ExcelUtil<CtgLedgerProjectExpenseDetail> util = new ExcelUtil<CtgLedgerProjectExpenseDetail>(CtgLedgerProjectExpenseDetail.class);
+        util.exportExcel(response, list, "项目支出明细数据");
+    }
+
+    /**
+     * 获取项目支出明细详细信息
+     */
+    @PreAuthorize("@ss.hasPermi('business:detail:query')")
+    @GetMapping(value = "/{id}")
+    public AjaxResult getInfo(@PathVariable("id") Long id)
+    {
+        return success(ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailById(id));
+    }
+
+    /**
+     * 新增项目支出明细
+     */
+    @PreAuthorize("@ss.hasPermi('business:detail:add')")
+    @Log(title = "项目支出明细", businessType = BusinessType.INSERT)
+    @PostMapping
+    public AjaxResult add(@RequestBody CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail)
+    {
+        return toAjax(ctgLedgerProjectExpenseDetailService.insertCtgLedgerProjectExpenseDetail(ctgLedgerProjectExpenseDetail));
+    }
+
+    /**
+     * 修改项目支出明细
+     */
+    @PreAuthorize("@ss.hasPermi('business:detail:edit')")
+    @Log(title = "项目支出明细", businessType = BusinessType.UPDATE)
+    @PutMapping
+    public AjaxResult edit(@RequestBody CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail)
+    {
+        return toAjax(ctgLedgerProjectExpenseDetailService.updateCtgLedgerProjectExpenseDetail(ctgLedgerProjectExpenseDetail));
+    }
+
+    /**
+     * 删除项目支出明细
+     */
+    @PreAuthorize("@ss.hasPermi('business:detail:remove')")
+    @Log(title = "项目支出明细", businessType = BusinessType.DELETE)
+	@DeleteMapping("/{ids}")
+    public AjaxResult remove(@PathVariable Long[] ids)
+    {
+        return toAjax(ctgLedgerProjectExpenseDetailService.deleteCtgLedgerProjectExpenseDetailByIds(ids));
+    }
+}

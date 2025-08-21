@@ -2,9 +2,9 @@ package com.ledger.business.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,11 +28,11 @@ import com.ledger.common.core.page.TableDataInfo;
  * 项目管理Controller
  * 
  * @author ledger
- * @date 2025-08-19
+ * @date 2025-08-21
  */
 @RestController
 @RequestMapping("/api/project")
-@Api(tags = "项目管理")
+@Api(value = "台账接口", tags = {"项目信息维护"})
 public class CtgLedgerProjectController extends BaseController
 {
     @Autowired
@@ -41,10 +41,10 @@ public class CtgLedgerProjectController extends BaseController
     /**
      * 查询项目管理列表
      */
-    //@PreAuthorize("@ss.hasPermi('system:project:list')")
+   // @PreAuthorize("@ss.hasPermi('business:project:list')")
     @GetMapping("/list")
-    @ApiOperation("查询项目管理列表")
-    public TableDataInfo list(@ApiParam("项目管理信息") CtgLedgerProject ctgLedgerProject)
+    @ApiOperation("项目基本信息列表")
+    public TableDataInfo list(CtgLedgerProject ctgLedgerProject)
     {
         startPage();
         List<CtgLedgerProject> list = ctgLedgerProjectService.selectCtgLedgerProjectList(ctgLedgerProject);
@@ -54,11 +54,11 @@ public class CtgLedgerProjectController extends BaseController
     /**
      * 导出项目管理列表
      */
-    //@PreAuthorize("@ss.hasPermi('system:project:export')")
+  //  @PreAuthorize("@ss.hasPermi('business:project:export')")
     @Log(title = "项目管理", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    @ApiOperation("导出项目管理列表")
-    public void export(HttpServletResponse response, @ApiParam("项目管理信息") CtgLedgerProject ctgLedgerProject)
+    @ApiOperation("导出项目excel")
+    public void export(HttpServletResponse response, CtgLedgerProject ctgLedgerProject)
     {
         List<CtgLedgerProject> list = ctgLedgerProjectService.selectCtgLedgerProjectList(ctgLedgerProject);
         ExcelUtil<CtgLedgerProject> util = new ExcelUtil<CtgLedgerProject>(CtgLedgerProject.class);
@@ -68,10 +68,10 @@ public class CtgLedgerProjectController extends BaseController
     /**
      * 获取项目管理详细信息
      */
-    //@PreAuthorize("@ss.hasPermi('system:project:query')")
+ //   @PreAuthorize("@ss.hasPermi('business:project:query')")
     @GetMapping(value = "/{id}")
-    @ApiOperation("获取项目管理详细信息")
-    public AjaxResult getInfo(@ApiParam("项目ID") @PathVariable("id") Long id)
+    @ApiOperation("获取项目基本信息")
+    public AjaxResult getInfo(@PathVariable("id") Long id)
     {
         return success(ctgLedgerProjectService.selectCtgLedgerProjectById(id));
     }
@@ -79,11 +79,11 @@ public class CtgLedgerProjectController extends BaseController
     /**
      * 新增项目管理
      */
-    // @PreAuthorize("@ss.hasPermi('system:project:add')")
+   // @PreAuthorize("@ss.hasPermi('business:project:add')")
     @Log(title = "项目管理", businessType = BusinessType.INSERT)
     @PostMapping
-    @ApiOperation("新增项目管理")
-    public AjaxResult add(@ApiParam("项目管理信息") @RequestBody CtgLedgerProject ctgLedgerProject)
+    @ApiOperation("新增项目")
+    public AjaxResult add(@RequestBody CtgLedgerProject ctgLedgerProject)
     {
         return toAjax(ctgLedgerProjectService.insertCtgLedgerProject(ctgLedgerProject));
     }
@@ -91,11 +91,11 @@ public class CtgLedgerProjectController extends BaseController
     /**
      * 修改项目管理
      */
-    //@PreAuthorize("@ss.hasPermi('system:project:edit')")
+  //  @PreAuthorize("@ss.hasPermi('business:project:edit')")
     @Log(title = "项目管理", businessType = BusinessType.UPDATE)
     @PutMapping
-    @ApiOperation("修改项目管理")
-    public AjaxResult edit(@ApiParam("项目管理信息") @RequestBody CtgLedgerProject ctgLedgerProject)
+    @ApiOperation("编辑项目")
+    public AjaxResult edit(@RequestBody CtgLedgerProject ctgLedgerProject)
     {
         return toAjax(ctgLedgerProjectService.updateCtgLedgerProject(ctgLedgerProject));
     }
@@ -103,11 +103,11 @@ public class CtgLedgerProjectController extends BaseController
     /**
      * 删除项目管理
      */
-    //@PreAuthorize("@ss.hasPermi('system:project:remove')")
+ //   @PreAuthorize("@ss.hasPermi('business:project:remove')")
     @Log(title = "项目管理", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
-    @ApiOperation("删除项目管理")
-    public AjaxResult remove(@ApiParam("项目ID数组") @PathVariable Long[] ids)
+    @ApiOperation("删除项目")
+    public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(ctgLedgerProjectService.deleteCtgLedgerProjectByIds(ids));
     }

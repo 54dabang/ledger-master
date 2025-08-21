@@ -50,7 +50,6 @@ public class ReimbursementDTO {
     @ApiModelProperty(value = "提交人相关信息")
     private ClaimantDTO.UserDetail handler;
 
-
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

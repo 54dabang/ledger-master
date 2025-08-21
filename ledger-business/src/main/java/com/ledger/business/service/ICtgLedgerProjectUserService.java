@@ -20,6 +20,15 @@ public interface ICtgLedgerProjectUserService
     public CtgLedgerProjectUser selectCtgLedgerProjectUserById(Long id);
 
     /**
+     * 根据ctgLedgerProjectId和sysUserId查询项目用户
+     * 
+     * @param ctgLedgerProjectId 项目ID
+     * @param sysUserId 用户ID
+     * @return 项目用户
+     */
+    public CtgLedgerProjectUser selectCtgLedgerProjectUserByProjectIdAndUserId(Long ctgLedgerProjectId, Long sysUserId);
+
+    /**
      * 查询项目用户列表
      * 
      * @param ctgLedgerProjectUser 项目用户
@@ -58,4 +67,7 @@ public interface ICtgLedgerProjectUserService
      * @return 结果
      */
     public int deleteCtgLedgerProjectUserById(Long id);
+
+
+    public boolean isProjectUser(Long projectId,Long userId);
 }

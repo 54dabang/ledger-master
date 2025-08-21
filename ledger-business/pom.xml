@@ -30,6 +30,10 @@
             <groupId>com.ledger</groupId>
             <artifactId>ledger-system</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.ledger</groupId>
+            <artifactId>ledger-framework</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>io.swagger</groupId>

@@ -33,6 +33,30 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
     }
 
     /**
+     * 根据ctgLedgerProjectId和sysUserId查询项目用户
+     * 
+     * @param ctgLedgerProjectId 项目ID
+     * @param sysUserId 用户ID
+     * @return 项目用户
+     */
+    @Override
+    public CtgLedgerProjectUser selectCtgLedgerProjectUserByProjectIdAndUserId(Long ctgLedgerProjectId, Long sysUserId)
+    {
+        return ctgLedgerProjectUserMapper.selectCtgLedgerProjectUserByProjectIdAndUserId(ctgLedgerProjectId, sysUserId);
+    }
+
+    /**
+     * 判断是否为项目用户
+     *
+     * @param projectId 项目ID
+     * @param userId 用户ID
+     * @return 是否为项目用户
+     */
+    public boolean isProjectUser(Long projectId, Long userId) {
+        return ctgLedgerProjectUserMapper.selectCtgLedgerProjectUserByProjectIdAndUserId(projectId, userId) != null;
+    }
+
+    /**
      * 查询项目用户列表
      * 
      * @param ctgLedgerProjectUser 项目用户
