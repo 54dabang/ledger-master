@@ -34,7 +34,7 @@ server:
 # 日志配置
 logging:
   level:
-    com.ledger: debug
+    com.ledger: info
     org.springframework: warn
 
 # 用户配置
@@ -95,7 +95,7 @@ token:
   # 令牌密钥
   secret: abcdefghijklmnopqrstuvwxyz
   # 令牌有效期（默认30分钟）
-  expireTime: 720
+  expireTime: 2400
 
 # MyBatis配置
 mybatis:

@@ -2,6 +2,8 @@ package com.ledger.business.service.impl;
 
 import java.util.List;
 import com.ledger.common.utils.DateUtils;
+import com.ledger.common.utils.SecurityUtils;
+import com.ledger.common.utils.spring.SpringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ledger.business.mapper.CtgLedgerProjectUserMapper;
@@ -78,6 +80,7 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
     public int insertCtgLedgerProjectUser(CtgLedgerProjectUser ctgLedgerProjectUser)
     {
         ctgLedgerProjectUser.setCreateTime(DateUtils.getNowDate());
+        ctgLedgerProjectUser.setCreateBy(SecurityUtils.getUsername());
         return ctgLedgerProjectUserMapper.insertCtgLedgerProjectUser(ctgLedgerProjectUser);
     }
 

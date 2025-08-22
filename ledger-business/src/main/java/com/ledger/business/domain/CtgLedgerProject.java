@@ -87,6 +87,64 @@ public class CtgLedgerProject extends BaseEntity
     @Excel(name = "税金")
     private BigDecimal taxFee;
 
+
+
+
+    @Excel(name = "已执行购置设备费")
+    private BigDecimal executedEquipPurchaseFee;
+
+    /** 试制设备费 */
+    @Excel(name = "已执行试制设备费")
+    private BigDecimal executedProtoEquipFee;
+
+    /** 设备改造费 */
+    @Excel(name = "已执行设备改造费")
+    private BigDecimal executedEquipRenovFee;
+
+    /** 设备租赁费 */
+    @Excel(name = "已执行设备租赁费")
+    private BigDecimal executedEquipRentFee;
+
+    /** 材料费 */
+    @Excel(name = "已执行材料费")
+    private BigDecimal executedMaterialCost;
+
+    /** 测试化验加工费 */
+    @Excel(name = "已执行测试化验加工费")
+    private BigDecimal executedTestProcFee;
+
+    /** 燃料动力费 */
+    @Excel(name = "已执行燃料动力费")
+    private BigDecimal executedFuelPowerCost;
+
+    /** 出版/文献/信息传播/知识产权事务费 */
+    @Excel(name = "已执行出版/文献/信息传播/知识产权事务费")
+    private BigDecimal executedPubDocIpFee;
+
+    /** 差旅/会议/国际合作交流费 */
+    @Excel(name = "已执行差旅/会议/国际合作交流费")
+    private BigDecimal executedTravelConfCoopFee;
+
+    /** 人工费 */
+    @Excel(name = "已执行人工费")
+    private BigDecimal executedLaborCost;
+
+    /** 劳务费 */
+    @Excel(name = "已执行劳务费")
+    private BigDecimal executedServiceCost;
+
+    /** 专家咨询费 */
+    @Excel(name = "已执行专家咨询费")
+    private BigDecimal executedExpertConsultFee;
+
+    /** 管理费 */
+    @Excel(name = "已执行管理费")
+    private BigDecimal executedMgmtFee;
+
+    /** 税金 */
+    @Excel(name = "已执行税金")
+    private BigDecimal executedTaxFee;
+
     public void setId(Long id) 
     {
         this.id = id;
@@ -265,6 +323,118 @@ public class CtgLedgerProject extends BaseEntity
     public BigDecimal getTaxFee() 
     {
         return taxFee;
+    }
+
+    public BigDecimal getExecutedEquipPurchaseFee() {
+        return executedEquipPurchaseFee;
+    }
+
+    public void setExecutedEquipPurchaseFee(BigDecimal executedEquipPurchaseFee) {
+        this.executedEquipPurchaseFee = executedEquipPurchaseFee;
+    }
+
+    public BigDecimal getExecutedProtoEquipFee() {
+        return executedProtoEquipFee;
+    }
+
+    public void setExecutedProtoEquipFee(BigDecimal executedProtoEquipFee) {
+        this.executedProtoEquipFee = executedProtoEquipFee;
+    }
+
+    public BigDecimal getExecutedEquipRenovFee() {
+        return executedEquipRenovFee;
+    }
+
+    public void setExecutedEquipRenovFee(BigDecimal executedEquipRenovFee) {
+        this.executedEquipRenovFee = executedEquipRenovFee;
+    }
+
+    public BigDecimal getExecutedEquipRentFee() {
+        return executedEquipRentFee;
+    }
+
+    public void setExecutedEquipRentFee(BigDecimal executedEquipRentFee) {
+        this.executedEquipRentFee = executedEquipRentFee;
+    }
+
+    public BigDecimal getExecutedMaterialCost() {
+        return executedMaterialCost;
+    }
+
+    public void setExecutedMaterialCost(BigDecimal executedMaterialCost) {
+        this.executedMaterialCost = executedMaterialCost;
+    }
+
+    public BigDecimal getExecutedTestProcFee() {
+        return executedTestProcFee;
+    }
+
+    public void setExecutedTestProcFee(BigDecimal executedTestProcFee) {
+        this.executedTestProcFee = executedTestProcFee;
+    }
+
+    public BigDecimal getExecutedFuelPowerCost() {
+        return executedFuelPowerCost;
+    }
+
+    public void setExecutedFuelPowerCost(BigDecimal executedFuelPowerCost) {
+        this.executedFuelPowerCost = executedFuelPowerCost;
+    }
+
+    public BigDecimal getExecutedPubDocIpFee() {
+        return executedPubDocIpFee;
+    }
+
+    public void setExecutedPubDocIpFee(BigDecimal executedPubDocIpFee) {
+        this.executedPubDocIpFee = executedPubDocIpFee;
+    }
+
+    public BigDecimal getExecutedTravelConfCoopFee() {
+        return executedTravelConfCoopFee;
+    }
+
+    public void setExecutedTravelConfCoopFee(BigDecimal executedTravelConfCoopFee) {
+        this.executedTravelConfCoopFee = executedTravelConfCoopFee;
+    }
+
+    public BigDecimal getExecutedLaborCost() {
+        return executedLaborCost;
+    }
+
+    public void setExecutedLaborCost(BigDecimal executedLaborCost) {
+        this.executedLaborCost = executedLaborCost;
+    }
+
+    public BigDecimal getExecutedServiceCost() {
+        return executedServiceCost;
+    }
+
+    public void setExecutedServiceCost(BigDecimal executedServiceCost) {
+        this.executedServiceCost = executedServiceCost;
+    }
+
+    public BigDecimal getExecutedExpertConsultFee() {
+        return executedExpertConsultFee;
+    }
+
+    public void setExecutedExpertConsultFee(BigDecimal executedExpertConsultFee) {
+        this.executedExpertConsultFee = executedExpertConsultFee;
+    }
+
+    public BigDecimal getExecutedMgmtFee() {
+        return executedMgmtFee;
+    }
+
+    public void setExecutedMgmtFee(BigDecimal executedMgmtFee) {
+        this.executedMgmtFee = executedMgmtFee;
+    }
+
+    public BigDecimal getExecutedTaxFee() {
+        return executedTaxFee;
+    }
+
+    public void setExecutedTaxFee(BigDecimal executedTaxFee) {
+        this.executedTaxFee = executedTaxFee;
     }
 
     @Override

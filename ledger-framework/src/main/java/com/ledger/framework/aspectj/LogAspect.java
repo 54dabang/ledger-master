@@ -43,6 +43,7 @@ import com.ledger.system.domain.SysOperLog;
 public class LogAspect
 {
     private static final Logger log = LoggerFactory.getLogger(LogAspect.class);
+    private static final Logger operLogger = LoggerFactory.getLogger("sys-oper-log");
 
     /** 排除敏感属性字段 */
     public static final String[] EXCLUDE_PROPERTIES = { "password", "oldPassword", "newPassword", "confirmPassword" };
@@ -121,6 +122,10 @@ public class LogAspect
             getControllerMethodDescription(joinPoint, controllerLog, operLog, jsonResult);
             // 设置消耗时间
             operLog.setCostTime(System.currentTimeMillis() - TIME_THREADLOCAL.get());
+            
+            // 记录操作日志到文件
+            logOperToFile(operLog, e);
+            
             // 保存数据库
             AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
         }
@@ -133,6 +138,42 @@ public class LogAspect
         finally
         {
             TIME_THREADLOCAL.remove();
+        }
+    }
+
+    /**
+     * 将操作日志记录到文件
+     * 
+     * @param operLog 操作日志对象
+     * @param e 异常对象
+     */
+    private void logOperToFile(SysOperLog operLog, Exception e) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("操作模块: ").append(operLog.getTitle()).append(", ");
+            sb.append("操作人员: ").append(operLog.getOperName()).append(", ");
+            sb.append("操作IP: ").append(operLog.getOperIp()).append(", ");
+            sb.append("请求URL: ").append(operLog.getOperUrl()).append(", ");
+            sb.append("请求方法: ").append(operLog.getMethod()).append(", ");
+            sb.append("请求方式: ").append(operLog.getRequestMethod()).append(", ");
+            sb.append("操作参数: ").append(operLog.getOperParam()).append(", ");
+            sb.append("返回参数: ").append(operLog.getJsonResult()).append(", ");
+            sb.append("消耗时间: ").append(operLog.getCostTime()).append("毫秒");
+            
+            if (e != null) {
+                // 错误日志
+                sb.append(", 错误信息: ").append(operLog.getErrorMsg());
+                operLogger.error(sb.toString(), e);
+            } else if (operLog.getStatus() != null && operLog.getStatus() == BusinessStatus.FAIL.ordinal()) {
+                // 失败状态日志
+                sb.append(", 错误信息: ").append(operLog.getErrorMsg());
+                operLogger.warn(sb.toString());
+            } else {
+                // 正常日志
+                operLogger.info(sb.toString());
+            }
+        } catch (Exception ex) {
+            log.error("记录操作日志到文件时发生异常: ", ex);
         }
     }
 

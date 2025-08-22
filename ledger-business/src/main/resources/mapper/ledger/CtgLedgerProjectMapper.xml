@@ -27,10 +27,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
+        <!-- 新增的已执行字段 -->
+        <result property="executedEquipPurchaseFee" column="executed_equip_purchase_fee" />
+        <result property="executedProtoEquipFee" column="executed_proto_equip_fee" />
+        <result property="executedEquipRenovFee" column="executed_equip_renov_fee" />
+        <result property="executedEquipRentFee" column="executed_equip_rent_fee" />
+        <result property="executedMaterialCost" column="executed_material_cost" />
+        <result property="executedTestProcFee" column="executed_test_proc_fee" />
+        <result property="executedFuelPowerCost" column="executed_fuel_power_cost" />
+        <result property="executedPubDocIpFee" column="executed_pub_doc_ip_fee" />
+        <result property="executedTravelConfCoopFee" column="executed_travel_conf_coop_fee" />
+        <result property="executedLaborCost" column="executed_labor_cost" />
+        <result property="executedServiceCost" column="executed_service_cost" />
+        <result property="executedExpertConsultFee" column="executed_expert_consult_fee" />
+        <result property="executedMgmtFee" column="executed_mgmt_fee" />
+        <result property="executedTaxFee" column="executed_tax_fee" />
     </resultMap>
 
     <sql id="selectCtgLedgerProjectVo">
-        select id, project_name, project_code, extend_project_id, equip_purchase_fee, proto_equip_fee, equip_renov_fee, equip_rent_fee, material_cost, test_proc_fee, fuel_power_cost, pub_doc_ip_fee, travel_conf_coop_fee, labor_cost, service_cost, expert_consult_fee, mgmt_fee, tax_fee, create_by, create_time, update_by, update_time from ctg_ledger_project
+        select id, project_name, project_code, extend_project_id, equip_purchase_fee, proto_equip_fee, equip_renov_fee, equip_rent_fee, material_cost, test_proc_fee, fuel_power_cost, pub_doc_ip_fee, travel_conf_coop_fee, labor_cost, service_cost, expert_consult_fee, mgmt_fee, tax_fee, create_by, create_time, update_by, update_time, executed_equip_purchase_fee, executed_proto_equip_fee, executed_equip_renov_fee, executed_equip_rent_fee, executed_material_cost, executed_test_proc_fee, executed_fuel_power_cost, executed_pub_doc_ip_fee, executed_travel_conf_coop_fee, executed_labor_cost, executed_service_cost, executed_expert_consult_fee, executed_mgmt_fee, executed_tax_fee from ctg_ledger_project
     </sql>
 
     <select id="selectCtgLedgerProjectList" parameterType="CtgLedgerProject" resultMap="CtgLedgerProjectResult">
@@ -53,6 +68,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="expertConsultFee != null "> and expert_consult_fee = #{expertConsultFee}</if>
             <if test="mgmtFee != null "> and mgmt_fee = #{mgmtFee}</if>
             <if test="taxFee != null "> and tax_fee = #{taxFee}</if>
+            <!-- 已执行字段查询条件 -->
+            <if test="executedEquipPurchaseFee != null "> and executed_equip_purchase_fee = #{executedEquipPurchaseFee}</if>
+            <if test="executedProtoEquipFee != null "> and executed_proto_equip_fee = #{executedProtoEquipFee}</if>
+            <if test="executedEquipRenovFee != null "> and executed_equip_renov_fee = #{executedEquipRenovFee}</if>
+            <if test="executedEquipRentFee != null "> and executed_equip_rent_fee = #{executedEquipRentFee}</if>
+            <if test="executedMaterialCost != null "> and executed_material_cost = #{executedMaterialCost}</if>
+            <if test="executedTestProcFee != null "> and executed_test_proc_fee = #{executedTestProcFee}</if>
+            <if test="executedFuelPowerCost != null "> and executed_fuel_power_cost = #{executedFuelPowerCost}</if>
+            <if test="executedPubDocIpFee != null "> and executed_pub_doc_ip_fee = #{executedPubDocIpFee}</if>
+            <if test="executedTravelConfCoopFee != null "> and executed_travel_conf_coop_fee = #{executedTravelConfCoopFee}</if>
+            <if test="executedLaborCost != null "> and executed_labor_cost = #{executedLaborCost}</if>
+            <if test="executedServiceCost != null "> and executed_service_cost = #{executedServiceCost}</if>
+            <if test="executedExpertConsultFee != null "> and executed_expert_consult_fee = #{executedExpertConsultFee}</if>
+            <if test="executedMgmtFee != null "> and executed_mgmt_fee = #{executedMgmtFee}</if>
+            <if test="executedTaxFee != null "> and executed_tax_fee = #{executedTaxFee}</if>
         </where>
     </select>
     
@@ -85,6 +115,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
+            <!-- 新增的已执行字段 -->
+            <if test="executedEquipPurchaseFee != null">executed_equip_purchase_fee,</if>
+            <if test="executedProtoEquipFee != null">executed_proto_equip_fee,</if>
+            <if test="executedEquipRenovFee != null">executed_equip_renov_fee,</if>
+            <if test="executedEquipRentFee != null">executed_equip_rent_fee,</if>
+            <if test="executedMaterialCost != null">executed_material_cost,</if>
+            <if test="executedTestProcFee != null">executed_test_proc_fee,</if>
+            <if test="executedFuelPowerCost != null">executed_fuel_power_cost,</if>
+            <if test="executedPubDocIpFee != null">executed_pub_doc_ip_fee,</if>
+            <if test="executedTravelConfCoopFee != null">executed_travel_conf_coop_fee,</if>
+            <if test="executedLaborCost != null">executed_labor_cost,</if>
+            <if test="executedServiceCost != null">executed_service_cost,</if>
+            <if test="executedExpertConsultFee != null">executed_expert_consult_fee,</if>
+            <if test="executedMgmtFee != null">executed_mgmt_fee,</if>
+            <if test="executedTaxFee != null">executed_tax_fee,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="projectName != null and projectName != ''">#{projectName},</if>
@@ -108,6 +153,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
+            <!-- 新增的已执行字段 -->
+            <if test="executedEquipPurchaseFee != null">#{executedEquipPurchaseFee},</if>
+            <if test="executedProtoEquipFee != null">#{executedProtoEquipFee},</if>
+            <if test="executedEquipRenovFee != null">#{executedEquipRenovFee},</if>
+            <if test="executedEquipRentFee != null">#{executedEquipRentFee},</if>
+            <if test="executedMaterialCost != null">#{executedMaterialCost},</if>
+            <if test="executedTestProcFee != null">#{executedTestProcFee},</if>
+            <if test="executedFuelPowerCost != null">#{executedFuelPowerCost},</if>
+            <if test="executedPubDocIpFee != null">#{executedPubDocIpFee},</if>
+            <if test="executedTravelConfCoopFee != null">#{executedTravelConfCoopFee},</if>
+            <if test="executedLaborCost != null">#{executedLaborCost},</if>
+            <if test="executedServiceCost != null">#{executedServiceCost},</if>
+            <if test="executedExpertConsultFee != null">#{executedExpertConsultFee},</if>
+            <if test="executedMgmtFee != null">#{executedMgmtFee},</if>
+            <if test="executedTaxFee != null">#{executedTaxFee},</if>
          </trim>
     </insert>
 
@@ -135,6 +195,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
+            <!-- 新增的已执行字段 -->
+            <if test="executedEquipPurchaseFee != null">executed_equip_purchase_fee = #{executedEquipPurchaseFee},</if>
+            <if test="executedProtoEquipFee != null">executed_proto_equip_fee = #{executedProtoEquipFee},</if>
+            <if test="executedEquipRenovFee != null">executed_equip_renov_fee = #{executedEquipRenovFee},</if>
+            <if test="executedEquipRentFee != null">executed_equip_rent_fee = #{executedEquipRentFee},</if>
+            <if test="executedMaterialCost != null">executed_material_cost = #{executedMaterialCost},</if>
+            <if test="executedTestProcFee != null">executed_test_proc_fee = #{executedTestProcFee},</if>
+            <if test="executedFuelPowerCost != null">executed_fuel_power_cost = #{executedFuelPowerCost},</if>
+            <if test="executedPubDocIpFee != null">executed_pub_doc_ip_fee = #{executedPubDocIpFee},</if>
+            <if test="executedTravelConfCoopFee != null">executed_travel_conf_coop_fee = #{executedTravelConfCoopFee},</if>
+            <if test="executedLaborCost != null">executed_labor_cost = #{executedLaborCost},</if>
+            <if test="executedServiceCost != null">executed_service_cost = #{executedServiceCost},</if>
+            <if test="executedExpertConsultFee != null">executed_expert_consult_fee = #{executedExpertConsultFee},</if>
+            <if test="executedMgmtFee != null">executed_mgmt_fee = #{executedMgmtFee},</if>
+            <if test="executedTaxFee != null">executed_tax_fee = #{executedTaxFee},</if>
         </trim>
         where id = #{id}
     </update>
