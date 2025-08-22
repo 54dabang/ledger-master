@@ -1,9 +1,14 @@
 package com.ledger.business.service.impl;
 
 import java.util.List;
+
+import com.ledger.business.domain.CtgLedgerProject;
+import com.ledger.business.service.ICtgLedgerProjectService;
+import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.common.utils.DateUtils;
 import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.spring.SpringUtils;
+import com.ledger.system.service.ISysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ledger.business.mapper.CtgLedgerProjectUserMapper;
@@ -21,6 +26,11 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
 {
     @Autowired
     private CtgLedgerProjectUserMapper ctgLedgerProjectUserMapper;
+    @Autowired
+    private ISysUserService userService;
+
+    @Autowired
+    private ICtgLedgerProjectService projectService;
 
     /**
      * 查询项目用户
@@ -119,5 +129,18 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
     public int deleteCtgLedgerProjectUserById(Long id)
     {
         return ctgLedgerProjectUserMapper.deleteCtgLedgerProjectUserById(id);
+    }
+
+    @Override
+    public boolean isProjectManager(Long projectId, String loginName) {
+        CtgLedgerProject project = projectService.selectCtgLedgerProjectById(projectId);
+
+        return project.getProjectManagerLoginName().equals(loginName);
+    }
+
+    @Override
+    public boolean isProjectMember(Long projectId, String loginName) {
+        SysUser sysUser =  userService.selectUserByUserName(loginName);
+        return isProjectUser(projectId,sysUser.getUserId());
     }
 }

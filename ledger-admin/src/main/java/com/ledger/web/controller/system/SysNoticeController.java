@@ -20,6 +20,7 @@ import com.ledger.common.enums.BusinessType;
 import com.ledger.system.domain.SysNotice;
 import com.ledger.system.service.ISysNoticeService;
 
+
 /**
  * 公告 信息操作处理
  * 
@@ -37,6 +38,7 @@ public class SysNoticeController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:notice:list')")
     @GetMapping("/list")
+
     public TableDataInfo list(SysNotice notice)
     {
         startPage();

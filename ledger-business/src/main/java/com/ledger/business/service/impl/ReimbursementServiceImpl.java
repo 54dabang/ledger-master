@@ -95,7 +95,8 @@ public class ReimbursementServiceImpl implements IReimbursementService {
         for (ClaimantDTO claimantDTO : reimbursementDTO.getClaimantList()) {
             SysUser user = userMapper.selectUserByUserName(claimantDTO.getUser().getLoginName());
             boolean isMember = projectUserService.isProjectUser(ctgLedgerProject.getId(), user.getUserId());
-            if (!isMember) {
+            boolean isProjectManager = claimantDTO.getUser().getLoginName().equals(ctgLedgerProject.getProjectManagerLoginName());
+            if (!isMember && !isProjectManager) {
                 return  Pair.of(false, claimantDTO.getUser().getLoginName());
             }
         }

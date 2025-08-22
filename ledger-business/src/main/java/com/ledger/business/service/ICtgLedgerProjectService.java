@@ -33,7 +33,7 @@ public interface ICtgLedgerProjectService
      * @param ctgLedgerProject 项目管理
      * @return 结果
      */
-    public int insertCtgLedgerProject(CtgLedgerProject ctgLedgerProject);
+    public CtgLedgerProject insertCtgLedgerProject(CtgLedgerProject ctgLedgerProject);
 
     /**
      * 修改项目管理
@@ -66,4 +66,6 @@ public interface ICtgLedgerProjectService
      * @return 项目管理信息
      */
     public CtgLedgerProject selectCtgLedgerProjectByProjectName(String projectName);
+
+
 }

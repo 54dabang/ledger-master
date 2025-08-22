@@ -31,6 +31,9 @@ public class CtgLedgerProject extends BaseEntity
     @Excel(name = "报销系统中的项目id")
     private Long extendProjectId;
 
+    @Excel(name = "项目负责人登录用户名")
+    private String projectManagerLoginName;
+
     /** 购置设备费 */
     @Excel(name = "购置设备费")
     private BigDecimal equipPurchaseFee;
@@ -86,6 +89,8 @@ public class CtgLedgerProject extends BaseEntity
     /** 税金 */
     @Excel(name = "税金")
     private BigDecimal taxFee;
+    @Excel(name = "合同金额")
+    private BigDecimal contractAmount;
 
 
 
@@ -145,6 +150,9 @@ public class CtgLedgerProject extends BaseEntity
     @Excel(name = "已执行税金")
     private BigDecimal executedTaxFee;
 
+    @Excel(name = "合同金额")
+    private BigDecimal executedContractAmount;
+
     public void setId(Long id) 
     {
         this.id = id;
@@ -183,6 +191,16 @@ public class CtgLedgerProject extends BaseEntity
     public Long getExtendProjectId() 
     {
         return extendProjectId;
+    }
+
+    public void setProjectManagerLoginName(String projectManagerLoginName) 
+    {
+        this.projectManagerLoginName = projectManagerLoginName;
+    }
+
+    public String getProjectManagerLoginName() 
+    {
+        return projectManagerLoginName;
     }
 
     public void setEquipPurchaseFee(BigDecimal equipPurchaseFee) 
@@ -435,6 +453,22 @@ public class CtgLedgerProject extends BaseEntity
 
     public void setExecutedTaxFee(BigDecimal executedTaxFee) {
         this.executedTaxFee = executedTaxFee;
+    }
+
+    public BigDecimal getContractAmount() {
+        return contractAmount;
+    }
+
+    public void setContractAmount(BigDecimal contractAmount) {
+        this.contractAmount = contractAmount;
+    }
+
+    public BigDecimal getExecutedContractAmount() {
+        return executedContractAmount;
+    }
+
+    public void setExecutedContractAmount(BigDecimal executedContractAmount) {
+        this.executedContractAmount = executedContractAmount;
     }
 
     @Override

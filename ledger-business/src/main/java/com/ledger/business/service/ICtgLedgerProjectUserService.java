@@ -70,4 +70,8 @@ public interface ICtgLedgerProjectUserService
 
 
     public boolean isProjectUser(Long projectId,Long userId);
+
+    boolean isProjectManager(Long projectId,String loginName);
+
+    boolean isProjectMember(Long projectId,String loginName);
 }

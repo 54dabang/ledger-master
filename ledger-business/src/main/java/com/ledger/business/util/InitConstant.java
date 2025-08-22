@@ -13,4 +13,7 @@ public class InitConstant {
 
     public static final String DATA_RESOURCE = "(报销系统同步)";
 
+    public static final String PROJECT_QUERY_TYPE_PARTICIPATE = "participate";
+
+    public static final String PROJECT_QUERY_TYPE_MANAGE = "manage";
 }

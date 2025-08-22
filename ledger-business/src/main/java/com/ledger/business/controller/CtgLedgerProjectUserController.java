@@ -2,6 +2,13 @@ package com.ledger.business.controller;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ledger.business.domain.CtgLedgerProject;
+import com.ledger.business.service.ICtgLedgerProjectService;
+import com.ledger.common.constant.Constants;
+import com.ledger.common.constant.HttpStatus;
+import com.ledger.common.utils.SecurityUtils;
+import com.ledger.framework.web.service.PermissionService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +40,10 @@ public class CtgLedgerProjectUserController extends BaseController
 {
     @Autowired
     private ICtgLedgerProjectUserService ctgLedgerProjectUserService;
+    @Autowired
+    private ICtgLedgerProjectService projectService;
+    @Autowired
+    private PermissionService permissionService;
 
     /**
      * 查询项目用户列表
@@ -73,10 +84,16 @@ public class CtgLedgerProjectUserController extends BaseController
      * 新增项目用户
      */
     @PreAuthorize("@ss.hasPermi('business:user:add')")
-    @Log(title = "项目用户", businessType = BusinessType.INSERT)
+    @Log(title = "添加项目用户", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody CtgLedgerProjectUser ctgLedgerProjectUser)
-    {
+    public AjaxResult add(@RequestBody CtgLedgerProjectUser ctgLedgerProjectUser) {
+        Long projectId = ctgLedgerProjectUser.getCtgLedgerProjectId();
+        boolean isProjectMember = ctgLedgerProjectUserService.isProjectMember(projectId, SecurityUtils.getUsername());
+        boolean isAdmin = permissionService.hasRole(Constants.SUPER_ADMIN);
+        if(!isProjectMember && !isAdmin){
+            AjaxResult.error(HttpStatus.UNAUTHORIZED, String.format("只有项目管理员或系统管理员可添加用户！"));
+        }
+
         return toAjax(ctgLedgerProjectUserService.insertCtgLedgerProjectUser(ctgLedgerProjectUser));
     }
 
