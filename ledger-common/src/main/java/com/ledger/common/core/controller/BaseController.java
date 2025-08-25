@@ -21,6 +21,8 @@ import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.StringUtils;
 import com.ledger.common.utils.sql.SqlUtil;
 
+import javax.security.auth.Subject;
+
 /**
  * web层通用数据处理
  * 
@@ -175,6 +177,8 @@ public class BaseController
     {
         return SecurityUtils.getLoginUser();
     }
+
+
 
     /**
      * 获取登录用户id
