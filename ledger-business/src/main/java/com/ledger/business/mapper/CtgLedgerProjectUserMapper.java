@@ -68,4 +68,6 @@ public interface CtgLedgerProjectUserMapper
      * @return 结果
      */
     public int deleteCtgLedgerProjectUserByIds(Long[] ids);
+
+    int deleteByCtgLedgerProjectIdInt(@Param("projectId")Long projectId);
 }

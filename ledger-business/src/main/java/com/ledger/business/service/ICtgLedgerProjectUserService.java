@@ -42,7 +42,7 @@ public interface ICtgLedgerProjectUserService
      * @param ctgLedgerProjectUser 项目用户
      * @return 结果
      */
-    public int insertCtgLedgerProjectUser(CtgLedgerProjectUser ctgLedgerProjectUser);
+    public CtgLedgerProjectUser insertCtgLedgerProjectUser(CtgLedgerProjectUser ctgLedgerProjectUser);
 
     /**
      * 修改项目用户
@@ -74,4 +74,6 @@ public interface ICtgLedgerProjectUserService
     boolean isProjectManager(Long projectId,String loginName);
 
     boolean isProjectMember(Long projectId,String loginName);
+
+    public List<CtgLedgerProjectUser> batchInsertCtgLedgerProjectUser( List<CtgLedgerProjectUser>  ctgLedgerProjectUsers);
 }

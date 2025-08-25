@@ -79,4 +79,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
+    <delete id="deleteByCtgLedgerProjectIdInt" parameterType="Long">
+        delete from ctg_ledger_project_user where ctg_ledger_project_id = #{projectId}
+    </delete>
 </mapper>
