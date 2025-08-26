@@ -93,8 +93,6 @@ public class CtgLedgerProject extends BaseEntity
     private BigDecimal contractAmount;
 
 
-
-
     @Excel(name = "已执行购置设备费")
     private BigDecimal executedEquipPurchaseFee;
 

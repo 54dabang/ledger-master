@@ -2,6 +2,7 @@ package com.ledger.business.mapper;
 
 import java.util.List;
 import com.ledger.business.domain.CtgLedgerAnnualBudget;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 项目总预算台账Mapper接口
@@ -58,4 +59,6 @@ public interface CtgLedgerAnnualBudgetMapper
      * @return 结果
      */
     public int deleteCtgLedgerAnnualBudgetByIds(Long[] ids);
+
+    CtgLedgerAnnualBudget selectByProjectIdAndYear(@Param("projectId") Long projectId,@Param("year")  Integer year);
 }

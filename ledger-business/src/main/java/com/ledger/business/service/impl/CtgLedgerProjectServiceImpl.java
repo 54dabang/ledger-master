@@ -69,6 +69,7 @@ public class CtgLedgerProjectServiceImpl implements ICtgLedgerProjectService {
     @Override
     public int updateCtgLedgerProject(CtgLedgerProject ctgLedgerProject) {
         ctgLedgerProject.setUpdateTime(DateUtils.getNowDate());
+        ctgLedgerProject.setUpdateBy(SecurityUtils.getUsername());
         return ctgLedgerProjectMapper.updateCtgLedgerProject(ctgLedgerProject);
     }
 

@@ -64,6 +64,7 @@ public class ReimbursementServiceImpl implements IReimbursementService {
             //填充信息
             CtgLedgerProjectExpenseDetail expenseDetail = new CtgLedgerProjectExpenseDetail();
 
+            expenseDetail.setYear(reimbursementDTO.getCreateTime().getYear()+1900);
             expenseDetail.setExpenseReportNumber(reimbursementDTO.getId());
             expenseDetail.setFeeType(reimbursementDTO.getFeeType());
             expenseDetail.setSubjectName(reimbursementDTO.getSubjectName());

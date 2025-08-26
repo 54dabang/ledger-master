@@ -1,19 +1,20 @@
 package com.ledger.business.mapper;
 
 import java.util.List;
+
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 项目支出明细Mapper接口
- * 
+ *
  * @author ledger
  * @date 2025-08-21
  */
-public interface CtgLedgerProjectExpenseDetailMapper 
-{
+public interface CtgLedgerProjectExpenseDetailMapper {
     /**
      * 查询项目支出明细
-     * 
+     *
      * @param id 项目支出明细主键
      * @return 项目支出明细
      */
@@ -37,7 +38,7 @@ public interface CtgLedgerProjectExpenseDetailMapper
 
     /**
      * 查询项目支出明细列表
-     * 
+     *
      * @param ctgLedgerProjectExpenseDetail 项目支出明细
      * @return 项目支出明细集合
      */
@@ -45,7 +46,7 @@ public interface CtgLedgerProjectExpenseDetailMapper
 
     /**
      * 新增项目支出明细
-     * 
+     *
      * @param ctgLedgerProjectExpenseDetail 项目支出明细
      * @return 结果
      */
@@ -53,7 +54,7 @@ public interface CtgLedgerProjectExpenseDetailMapper
 
     /**
      * 修改项目支出明细
-     * 
+     *
      * @param ctgLedgerProjectExpenseDetail 项目支出明细
      * @return 结果
      */
@@ -61,7 +62,7 @@ public interface CtgLedgerProjectExpenseDetailMapper
 
     /**
      * 删除项目支出明细
-     * 
+     *
      * @param id 项目支出明细主键
      * @return 结果
      */
@@ -69,9 +70,15 @@ public interface CtgLedgerProjectExpenseDetailMapper
 
     /**
      * 批量删除项目支出明细
-     * 
+     *
      * @param ids 需要删除的数据主键集合
      * @return 结果
      */
     public int deleteCtgLedgerProjectExpenseDetailByIds(Long[] ids);
+
+    List<CtgLedgerProjectExpenseDetail> selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(@Param("projectId") Long projectId,
+                                                                                                  @Param("year") Integer year);
+
+    Long selectMaxReimbursementSequenceNoByProjectIdAndYear(@Param("projectId") Long projectId,
+                                         @Param("year") Integer year);
 }

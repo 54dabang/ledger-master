@@ -1,6 +1,7 @@
 package com.ledger.business.domain;
 
 import java.math.BigDecimal;
+
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ledger.common.annotation.Excel;
@@ -8,260 +9,283 @@ import com.ledger.common.core.domain.BaseEntity;
 
 /**
  * 项目总预算台账对象 ctg_ledger_annual_budget
- * 
+ *
  * @author ledger
  * @date 2025-08-20
  */
-public class CtgLedgerAnnualBudget extends BaseEntity
-{
+public class CtgLedgerAnnualBudget extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
-    /** 费用记录ID */
+    /**
+     * 费用记录ID
+     */
     private Long id;
+    @Excel(name = "项目id")
+    private Long projectId;
 
-    /** 年度 */
+    /**
+     * 年度
+     */
     @Excel(name = "年度")
     private Long year;
 
-    /** 购置设备费 */
+    /**
+     * 购置设备费
+     */
     @Excel(name = "购置设备费")
     private BigDecimal equipPurchaseFee;
 
-    /** 试制设备费 */
+    /**
+     * 试制设备费
+     */
     @Excel(name = "试制设备费")
     private BigDecimal protoEquipFee;
 
-    /** 设备改造费 */
+    /**
+     * 设备改造费
+     */
     @Excel(name = "设备改造费")
     private BigDecimal equipRenovFee;
 
-    /** 设备租赁费 */
+    /**
+     * 设备租赁费
+     */
     @Excel(name = "设备租赁费")
     private BigDecimal equipRentFee;
 
-    /** 材料费 */
+    /**
+     * 材料费
+     */
     @Excel(name = "材料费")
     private BigDecimal materialCost;
 
-    /** 测试化验加工费 */
+    /**
+     * 测试化验加工费
+     */
     @Excel(name = "测试化验加工费")
     private BigDecimal testProcFee;
 
-    /** 燃料动力费 */
+    /**
+     * 燃料动力费
+     */
     @Excel(name = "燃料动力费")
     private BigDecimal fuelPowerCost;
 
-    /** 出版/文献/信息传播/知识产权事务费 */
+    /**
+     * 出版/文献/信息传播/知识产权事务费
+     */
     @Excel(name = "出版/文献/信息传播/知识产权事务费")
     private BigDecimal pubDocIpFee;
 
-    /** 差旅/会议/国际合作交流费 */
+    /**
+     * 差旅/会议/国际合作交流费
+     */
     @Excel(name = "差旅/会议/国际合作交流费")
     private BigDecimal travelConfCoopFee;
 
-    /** 人工费 */
+    /**
+     * 人工费
+     */
     @Excel(name = "人工费")
     private BigDecimal laborCost;
 
-    /** 劳务费 */
+    /**
+     * 劳务费
+     */
     @Excel(name = "劳务费")
     private BigDecimal serviceCost;
 
-    /** 专家咨询费 */
+    /**
+     * 专家咨询费
+     */
     @Excel(name = "专家咨询费")
     private BigDecimal expertConsultFee;
 
-    /** 管理费 */
+    /**
+     * 管理费
+     */
     @Excel(name = "管理费")
     private BigDecimal mgmtFee;
 
-    /** 税金 */
+    /**
+     * 税金
+     */
     @Excel(name = "税金")
     private BigDecimal taxFee;
 
-    public void setId(Long id) 
-    {
+    @Excel(name = "合同金额")
+    private BigDecimal contractAmount;
+
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public Long getId() 
-    {
+    public Long getId() {
         return id;
     }
 
-    public void setYear(Long year) 
-    {
+    public void setYear(Long year) {
         this.year = year;
     }
 
-    public Long getYear() 
-    {
+    public Long getYear() {
         return year;
     }
 
-    public void setEquipPurchaseFee(BigDecimal equipPurchaseFee) 
-    {
+    public void setEquipPurchaseFee(BigDecimal equipPurchaseFee) {
         this.equipPurchaseFee = equipPurchaseFee;
     }
 
-    public BigDecimal getEquipPurchaseFee() 
-    {
+    public BigDecimal getEquipPurchaseFee() {
         return equipPurchaseFee;
     }
 
-    public void setProtoEquipFee(BigDecimal protoEquipFee) 
-    {
+    public void setProtoEquipFee(BigDecimal protoEquipFee) {
         this.protoEquipFee = protoEquipFee;
     }
 
-    public BigDecimal getProtoEquipFee() 
-    {
+    public BigDecimal getProtoEquipFee() {
         return protoEquipFee;
     }
 
-    public void setEquipRenovFee(BigDecimal equipRenovFee) 
-    {
+    public void setEquipRenovFee(BigDecimal equipRenovFee) {
         this.equipRenovFee = equipRenovFee;
     }
 
-    public BigDecimal getEquipRenovFee() 
-    {
+    public BigDecimal getEquipRenovFee() {
         return equipRenovFee;
     }
 
-    public void setEquipRentFee(BigDecimal equipRentFee) 
-    {
+    public void setEquipRentFee(BigDecimal equipRentFee) {
         this.equipRentFee = equipRentFee;
     }
 
-    public BigDecimal getEquipRentFee() 
-    {
+    public BigDecimal getEquipRentFee() {
         return equipRentFee;
     }
 
-    public void setMaterialCost(BigDecimal materialCost) 
-    {
+    public void setMaterialCost(BigDecimal materialCost) {
         this.materialCost = materialCost;
     }
 
-    public BigDecimal getMaterialCost() 
-    {
+    public BigDecimal getMaterialCost() {
         return materialCost;
     }
 
-    public void setTestProcFee(BigDecimal testProcFee) 
-    {
+    public void setTestProcFee(BigDecimal testProcFee) {
         this.testProcFee = testProcFee;
     }
 
-    public BigDecimal getTestProcFee() 
-    {
+    public BigDecimal getTestProcFee() {
         return testProcFee;
     }
 
-    public void setFuelPowerCost(BigDecimal fuelPowerCost) 
-    {
+    public void setFuelPowerCost(BigDecimal fuelPowerCost) {
         this.fuelPowerCost = fuelPowerCost;
     }
 
-    public BigDecimal getFuelPowerCost() 
-    {
+    public BigDecimal getFuelPowerCost() {
         return fuelPowerCost;
     }
 
-    public void setPubDocIpFee(BigDecimal pubDocIpFee) 
-    {
+    public void setPubDocIpFee(BigDecimal pubDocIpFee) {
         this.pubDocIpFee = pubDocIpFee;
     }
 
-    public BigDecimal getPubDocIpFee() 
-    {
+    public BigDecimal getPubDocIpFee() {
         return pubDocIpFee;
     }
 
-    public void setTravelConfCoopFee(BigDecimal travelConfCoopFee) 
-    {
+    public void setTravelConfCoopFee(BigDecimal travelConfCoopFee) {
         this.travelConfCoopFee = travelConfCoopFee;
     }
 
-    public BigDecimal getTravelConfCoopFee() 
-    {
+    public BigDecimal getTravelConfCoopFee() {
         return travelConfCoopFee;
     }
 
-    public void setLaborCost(BigDecimal laborCost) 
-    {
+    public void setLaborCost(BigDecimal laborCost) {
         this.laborCost = laborCost;
     }
 
-    public BigDecimal getLaborCost() 
-    {
+    public BigDecimal getLaborCost() {
         return laborCost;
     }
 
-    public void setServiceCost(BigDecimal serviceCost) 
-    {
+    public void setServiceCost(BigDecimal serviceCost) {
         this.serviceCost = serviceCost;
     }
 
-    public BigDecimal getServiceCost() 
-    {
+    public BigDecimal getServiceCost() {
         return serviceCost;
     }
 
-    public void setExpertConsultFee(BigDecimal expertConsultFee) 
-    {
+    public void setExpertConsultFee(BigDecimal expertConsultFee) {
         this.expertConsultFee = expertConsultFee;
     }
 
-    public BigDecimal getExpertConsultFee() 
-    {
+    public BigDecimal getExpertConsultFee() {
         return expertConsultFee;
     }
 
-    public void setMgmtFee(BigDecimal mgmtFee) 
-    {
+    public void setMgmtFee(BigDecimal mgmtFee) {
         this.mgmtFee = mgmtFee;
     }
 
-    public BigDecimal getMgmtFee() 
-    {
+    public BigDecimal getMgmtFee() {
         return mgmtFee;
     }
 
-    public void setTaxFee(BigDecimal taxFee) 
-    {
+    public void setTaxFee(BigDecimal taxFee) {
         this.taxFee = taxFee;
     }
 
-    public BigDecimal getTaxFee() 
-    {
+    public BigDecimal getTaxFee() {
         return taxFee;
+    }
+
+    public BigDecimal getContractAmount() {
+        return contractAmount;
+    }
+
+    public void setContractAmount(BigDecimal contractAmount) {
+        this.contractAmount = contractAmount;
+    }
+
+    public Long getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(Long projectId) {
+        this.projectId = projectId;
     }
 
     @Override
     public String toString() {
-        return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
-            .append("id", getId())
-            .append("year", getYear())
-            .append("equipPurchaseFee", getEquipPurchaseFee())
-            .append("protoEquipFee", getProtoEquipFee())
-            .append("equipRenovFee", getEquipRenovFee())
-            .append("equipRentFee", getEquipRentFee())
-            .append("materialCost", getMaterialCost())
-            .append("testProcFee", getTestProcFee())
-            .append("fuelPowerCost", getFuelPowerCost())
-            .append("pubDocIpFee", getPubDocIpFee())
-            .append("travelConfCoopFee", getTravelConfCoopFee())
-            .append("laborCost", getLaborCost())
-            .append("serviceCost", getServiceCost())
-            .append("expertConsultFee", getExpertConsultFee())
-            .append("mgmtFee", getMgmtFee())
-            .append("taxFee", getTaxFee())
-            .append("createBy", getCreateBy())
-            .append("createTime", getCreateTime())
-            .append("updateBy", getUpdateBy())
-            .append("updateTime", getUpdateTime())
-            .toString();
+        return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
+                .append("id", getId())
+                .append("projectId", getProjectId())
+                .append("year", getYear())
+                .append("equipPurchaseFee", getEquipPurchaseFee())
+                .append("protoEquipFee", getProtoEquipFee())
+                .append("equipRenovFee", getEquipRenovFee())
+                .append("equipRentFee", getEquipRentFee())
+                .append("materialCost", getMaterialCost())
+                .append("testProcFee", getTestProcFee())
+                .append("fuelPowerCost", getFuelPowerCost())
+                .append("pubDocIpFee", getPubDocIpFee())
+                .append("travelConfCoopFee", getTravelConfCoopFee())
+                .append("laborCost", getLaborCost())
+                .append("serviceCost", getServiceCost())
+                .append("expertConsultFee", getExpertConsultFee())
+                .append("mgmtFee", getMgmtFee())
+                .append("taxFee", getTaxFee())
+                .append("createBy", getCreateBy())
+                .append("createTime", getCreateTime())
+                .append("updateBy", getUpdateBy())
+                .append("updateTime", getUpdateTime())
+                .append("contractAmount", getContractAmount())
+                .toString();
     }
+
 }

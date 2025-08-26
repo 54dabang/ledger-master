@@ -37,15 +37,14 @@ import com.ledger.common.core.page.TableDataInfo;
 
 /**
  * 项目用户Controller
- * 
+ *
  * @author ledger
  * @date 2025-08-20
  */
 @Api(tags = "项目用户管理")
 @RestController
 @RequestMapping("/api/projectUser")
-public class CtgLedgerProjectUserController extends BaseController
-{
+public class CtgLedgerProjectUserController extends BaseController {
     @Autowired
     private ICtgLedgerProjectUserService ctgLedgerProjectUserService;
     @Autowired
@@ -58,14 +57,13 @@ public class CtgLedgerProjectUserController extends BaseController
      */
     @ApiOperation("查询项目用户列表")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "ctgLedgerProjectId", value = "项目ID", dataType = "Long", paramType = "query"),
-        @ApiImplicitParam(name = "ctgLedgerUserId", value = "用户ID", dataType = "Long", paramType = "query"),
-        @ApiImplicitParam(name = "projectUserNickname", value = "项目用户昵称", dataType = "String", paramType = "query")
+            @ApiImplicitParam(name = "ctgLedgerProjectId", value = "项目ID", dataType = "Long", paramType = "query"),
+            @ApiImplicitParam(name = "ctgLedgerUserId", value = "用户ID", dataType = "Long", paramType = "query"),
+            @ApiImplicitParam(name = "projectUserNickname", value = "项目用户昵称", dataType = "String", paramType = "query")
     })
     @PreAuthorize("@ss.hasPermi('business:user:list')")
     @GetMapping("/list")
-    public TableDataInfo list(CtgLedgerProjectUser ctgLedgerProjectUser)
-    {
+    public TableDataInfo list(CtgLedgerProjectUser ctgLedgerProjectUser) {
         startPage();
         List<CtgLedgerProjectUser> list = ctgLedgerProjectUserService.selectCtgLedgerProjectUserList(ctgLedgerProjectUser);
         return getDataTable(list);
@@ -76,15 +74,14 @@ public class CtgLedgerProjectUserController extends BaseController
      */
     @ApiOperation("导出项目用户列表")
     @ApiImplicitParams({
-        @ApiImplicitParam(name = "ctgLedgerProjectId", value = "项目ID", dataType = "Long", paramType = "query"),
-        @ApiImplicitParam(name = "ctgLedgerUserId", value = "用户ID", dataType = "Long", paramType = "query"),
-        @ApiImplicitParam(name = "projectUserNickname", value = "项目用户昵称", dataType = "String", paramType = "query")
+            @ApiImplicitParam(name = "ctgLedgerProjectId", value = "项目ID", dataType = "Long", paramType = "query"),
+            @ApiImplicitParam(name = "ctgLedgerUserId", value = "用户ID", dataType = "Long", paramType = "query"),
+            @ApiImplicitParam(name = "projectUserNickname", value = "项目用户昵称", dataType = "String", paramType = "query")
     })
     @PreAuthorize("@ss.hasPermi('business:user:export')")
     @Log(title = "项目用户", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response, CtgLedgerProjectUser ctgLedgerProjectUser)
-    {
+    public void export(HttpServletResponse response, CtgLedgerProjectUser ctgLedgerProjectUser) {
         List<CtgLedgerProjectUser> list = ctgLedgerProjectUserService.selectCtgLedgerProjectUserList(ctgLedgerProjectUser);
         ExcelUtil<CtgLedgerProjectUser> util = new ExcelUtil<CtgLedgerProjectUser>(CtgLedgerProjectUser.class);
         util.exportExcel(response, list, "项目用户数据");
@@ -97,8 +94,7 @@ public class CtgLedgerProjectUserController extends BaseController
     @ApiImplicitParam(name = "id", value = "项目用户主键ID", required = true, dataType = "Long", paramType = "path")
     @PreAuthorize("@ss.hasPermi('business:user:query')")
     @GetMapping(value = "/{id}")
-    public AjaxResult getInfo(@PathVariable("id") Long id)
-    {
+    public AjaxResult getInfo(@PathVariable("id") Long id) {
         return success(ctgLedgerProjectUserService.selectCtgLedgerProjectUserById(id));
     }
 
@@ -131,8 +127,7 @@ public class CtgLedgerProjectUserController extends BaseController
     @PreAuthorize("@ss.hasPermi('business:user:edit')")
     @Log(title = "项目用户", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@ApiParam("项目用户对象") @RequestBody CtgLedgerProjectUser ctgLedgerProjectUser)
-    {
+    public AjaxResult edit(@ApiParam("项目用户对象") @RequestBody CtgLedgerProjectUser ctgLedgerProjectUser) {
         return toAjax(ctgLedgerProjectUserService.updateCtgLedgerProjectUser(ctgLedgerProjectUser));
     }
 
@@ -143,9 +138,8 @@ public class CtgLedgerProjectUserController extends BaseController
     @ApiImplicitParam(name = "ids", value = "项目用户主键ID数组", required = true, dataType = "Long", paramType = "path")
     @PreAuthorize("@ss.hasPermi('business:user:remove')")
     @Log(title = "项目用户", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids)
-    {
+    @DeleteMapping("/{ids}")
+    public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(ctgLedgerProjectUserService.deleteCtgLedgerProjectUserByIds(ids));
     }
 }

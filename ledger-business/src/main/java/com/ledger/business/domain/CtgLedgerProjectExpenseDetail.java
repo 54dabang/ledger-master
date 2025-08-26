@@ -27,6 +27,9 @@ public class CtgLedgerProjectExpenseDetail extends BaseEntity {
     @Excel(name = "台账系统项目id")
     private Long ledgerProjectId;
 
+    @Excel(name = "报销年度")
+    private Integer year;
+
     /**
      * 报销单号，差旅系统支出明细编号，用于去重
      */
@@ -137,11 +140,20 @@ public class CtgLedgerProjectExpenseDetail extends BaseEntity {
         this.reimburserLoginName = reimburserLoginName;
     }
 
+    public Integer getYear() {
+        return year;
+    }
+
+    public void setYear(Integer year) {
+        this.year = year;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
                 .append("id", getId())
                 .append("ledgerProjectId", getLedgerProjectId())
+                .append("year",getYear())
                 .append("expenseReportNumber", getExpenseReportNumber())
                 .append("subjectName", getSubjectName())
                 .append("feeType", getFeeType())

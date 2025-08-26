@@ -2,7 +2,7 @@ package com.ledger.business.mapper;
 
 import java.util.List;
 import com.ledger.business.domain.CtgLedgerProject;
-
+import org.apache.ibatis.annotations.Param;
 /**
  * 项目管理Mapper接口
  * 

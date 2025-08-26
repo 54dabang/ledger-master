@@ -3,32 +3,30 @@ package com.ledger.business.controller;
 import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import com.ledger.business.dto.ReimbursementDTO;
-import com.ledger.business.service.ICtgLedgerProjectExpenseDetailService;
-import com.ledger.business.service.ICtgLedgerProjectService;
-import com.ledger.business.service.ICtgLedgerProjectUserService;
-import com.ledger.business.service.IReimbursementService;
+import com.ledger.business.service.*;
 import com.ledger.business.util.InitConstant;
 import com.ledger.business.util.Result;
+import com.ledger.business.vo.ProjectExpenditureLedgerVo;
 import com.ledger.common.annotation.Log;
 import com.ledger.common.constant.HttpStatus;
 import com.ledger.common.core.controller.BaseController;
 import com.ledger.common.core.domain.AjaxResult;
 import com.ledger.common.enums.BusinessType;
 import com.ledger.common.enums.OperatorType;
+import com.ledger.common.utils.DateUtils;
 import com.ledger.framework.tools.RedisLock;
 import io.swagger.annotations.Api;
 
 import io.swagger.annotations.ApiOperation;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,6 +48,8 @@ public class ReimbursementController extends BaseController {
     private ICtgLedgerProjectUserService projectUserService;
     @Autowired
     private RedisLock redisLock;
+    @Autowired
+    private IProjectExpenditureLedgerService projectExpenditureLedgerService;
 
 
     @ApiOperation("同步台账基本数据信息")
@@ -100,4 +100,14 @@ public class ReimbursementController extends BaseController {
 
         return AjaxResult.success("同步台账数据成功");
     }
+
+    @RequestMapping(value = "/getProjectExpenditureLedger", method = RequestMethod.GET)
+    public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId) {
+        Integer year = DateUtils.getNowDate().getYear() + 1900;
+        Long  maxReimbursementSequenceNo = projectExpenditureLedgerService.selectMaxReimbursementSequenceNo(projectId, year);
+        maxReimbursementSequenceNo = Optional.ofNullable(maxReimbursementSequenceNo).orElse(0l);
+        ProjectExpenditureLedgerVo projectExpenditureLedgerVo = projectExpenditureLedgerService.getProjectExpenditureLedgerVo(projectId, year, maxReimbursementSequenceNo);
+        return AjaxResult.success(projectExpenditureLedgerVo);
+    }
+
 }

@@ -14,6 +14,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="reimburserName"    column="reimburser_name"    />
         <result property="reimburserLoginName"    column="reimburser_login_name"    />
         <result property="reimbursementSequenceNo"    column="reimbursement_sequence_no"    />
+        <result property="year"    column="year"    />
         <result property="remark"    column="remark"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
@@ -22,7 +23,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectCtgLedgerProjectExpenseDetailVo">
-        select id, ledger_project_id, expense_report_number, subject_name, feeType, amount, reimburser_name, reimburser_login_name, reimbursement_sequence_no, remark, create_by, create_time, update_by, update_time from ctg_ledger_project_expense_detail
+        select id, ledger_project_id, expense_report_number, subject_name, feeType, amount, reimburser_name, reimburser_login_name, reimbursement_sequence_no, year, remark, create_by, create_time, update_by, update_time from ctg_ledger_project_expense_detail
     </sql>
 
     <select id="selectCtgLedgerProjectExpenseDetailList" parameterType="CtgLedgerProjectExpenseDetail" resultMap="CtgLedgerProjectExpenseDetailResult">
@@ -36,7 +37,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="reimburserName != null  and reimburserName != ''"> and reimburser_name like concat('%', #{reimburserName}, '%')</if>
             <if test="reimburserLoginName != null  and reimburserLoginName != ''"> and reimburser_login_name like concat('%', #{reimburserLoginName}, '%')</if>
             <if test="reimbursementSequenceNo != null "> and reimbursement_sequence_no = #{reimbursementSequenceNo}</if>
+            <if test="year != null "> and year = #{year}</if>
         </where>
+        order by reimbursement_sequence_no desc
     </select>
     
     <select id="selectCtgLedgerProjectExpenseDetailById" parameterType="Long" resultMap="CtgLedgerProjectExpenseDetailResult">
@@ -56,6 +59,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         limit 1
     </select>
 
+    <select id="selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear" parameterType="map" resultMap="CtgLedgerProjectExpenseDetailResult">
+        <include refid="selectCtgLedgerProjectExpenseDetailVo"/>
+        where ledger_project_id = #{projectId} and year = #{year}
+        order by reimbursement_sequence_no desc
+    </select>
+
+    <select id="selectMaxReimbursementSequenceNoByProjectIdAndYear" resultType="java.lang.Long">
+        select max(reimbursement_sequence_no) from ctg_ledger_project_expense_detail
+        where ledger_project_id = #{projectId} and year = #{year}
+    </select>
+
     <insert id="insertCtgLedgerProjectExpenseDetail" parameterType="CtgLedgerProjectExpenseDetail" useGeneratedKeys="true" keyProperty="id">
         insert into ctg_ledger_project_expense_detail
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -67,6 +81,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="reimburserName != null and reimburserName != ''">reimburser_name,</if>
             <if test="reimburserLoginName != null and reimburserLoginName != ''">reimburser_login_name,</if>
             <if test="reimbursementSequenceNo != null">reimbursement_sequence_no,</if>
+            <if test="year != null">year,</if>
             <if test="remark != null">remark,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
@@ -82,6 +97,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="reimburserName != null and reimburserName != ''">#{reimburserName},</if>
             <if test="reimburserLoginName != null and reimburserLoginName != ''">#{reimburserLoginName},</if>
             <if test="reimbursementSequenceNo != null">#{reimbursementSequenceNo},</if>
+            <if test="year != null">#{year},</if>
             <if test="remark != null">#{remark},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
@@ -101,6 +117,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="reimburserName != null and reimburserName != ''">reimburser_name = #{reimburserName},</if>
             <if test="reimburserLoginName != null and reimburserLoginName != ''">reimburser_login_name = #{reimburserLoginName},</if>
             <if test="reimbursementSequenceNo != null">reimbursement_sequence_no = #{reimbursementSequenceNo},</if>
+            <if test="year != null">year = #{year},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>

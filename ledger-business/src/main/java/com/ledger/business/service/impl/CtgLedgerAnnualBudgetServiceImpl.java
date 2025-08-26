@@ -93,4 +93,9 @@ public class CtgLedgerAnnualBudgetServiceImpl implements ICtgLedgerAnnualBudgetS
     {
         return ctgLedgerAnnualBudgetMapper.deleteCtgLedgerAnnualBudgetById(id);
     }
+
+    @Override
+    public CtgLedgerAnnualBudget selectByProjectIdAndYear(Long projectId, Integer year) {
+        return ctgLedgerAnnualBudgetMapper.selectByProjectIdAndYear(projectId,year);
+    }
 }
