@@ -101,6 +101,8 @@ public class ReimbursementController extends BaseController {
         return AjaxResult.success("同步台账数据成功");
     }
 
+    @ApiOperation("到处台账")
+
     @RequestMapping(value = "/getProjectExpenditureLedger", method = RequestMethod.GET)
     public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId) {
         Integer year = DateUtils.getNowDate().getYear() + 1900;
