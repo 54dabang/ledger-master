@@ -10,6 +10,15 @@ import java.math.BigDecimal;
 @Builder
 public class ProjectExpenditureLedgerVo {
 
+    @ApiModelProperty(name = "项目名称")
+    private String projectName;
+
+    @ApiModelProperty(name = "年度")
+    private Integer year;
+
+    @ApiModelProperty(name = "序列号")
+    private Long sequenceNo;
+
     @ApiModelProperty(name = "项目总经费")
     private ProjectExpenditureLedgerColumnVo totalBudget;
 

@@ -97,6 +97,10 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
 
         projectExpenditureLedgerVo.setRemainingTotalFunds(remainingTotalFunds);
 
+        projectExpenditureLedgerVo.setProjectName(ctgLedgerProject.getProjectName());
+        projectExpenditureLedgerVo.setYear(year);
+        projectExpenditureLedgerVo.setSequenceNo(reimbursementSequenceNo);
+
         return projectExpenditureLedgerVo;
     }
 
