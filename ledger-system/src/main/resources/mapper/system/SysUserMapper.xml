@@ -86,6 +86,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		${params.dataScope}
 	</select>
 	
+	<select id="selectByDelFlag" parameterType="Integer" resultMap="SysUserResult">
+		<include refid="selectUserVo"/>
+		where u.del_flag = #{delFlag}
+	</select>
+
 	<select id="selectAllocatedList" parameterType="SysUser" resultMap="SysUserResult">
 	    select distinct u.user_id, u.dept_id, u.user_name, u.nick_name, u.email, u.phonenumber, u.status, u.create_time
 	    from sys_user u

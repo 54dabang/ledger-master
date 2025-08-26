@@ -1,5 +1,6 @@
 package com.ledger.business.vo;
 
+import com.ledger.common.core.domain.entity.SysUser;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +16,12 @@ public class SysUserVo {
 
     @ApiModelProperty(value = "用户真实姓名")
     private String nickName;
+
+    public static SysUserVo toSysUserVo(SysUser sysUser){
+        return SysUserVo.builder().userId(sysUser.getUserId())
+                .userName(sysUser.getUserName())
+                .nickName(sysUser.getNickName())
+                .build();
+    }
 
 }

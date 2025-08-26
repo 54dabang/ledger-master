@@ -16,4 +16,6 @@ public class InitConstant {
     public static final String PROJECT_QUERY_TYPE_PARTICIPATE = "participate";
 
     public static final String PROJECT_QUERY_TYPE_MANAGE = "manage";
+
+    public static final String USER_EXIST_FLAG = "0";
 }

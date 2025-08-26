@@ -7,14 +7,17 @@ import com.ledger.business.service.*;
 import com.ledger.business.util.InitConstant;
 import com.ledger.business.util.Result;
 import com.ledger.business.vo.ProjectExpenditureLedgerVo;
+import com.ledger.business.vo.SysUserVo;
 import com.ledger.common.annotation.Log;
 import com.ledger.common.constant.HttpStatus;
 import com.ledger.common.core.controller.BaseController;
 import com.ledger.common.core.domain.AjaxResult;
+import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.common.enums.BusinessType;
 import com.ledger.common.enums.OperatorType;
 import com.ledger.common.utils.DateUtils;
 import com.ledger.framework.tools.RedisLock;
+import com.ledger.system.service.ISysUserService;
 import io.swagger.annotations.Api;
 
 import io.swagger.annotations.ApiOperation;
@@ -26,9 +29,11 @@ import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Calendar;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 报销申请控制器
@@ -51,6 +56,8 @@ public class ReimbursementController extends BaseController {
     private RedisLock redisLock;
     @Autowired
     private IProjectExpenditureLedgerService projectExpenditureLedgerService;
+    @Autowired
+    private ISysUserService userService;
 
 
     @ApiOperation("同步台账基本数据信息")
@@ -102,8 +109,7 @@ public class ReimbursementController extends BaseController {
         return AjaxResult.success("同步台账数据成功");
     }
 
-    @ApiOperation("到处台账")
-
+    @ApiOperation("导出台账")
     @RequestMapping(value = "/getProjectExpenditureLedger", method = RequestMethod.GET)
     public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId) {
         // 使用Calendar获取实际年份
@@ -113,6 +119,16 @@ public class ReimbursementController extends BaseController {
         maxReimbursementSequenceNo = Optional.ofNullable(maxReimbursementSequenceNo).orElse(0L);
         ProjectExpenditureLedgerVo projectExpenditureLedgerVo = projectExpenditureLedgerService.getProjectExpenditureLedgerVo(projectId, year, maxReimbursementSequenceNo);
         return AjaxResult.success(projectExpenditureLedgerVo);
+    }
+
+    @ApiOperation("获取所有有效用户")
+    @RequestMapping(value = "/loadValidUsers", method = RequestMethod.GET)
+    public AjaxResult loadValidUsers(){
+        SysUser param = new SysUser();
+        param.setDelFlag(InitConstant.USER_EXIST_FLAG);
+        List<SysUser> userList = userService.selectUserList(param);
+        List<SysUserVo> sysUserVoList = userList.stream().map(u->SysUserVo.toSysUserVo(u)).collect(Collectors.toList());
+        return AjaxResult.success(sysUserVoList);
     }
 
 }
