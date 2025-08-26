@@ -90,7 +90,7 @@ public class CtgLedgerProjectController extends BaseController {
     /**
      * 导出项目管理列表
      */
-    //  @PreAuthorize("@ss.hasPermi('business:project:export')")
+    @PreAuthorize("@ss.hasPermi('business:project:export')")
     @Log(title = "项目管理", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     @ApiOperation("导出项目excel")
@@ -103,7 +103,7 @@ public class CtgLedgerProjectController extends BaseController {
     /**
      * 获取项目管理详细信息
      */
-    //   @PreAuthorize("@ss.hasPermi('business:project:query')")
+    @PreAuthorize("@ss.hasPermi('business:project:query')")
     @GetMapping(value = "/{id}")
     @ApiOperation("获取项目基本信息")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
@@ -113,7 +113,7 @@ public class CtgLedgerProjectController extends BaseController {
     /**
      * 新增项目管理
      */
-    // @PreAuthorize("@ss.hasPermi('business:project:add')")
+    @PreAuthorize("@ss.hasPermi('business:project:add')")
     @Log(title = "项目管理", businessType = BusinessType.INSERT)
     @PostMapping
     @ApiOperation("新增项目")
@@ -124,7 +124,7 @@ public class CtgLedgerProjectController extends BaseController {
     /**
      * 修改项目管理
      */
-    //  @PreAuthorize("@ss.hasPermi('business:project:edit')")
+    @PreAuthorize("@ss.hasPermi('business:project:edit')")
     @Log(title = "项目管理", businessType = BusinessType.UPDATE)
     @PutMapping
     @ApiOperation("编辑项目")
@@ -135,7 +135,7 @@ public class CtgLedgerProjectController extends BaseController {
     /**
      * 删除项目管理
      */
-    //   @PreAuthorize("@ss.hasPermi('business:project:remove')")
+    @PreAuthorize("@ss.hasPermi('business:project:remove')")
     @Log(title = "项目管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     @ApiOperation("删除项目")

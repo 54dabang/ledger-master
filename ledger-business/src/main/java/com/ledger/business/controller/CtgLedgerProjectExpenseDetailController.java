@@ -37,7 +37,7 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController
     /**
      * 查询项目支出明细列表
      */
-    //@PreAuthorize("@ss.hasPermi('business:detail:list')")
+    @PreAuthorize("@ss.hasPermi('business:detail:list')")
     @GetMapping("/list")
     public TableDataInfo list(CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail)
     {

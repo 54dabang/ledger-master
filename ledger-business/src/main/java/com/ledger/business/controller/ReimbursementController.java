@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Calendar;
@@ -111,6 +112,7 @@ public class ReimbursementController extends BaseController {
 
     @ApiOperation("导出台账")
     @RequestMapping(value = "/getProjectExpenditureLedger", method = RequestMethod.GET)
+    @PreAuthorize("@ss.hasPermi('business:expenditure:exportledger')")
     public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId) {
         // 使用Calendar获取实际年份
         Calendar calendar = Calendar.getInstance();
@@ -123,6 +125,7 @@ public class ReimbursementController extends BaseController {
 
     @ApiOperation("获取所有有效用户")
     @RequestMapping(value = "/loadValidUsers", method = RequestMethod.GET)
+    @PreAuthorize("@ss.hasPermi('business:expenditure:userlist')")
     public AjaxResult loadValidUsers(){
         SysUser param = new SysUser();
         param.setDelFlag(InitConstant.USER_EXIST_FLAG);
