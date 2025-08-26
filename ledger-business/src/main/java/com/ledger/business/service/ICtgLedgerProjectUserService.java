@@ -1,7 +1,10 @@
 package com.ledger.business.service;
 
 import java.util.List;
+
+import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.domain.CtgLedgerProjectUser;
+import com.ledger.business.vo.CtgLedgerProjectVo;
 
 /**
  * 项目用户Service接口
@@ -76,4 +79,6 @@ public interface ICtgLedgerProjectUserService
     boolean isProjectMember(Long projectId,String loginName);
 
     public List<CtgLedgerProjectUser> batchInsertCtgLedgerProjectUser( List<CtgLedgerProjectUser>  ctgLedgerProjectUsers);
+
+    CtgLedgerProjectVo toCtgLedgerProjectVo(CtgLedgerProject project);
 }

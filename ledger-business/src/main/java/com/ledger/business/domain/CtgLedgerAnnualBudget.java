@@ -2,6 +2,7 @@ package com.ledger.business.domain;
 
 import java.math.BigDecimal;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ledger.common.annotation.Excel;
@@ -20,100 +21,100 @@ public class CtgLedgerAnnualBudget extends BaseEntity {
      * 费用记录ID
      */
     private Long id;
-    @Excel(name = "项目id")
+    @ApiModelProperty(name = "项目id")
     private Long projectId;
 
     /**
      * 年度
      */
-    @Excel(name = "年度")
+    @ApiModelProperty(name = "年度")
     private Long year;
 
     /**
      * 购置设备费
      */
-    @Excel(name = "购置设备费")
+    @ApiModelProperty(name = "购置设备费")
     private BigDecimal equipPurchaseFee;
 
     /**
      * 试制设备费
      */
-    @Excel(name = "试制设备费")
+    @ApiModelProperty(name = "试制设备费")
     private BigDecimal protoEquipFee;
 
     /**
      * 设备改造费
      */
-    @Excel(name = "设备改造费")
+    @ApiModelProperty(name = "设备改造费")
     private BigDecimal equipRenovFee;
 
     /**
      * 设备租赁费
      */
-    @Excel(name = "设备租赁费")
+    @ApiModelProperty(name = "设备租赁费")
     private BigDecimal equipRentFee;
 
     /**
      * 材料费
      */
-    @Excel(name = "材料费")
+    @ApiModelProperty(name = "材料费")
     private BigDecimal materialCost;
 
     /**
      * 测试化验加工费
      */
-    @Excel(name = "测试化验加工费")
+    @ApiModelProperty(name = "测试化验加工费")
     private BigDecimal testProcFee;
 
     /**
      * 燃料动力费
      */
-    @Excel(name = "燃料动力费")
+    @ApiModelProperty(name = "燃料动力费")
     private BigDecimal fuelPowerCost;
 
     /**
      * 出版/文献/信息传播/知识产权事务费
      */
-    @Excel(name = "出版/文献/信息传播/知识产权事务费")
+    @ApiModelProperty(name = "出版/文献/信息传播/知识产权事务费")
     private BigDecimal pubDocIpFee;
 
     /**
      * 差旅/会议/国际合作交流费
      */
-    @Excel(name = "差旅/会议/国际合作交流费")
+    @ApiModelProperty(name = "差旅/会议/国际合作交流费")
     private BigDecimal travelConfCoopFee;
 
     /**
      * 人工费
      */
-    @Excel(name = "人工费")
+    @ApiModelProperty(name = "人工费")
     private BigDecimal laborCost;
 
     /**
      * 劳务费
      */
-    @Excel(name = "劳务费")
+    @ApiModelProperty(name = "劳务费")
     private BigDecimal serviceCost;
 
     /**
      * 专家咨询费
      */
-    @Excel(name = "专家咨询费")
+    @ApiModelProperty(name = "专家咨询费")
     private BigDecimal expertConsultFee;
 
     /**
      * 管理费
      */
-    @Excel(name = "管理费")
+    @ApiModelProperty(name = "管理费")
     private BigDecimal mgmtFee;
 
     /**
      * 税金
      */
-    @Excel(name = "税金")
+    @ApiModelProperty(name = "税金")
     private BigDecimal taxFee;
 
-    @Excel(name = "合同金额")
+    @ApiModelProperty(name = "合同金额")
     private BigDecimal contractAmount;
 
     public void setId(Long id) {

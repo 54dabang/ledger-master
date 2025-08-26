@@ -34,11 +34,11 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
     private CtgLedgerProjectExpenseDetailMapper ctgLedgerProjectExpenseDetailMapper;
 
     @Override
-    public ProjectExpenditureLedgerVo getProjectExpenditureLedgerVo(Long projectId, Integer year, Long  reimbursementSequenceNo) {
+    public ProjectExpenditureLedgerVo getProjectExpenditureLedgerVo(Long projectId, Integer year, Long reimbursementSequenceNo) {
         CtgLedgerProject ctgLedgerProject = ctgLedgerProjectMapper.selectCtgLedgerProjectById(projectId);
         CtgLedgerAnnualBudget annualBudget = CtgLedgerAnnualBudgetMapper.selectByProjectIdAndYear(projectId, year);
         List<CtgLedgerProjectExpenseDetail> detailList = ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
-        detailList = detailList.stream().filter(d -> d.getReimbursementSequenceNo() >= reimbursementSequenceNo).collect(Collectors.toList());
+        detailList = detailList.stream().filter(d -> d.getReimbursementSequenceNo() <= reimbursementSequenceNo).collect(Collectors.toList());
         //项目经费执行情况
         ProjectExpenditureLedgerColumnVo totalBudgetCol = convertToLedgerColumnVo(ctgLedgerProject);
         ProjectExpenditureLedgerColumnVo executedAmountCol = convertToExecutedAmountLedgerColumnVo(ctgLedgerProject);
@@ -62,7 +62,7 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
                         (oldValue, newValue) -> oldValue,
                         LinkedHashMap::new));
         //累计支出经费
-        ProjectExpenditureLedgerColumnVo totalCumulativeExpenditure = sumHistory(sortedCtgLedgerProjectExpenseDetailMap);
+        ProjectExpenditureLedgerColumnVo totalCumulativeExpenditureColVo = sumHistory(sortedCtgLedgerProjectExpenseDetailMap, ProjectExpenditureColumnEnum.CUMULATIVE_FUNDS);
 
         //本次所有支出
         Map.Entry<Long, List<CtgLedgerProjectExpenseDetail>> lastEntry = sortedCtgLedgerProjectExpenseDetailMap
@@ -71,26 +71,30 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
                 .reduce((first, second) -> second)
                 .orElse(null);
         //本次支出经费
-        ProjectExpenditureLedgerColumnVo currentExpenditure = sumHistory(lastEntry.getValue());
+        ProjectExpenditureLedgerColumnVo currentExpenditureColVo = sumHistory(lastEntry.getValue(), ProjectExpenditureColumnEnum.CURRENT_FUNDS);
+
+
         //除本次之外的所有支出
         if (lastEntry != null) {
             sortedCtgLedgerProjectExpenseDetailMap.remove(lastEntry.getKey());
         }
-        ProjectExpenditureLedgerColumnVo cumulativeExpenditureExceptCurrent = sumHistory(sortedCtgLedgerProjectExpenseDetailMap);
+        ProjectExpenditureLedgerColumnVo cumulativeExpenditureExceptCurrentCol = sumHistory(sortedCtgLedgerProjectExpenseDetailMap, null);
 
 
-        ProjectExpenditureLedgerColumnVo lastRemainingExpenditure = buildLastRemainingFunds(annualBudgetCol, cumulativeExpenditureExceptCurrent);
-        ProjectExpenditureLedgerColumnVo currentRemainingExpenditure = buildLastRemainingFunds(annualBudgetCol, totalCumulativeExpenditure);
+        ProjectExpenditureLedgerColumnVo lastRemainingExpenditure = buildLastRemainingFunds(annualBudgetCol, cumulativeExpenditureExceptCurrentCol);
+        ProjectExpenditureLedgerColumnVo currentRemainingExpenditure = buildLastRemainingFunds(annualBudgetCol, totalCumulativeExpenditureColVo);
         ProjectExpenditureLedgerVo projectExpenditureLedgerVo = ProjectExpenditureLedgerVo.builder().totalBudget(totalBudgetCol)
                 .executedAmount(executedAmountCol)
                 .annualBudget(annualBudgetCol)
                 .lastRemainingFunds(lastRemainingExpenditure)
-                .currentFunds(currentExpenditure)
-                .cumulativeFunds(totalCumulativeExpenditure)
+                .currentFunds(currentExpenditureColVo)
+                .cumulativeFunds(totalCumulativeExpenditureColVo)
                 .currentRemainingFunds(currentRemainingExpenditure)
                 .build();
-        BigDecimal remainingTotalFunds = Stream.of(currentRemainingExpenditure.getDirectCosts(),currentRemainingExpenditure.getIndirectCosts(),currentRemainingExpenditure.getContractAmount())
+        BigDecimal remainingTotalFunds = Stream.of(currentRemainingExpenditure.getDirectCosts(), currentRemainingExpenditure.getIndirectCosts(), currentRemainingExpenditure.getContractAmount())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+
         projectExpenditureLedgerVo.setRemainingTotalFunds(remainingTotalFunds);
 
         return projectExpenditureLedgerVo;
@@ -119,7 +123,8 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
         // 计算直接费用和间接费用
         lastRemainingExpenditure.setDirectCosts(buildDirectCosts(lastRemainingExpenditure));
         lastRemainingExpenditure.setIndirectCosts(buildInDirectCosts(lastRemainingExpenditure));
-
+        lastRemainingExpenditure.setColumnCnName(ProjectExpenditureColumnEnum.LAST_REMAINING_FUNDS.cnName());
+        lastRemainingExpenditure.setColumnEngName(ProjectExpenditureColumnEnum.LAST_REMAINING_FUNDS.engName());
         return lastRemainingExpenditure;
     }
 
@@ -140,12 +145,12 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
      * @param sortedCtgLedgerProjectExpenseDetailMap
      * @return
      */
-    public ProjectExpenditureLedgerColumnVo sumHistory(LinkedHashMap<Long, List<CtgLedgerProjectExpenseDetail>> sortedCtgLedgerProjectExpenseDetailMap) {
+    public ProjectExpenditureLedgerColumnVo sumHistory(LinkedHashMap<Long, List<CtgLedgerProjectExpenseDetail>> sortedCtgLedgerProjectExpenseDetailMap, ProjectExpenditureColumnEnum columnEnum) {
         List<CtgLedgerProjectExpenseDetail> detailList = toList(sortedCtgLedgerProjectExpenseDetailMap);
-        return sumHistory(detailList);
+        return sumHistory(detailList, columnEnum);
     }
 
-    public ProjectExpenditureLedgerColumnVo sumHistory(List<CtgLedgerProjectExpenseDetail> detailList) {
+    public ProjectExpenditureLedgerColumnVo sumHistory(List<CtgLedgerProjectExpenseDetail> detailList, ProjectExpenditureColumnEnum columnEnum) {
         BigDecimal equipPurchaseFee = sumByCategoryEnum(CategoryEnum.EQUIP_PURCHASE_FEE, detailList);
         BigDecimal protoEquipFee = sumByCategoryEnum(CategoryEnum.PROTO_EQUIP_FEE, detailList);
         BigDecimal equipRenovFee = sumByCategoryEnum(CategoryEnum.EQUIP_RENOV_FEE, detailList);
@@ -193,6 +198,11 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
         //计算直接费用和间接费用
         sumHistory.setDirectCosts(directCosts);
         sumHistory.setIndirectCosts(insDirectCosts);
+        if (columnEnum != null) {
+            sumHistory.setColumnCnName(columnEnum.cnName());
+            sumHistory.setColumnEngName(columnEnum.engName());
+        }
+
 
         return sumHistory;
     }
@@ -376,6 +386,6 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
 
     @Override
     public Long selectMaxReimbursementSequenceNo(Long projectId, Integer year) {
-        return ctgLedgerProjectExpenseDetailMapper.selectMaxReimbursementSequenceNoByProjectIdAndYear(projectId,year);
+        return ctgLedgerProjectExpenseDetailMapper.selectMaxReimbursementSequenceNoByProjectIdAndYear(projectId, year);
     }
 }

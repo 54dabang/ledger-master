@@ -1,5 +1,6 @@
 package com.ledger.business.domain;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ledger.common.annotation.Excel;
@@ -19,11 +20,11 @@ public class CtgLedgerProjectUser extends BaseEntity
     private Long id;
 
     /** ctg_ledger_project表项目id */
-    @Excel(name = "ctg_ledger_project表项目id")
+    @ApiModelProperty(name = "ctg_ledger_project表项目id")
     private Long ctgLedgerProjectId;
 
     /** sys_user表用户id */
-    @Excel(name = "sys_user表用户id")
+    @ApiModelProperty(name = "sys_user表用户id")
     private Long sysUserId;
 
     public void setId(Long id) 

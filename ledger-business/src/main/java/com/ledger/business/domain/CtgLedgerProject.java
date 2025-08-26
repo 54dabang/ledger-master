@@ -1,6 +1,8 @@
 package com.ledger.business.domain;
 
 import java.math.BigDecimal;
+
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ledger.common.annotation.Excel;
@@ -21,134 +23,169 @@ public class CtgLedgerProject extends BaseEntity
 
     /** 项目名称 */
     @Excel(name = "项目名称")
+    @ApiModelProperty(value = "项目名称")
     private String projectName;
 
     /** 项目编号 */
     @Excel(name = "项目编号")
+    @ApiModelProperty(value = "项目编号")
     private String projectCode;
 
     /** 报销系统中的项目id */
     @Excel(name = "报销系统中的项目id")
+    @ApiModelProperty(value = "报销系统中的项目id")
     private Long extendProjectId;
 
     @Excel(name = "项目负责人登录用户名")
+    @ApiModelProperty(value = "项目负责人登录用户名")
     private String projectManagerLoginName;
 
     /** 购置设备费 */
     @Excel(name = "购置设备费")
+    @ApiModelProperty(value = "购置设备费")
     private BigDecimal equipPurchaseFee;
 
     /** 试制设备费 */
     @Excel(name = "试制设备费")
+    @ApiModelProperty(value = "试制设备费")
     private BigDecimal protoEquipFee;
 
     /** 设备改造费 */
     @Excel(name = "设备改造费")
+    @ApiModelProperty(value = "设备改造费")
     private BigDecimal equipRenovFee;
 
     /** 设备租赁费 */
     @Excel(name = "设备租赁费")
+    @ApiModelProperty(value = "设备租赁费")
     private BigDecimal equipRentFee;
 
     /** 材料费 */
     @Excel(name = "材料费")
+    @ApiModelProperty(value = "材料费")
     private BigDecimal materialCost;
 
     /** 测试化验加工费 */
     @Excel(name = "测试化验加工费")
+    @ApiModelProperty(value = "测试化验加工费")
     private BigDecimal testProcFee;
 
     /** 燃料动力费 */
     @Excel(name = "燃料动力费")
+    @ApiModelProperty(value = "燃料动力费")
     private BigDecimal fuelPowerCost;
 
     /** 出版/文献/信息传播/知识产权事务费 */
     @Excel(name = "出版/文献/信息传播/知识产权事务费")
+    @ApiModelProperty(value = "出版/文献/信息传播/知识产权事务费")
     private BigDecimal pubDocIpFee;
 
     /** 差旅/会议/国际合作交流费 */
     @Excel(name = "差旅/会议/国际合作交流费")
+    @ApiModelProperty(value = "差旅/会议/国际合作交流费")
     private BigDecimal travelConfCoopFee;
 
     /** 人工费 */
     @Excel(name = "人工费")
+    @ApiModelProperty(value = "人工费")
     private BigDecimal laborCost;
 
     /** 劳务费 */
     @Excel(name = "劳务费")
+    @ApiModelProperty(value = "劳务费")
     private BigDecimal serviceCost;
 
     /** 专家咨询费 */
     @Excel(name = "专家咨询费")
+    @ApiModelProperty(value = "专家咨询费")
     private BigDecimal expertConsultFee;
 
     /** 管理费 */
     @Excel(name = "管理费")
+    @ApiModelProperty(value = "管理费")
     private BigDecimal mgmtFee;
 
     /** 税金 */
     @Excel(name = "税金")
+    @ApiModelProperty(value = "税金")
     private BigDecimal taxFee;
+    
     @Excel(name = "合同金额")
+    @ApiModelProperty(value = "合同金额")
     private BigDecimal contractAmount;
 
 
     @Excel(name = "已执行购置设备费")
+    @ApiModelProperty(value = "已执行购置设备费")
     private BigDecimal executedEquipPurchaseFee;
 
     /** 试制设备费 */
     @Excel(name = "已执行试制设备费")
+    @ApiModelProperty(value = "已执行试制设备费")
     private BigDecimal executedProtoEquipFee;
 
     /** 设备改造费 */
     @Excel(name = "已执行设备改造费")
+    @ApiModelProperty(value = "已执行设备改造费")
     private BigDecimal executedEquipRenovFee;
 
     /** 设备租赁费 */
     @Excel(name = "已执行设备租赁费")
+    @ApiModelProperty(value = "已执行设备租赁费")
     private BigDecimal executedEquipRentFee;
 
     /** 材料费 */
     @Excel(name = "已执行材料费")
+    @ApiModelProperty(value = "已执行材料费")
     private BigDecimal executedMaterialCost;
 
     /** 测试化验加工费 */
     @Excel(name = "已执行测试化验加工费")
+    @ApiModelProperty(value = "已执行测试化验加工费")
     private BigDecimal executedTestProcFee;
 
     /** 燃料动力费 */
     @Excel(name = "已执行燃料动力费")
+    @ApiModelProperty(value = "已执行燃料动力费")
     private BigDecimal executedFuelPowerCost;
 
     /** 出版/文献/信息传播/知识产权事务费 */
     @Excel(name = "已执行出版/文献/信息传播/知识产权事务费")
+    @ApiModelProperty(value = "已执行出版/文献/信息传播/知识产权事务费")
     private BigDecimal executedPubDocIpFee;
 
     /** 差旅/会议/国际合作交流费 */
     @Excel(name = "已执行差旅/会议/国际合作交流费")
+    @ApiModelProperty(value = "已执行差旅/会议/国际合作交流费")
     private BigDecimal executedTravelConfCoopFee;
 
     /** 人工费 */
     @Excel(name = "已执行人工费")
+    @ApiModelProperty(value = "已执行人工费")
     private BigDecimal executedLaborCost;
 
     /** 劳务费 */
     @Excel(name = "已执行劳务费")
+    @ApiModelProperty(value = "已执行劳务费")
     private BigDecimal executedServiceCost;
 
     /** 专家咨询费 */
     @Excel(name = "已执行专家咨询费")
+    @ApiModelProperty(value = "已执行专家咨询费")
     private BigDecimal executedExpertConsultFee;
 
     /** 管理费 */
     @Excel(name = "已执行管理费")
+    @ApiModelProperty(value = "已执行管理费")
     private BigDecimal executedMgmtFee;
 
     /** 税金 */
     @Excel(name = "已执行税金")
+    @ApiModelProperty(value = "已执行税金")
     private BigDecimal executedTaxFee;
 
     @Excel(name = "合同金额")
+    @ApiModelProperty(value = "合同金额")
     private BigDecimal executedContractAmount;
 
     public void setId(Long id) 

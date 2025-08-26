@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.ledger.business.domain.CtgLedgerProjectUser;
 import com.ledger.business.service.ICtgLedgerProjectUserService;
 import com.ledger.business.util.InitConstant;
+import com.ledger.business.vo.CtgLedgerProjectVo;
 import com.ledger.common.utils.SecurityUtils;
 import com.ledger.system.service.ISysUserService;
 import io.swagger.annotations.Api;
@@ -53,7 +54,8 @@ public class CtgLedgerProjectController extends BaseController {
             ctgLedgerProject.setProjectManagerLoginName(SecurityUtils.getUsername());
             startPage();
             List<CtgLedgerProject> list = ctgLedgerProjectService.selectCtgLedgerProjectList(ctgLedgerProject);
-            return getDataTable(list);
+            List<CtgLedgerProjectVo> projectVoList = list.stream().map(p->projectUserService.toCtgLedgerProjectVo(p)).collect(Collectors.toList());
+            return getDataTable(projectVoList);
         } else  {
             Long userId = userService.selectUserByUserName(SecurityUtils.getUsername()).getUserId();
             CtgLedgerProjectUser ctgLedgerProjectUser = new CtgLedgerProjectUser();
@@ -68,7 +70,8 @@ public class CtgLedgerProjectController extends BaseController {
             ctgLedgerProject.getParams().put("ids", projectIdList);
             startPage();
             List<CtgLedgerProject> list = ctgLedgerProjectService.selectCtgLedgerProjectList(ctgLedgerProject);
-            return getDataTable(list);
+            List<CtgLedgerProjectVo> projectVoList = list.stream().map(p->projectUserService.toCtgLedgerProjectVo(p)).collect(Collectors.toList());
+            return getDataTable(projectVoList);
 
         }
 

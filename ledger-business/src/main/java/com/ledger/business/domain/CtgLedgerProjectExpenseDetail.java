@@ -1,5 +1,6 @@
 package com.ledger.business.domain;
 
+import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ledger.common.annotation.Excel;
@@ -24,48 +25,48 @@ public class CtgLedgerProjectExpenseDetail extends BaseEntity {
     /**
      * 台账系统项目id
      */
-    @Excel(name = "台账系统项目id")
+    @ApiModelProperty(name = "台账系统项目id")
     private Long ledgerProjectId;
 
-    @Excel(name = "报销年度")
+    @ApiModelProperty(name = "报销年度")
     private Integer year;
 
     /**
      * 报销单号，差旅系统支出明细编号，用于去重
      */
-    @Excel(name = "报销单号，差旅系统支出明细编号，用于去重")
+    @ApiModelProperty(name = "报销单号，差旅系统支出明细编号，用于去重")
     private Long expenseReportNumber;
 
     /**
      * 科目名称
      */
-    @Excel(name = "科目名称")
+    @ApiModelProperty(name = "科目名称")
     private String subjectName;
 
     /**
      * 费用类型
      */
-    @Excel(name = "费用类型")
+    @ApiModelProperty(name = "费用类型")
     private String feeType;
 
 
     /**
      * 设备改造费
      */
-    @Excel(name = "金额")
+    @ApiModelProperty(name = "金额")
     private BigDecimal amount;
 
 
-    @Excel(name = "报销人姓名")
+    @ApiModelProperty(name = "报销人姓名")
     private String reimburserName;
 
-    @Excel(name = "报销人登录用户名")
+    @ApiModelProperty(name = "报销人登录用户名")
     private String reimburserLoginName;
 
     /**
      * 报销次序
      */
-    @Excel(name = "报销次序")
+    @ApiModelProperty(name = "报销次序")
     private Long reimbursementSequenceNo;
 
     public void setId(Long id) {

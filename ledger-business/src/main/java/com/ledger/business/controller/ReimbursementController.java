@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Calendar;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -105,9 +106,11 @@ public class ReimbursementController extends BaseController {
 
     @RequestMapping(value = "/getProjectExpenditureLedger", method = RequestMethod.GET)
     public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId) {
-        Integer year = DateUtils.getNowDate().getYear() + 1900;
-        Long  maxReimbursementSequenceNo = projectExpenditureLedgerService.selectMaxReimbursementSequenceNo(projectId, year);
-        maxReimbursementSequenceNo = Optional.ofNullable(maxReimbursementSequenceNo).orElse(0l);
+        // 使用Calendar获取实际年份
+        Calendar calendar = Calendar.getInstance();
+        Integer year = calendar.get(Calendar.YEAR);
+        Long maxReimbursementSequenceNo = projectExpenditureLedgerService.selectMaxReimbursementSequenceNo(projectId, year);
+        maxReimbursementSequenceNo = Optional.ofNullable(maxReimbursementSequenceNo).orElse(0L);
         ProjectExpenditureLedgerVo projectExpenditureLedgerVo = projectExpenditureLedgerService.getProjectExpenditureLedgerVo(projectId, year, maxReimbursementSequenceNo);
         return AjaxResult.success(projectExpenditureLedgerVo);
     }

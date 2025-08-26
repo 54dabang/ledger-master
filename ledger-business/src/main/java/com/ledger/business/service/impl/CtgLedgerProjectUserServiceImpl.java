@@ -3,9 +3,12 @@ package com.ledger.business.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.service.ICtgLedgerProjectService;
+import com.ledger.business.vo.CtgLedgerProjectVo;
+import com.ledger.business.vo.SysUserVo;
 import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.common.utils.DateUtils;
 import com.ledger.common.utils.SecurityUtils;
@@ -56,17 +59,6 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
     @Override
     public CtgLedgerProjectUser selectCtgLedgerProjectUserByProjectIdAndUserId(Long ctgLedgerProjectId, Long sysUserId) {
         return ctgLedgerProjectUserMapper.selectCtgLedgerProjectUserByProjectIdAndUserId(ctgLedgerProjectId, sysUserId);
-    }
-
-    /**
-     * 判断是否为项目用户
-     *
-     * @param projectId 项目ID
-     * @param userId    用户ID
-     * @return 是否为项目用户
-     */
-    public boolean isProjectUser(Long projectId, Long userId) {
-        return ctgLedgerProjectUserMapper.selectCtgLedgerProjectUserByProjectIdAndUserId(projectId, userId) != null;
     }
 
     /**
@@ -142,8 +134,13 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
     }
 
     @Override
+    public boolean isProjectUser(Long projectId, Long userId) {
+        return ctgLedgerProjectUserMapper.selectCtgLedgerProjectUserByProjectIdAndUserId(projectId, userId) != null;
+    }
+
+    @Override
     public List<CtgLedgerProjectUser> batchInsertCtgLedgerProjectUser(List<CtgLedgerProjectUser> ctgLedgerProjectUsers) {
-        Long projectId = Optional.ofNullable(ctgLedgerProjectUsers).map(pus->pus.get(0)).map(p->p.getCtgLedgerProjectId()).orElse(null);
+        Long projectId = Optional.ofNullable(ctgLedgerProjectUsers).map(pus -> pus.get(0)).map(p -> p.getCtgLedgerProjectId()).orElse(null);
         ctgLedgerProjectUserMapper.deleteByCtgLedgerProjectIdInt(projectId);
         List<CtgLedgerProjectUser> ctgLedgerProjectUsersIndb = new ArrayList<>(ctgLedgerProjectUsers.size());
         for (CtgLedgerProjectUser u : ctgLedgerProjectUsers) {
@@ -151,5 +148,27 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
             ctgLedgerProjectUsersIndb.add(u);
         }
         return ctgLedgerProjectUsersIndb;
+    }
+
+    @Override
+    public CtgLedgerProjectVo toCtgLedgerProjectVo(CtgLedgerProject project) {
+        CtgLedgerProjectVo projectVo = new CtgLedgerProjectVo();
+        // 复制所有属性
+        org.springframework.beans.BeanUtils.copyProperties(project, projectVo);
+        CtgLedgerProjectUser param = new CtgLedgerProjectUser();
+        param.setCtgLedgerProjectId(project.getId());
+        List<CtgLedgerProjectUser> projectUserList = ctgLedgerProjectUserMapper.selectCtgLedgerProjectUserList(param);
+        List<SysUser> members = projectUserList.stream().map(p -> p.getSysUserId()).map(uid -> userService.selectUserById(uid)).collect(Collectors.toList());
+        List<SysUserVo> sysUserVoList = members.stream().map(m -> SysUserVo.builder().userId(m.getUserId())
+                .userName(m.getUserName())
+                .nickName(m.getNickName()).build()).collect(Collectors.toList());
+        SysUser user = userService.selectUserByUserName(project.getProjectManagerLoginName());
+        SysUserVo manager = SysUserVo.builder().userId(user.getUserId())
+                .userName(user.getUserName())
+                .nickName(user.getNickName())
+                .build();
+        projectVo.setMembers(sysUserVoList);
+        projectVo.setManager(manager);
+        return projectVo;
     }
 }
