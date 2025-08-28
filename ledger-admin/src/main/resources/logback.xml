@@ -1,52 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!-- 日志存放路径 -->
-	<property name="log.path" value="/Users/leixingbang/logs" />
+    <property name="log.path" value="/Users/leixingbang/logs"/>
     <!-- 日志输出格式 -->
-	<property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - [%method,%line] - %msg%n" />
+    <property name="log.pattern" value="%d{HH:mm:ss.SSS} [%thread] %-5level %logger{20} - [%method,%line] - %msg%n"/>
 
-	<!-- 控制台输出 -->
-	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-		<encoder>
-			<pattern>${log.pattern}</pattern>
-		</encoder>
-	</appender>
-	
-	<!-- 合并后的系统日志输出 -->
-	<appender name="file_all" class="ch.qos.logback.core.rolling.RollingFileAppender">
-	    <file>${log.path}/sys-all.log</file>
+    <!-- 控制台输出 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- 合并后的系统日志输出 -->
+    <appender name="file_all" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/sys-all.log</file>
         <!-- 循环政策：基于时间创建日志文件 -->
-		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- 日志文件名格式 -->
-			<fileNamePattern>${log.path}/sys-all.%d{yyyy-MM-dd}.log</fileNamePattern>
-			<!-- 日志最大的历史 60天 -->
-			<maxHistory>60</maxHistory>
-		</rollingPolicy>
-		<encoder>
-			<pattern>${log.pattern}</pattern>
-		</encoder>
-	</appender>
-	
-	<!-- 系统模块日志级别控制  -->
-	<logger name="com.ledger" level="info" />
-	<!-- Spring日志级别控制  -->
-	<logger name="org.springframework" level="warn" />
-	<!-- 操作日志记录器 -->
-	<logger name="sys-oper-log" level="info" additivity="false">
-		<appender-ref ref="file_all"/>
-	</logger>
+            <fileNamePattern>${log.path}/sys-all.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- 日志最大的历史 60天 -->
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+    </appender>
 
-	<root level="info">
-		<appender-ref ref="console" />
-	</root>
-	
-	<!--系统操作日志-->
+    <!-- 系统模块日志级别控制  -->
+    <logger name="com.ledger" level="info">
+        <appender-ref ref="file_all"/>
+        <appender-ref ref="console"/>
+    </logger>
+    <!-- Spring日志级别控制  -->
+    <logger name="org.springframework" level="warn">
+        <appender-ref ref="file_all"/>
+        <appender-ref ref="console"/>
+    </logger>
+    <!-- 操作日志记录器 -->
+    <logger name="sys-oper-log" level="info" additivity="false">
+        <appender-ref ref="file_all"/>
+        <appender-ref ref="console"/>
+    </logger>
+
     <root level="info">
-        <appender-ref ref="file_all" />
+        <appender-ref ref="file_all"/>
+        <appender-ref ref="console"/>
     </root>
-	
-	<!--系统用户操作日志-->
+
+    <!--系统操作日志-->
+    <root level="info">
+        <appender-ref ref="file_all"/>
+        <appender-ref ref="console"/>
+    </root>
+
+    <!--系统用户操作日志-->
     <logger name="sys-user" level="info" additivity="false">
         <appender-ref ref="file_all"/>
+        <appender-ref ref="console"/>
     </logger>
 </configuration>

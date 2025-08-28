@@ -59,6 +59,7 @@ public class UserDetailsServiceImpl implements UserDetailsService
         return createLoginUser(user);
     }
 
+    //登录认证成功后
     public UserDetails createLoginUser(SysUser user)
     {
         return new LoginUser(user.getUserId(), user.getDeptId(), user, permissionService.getMenuPermission(user));

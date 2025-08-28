@@ -10,7 +10,7 @@
 
     <name>ledger</name>
     <url>http://www.ledger.vip</url>
-    <description>若依管理系统</description>
+    <description>台账系统</description>
     
     <properties>
         <ledger.version>3.9.0</ledger.version>

@@ -12,7 +12,13 @@ import com.ledger.framework.security.context.PermissionContextHolder;
 
 /**
  * RuoYi首创 自定义权限实现，ss取自SpringSecurity首字母
- * 
+ * 是直接使用了 Spring Security 自带的机制
+ * 表达式解析与权限判断
+ * SpEL 里的 @ss 引用的就是容器中名为 ss 的 Bean，在若依中对应
+ * com.ruoyi.framework.web.service.PermissionService。
+ * 这个类里实现了 hasPermi()、hasRole() 等方法，内部会读取当前登录用户（SecurityUtils.getLoginUser()），再比对用户所拥有的权限集合
+ * @ss.hasPermi('business:budget:remove')
+ * 相当于找到bean ss然后调用该bean的hasPermi方法
  * @author ledger
  */
 @Service("ss")

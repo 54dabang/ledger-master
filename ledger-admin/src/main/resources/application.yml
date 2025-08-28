@@ -127,3 +127,19 @@ xss:
   excludes: /system/notice
   # 匹配链接
   urlPatterns: /system/*,/monitor/*,/tool/*
+oauth2:
+  #client_id: publicCode
+  #client_secret: baf561059dc04eada61533af95c8d298
+  client_id: ryjManage
+  client_secret: a892c5eef4e24ece8646975f6d7389a4
+  accesstoken_uri: https://work.ctg.com.cn/idp/oauth2/getToken?client_id=%s&grant_type=%s&code=%s&client_secret=%s
+  authorize_uri: https://work.ctg.com.cn/idp/oauth2/authorize?redirect_uri=${oauth2.redirect_uri}&state=abs&client_id=${oauth2.client_id}&response_type=code
+  #authorize_uri: http://www.baidu.com
+  revokeToken_uri: https://work.ctg.com.cn/idp/oauth2/revokeToken?access_token=%s
+  userinfo_uri: https://work.ctg.com.cn/idp/oauth2/getUserInfo?access_token=%s&client_id=%s&uid=%s
+  #redirect_uri: http://zpd8jg4m.c87e2267-1001-4c70-bb2a-ab41f3b81aa3.dcloud.ctg.com.cn/code
+  #redirect_uri: http://10.188.241.80/prod-api/oauth2sso/code
+  redirect_uri: http://127.0.0.1:6060/oauth2sso/code
+url:
+    oauth2SsoUrl: http://127.0.0.1:1024/oauth2SsoLogin
+    mySystemHomeUrl: http://127.0.0.1:1024/index

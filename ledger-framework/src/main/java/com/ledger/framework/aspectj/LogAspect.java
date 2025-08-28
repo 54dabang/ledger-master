@@ -1,38 +1,38 @@
 package com.ledger.framework.aspectj;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.lang3.ArrayUtils;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.AfterThrowing;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.NamedThreadLocal;
-import org.springframework.stereotype.Component;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson2.JSON;
 import com.ledger.common.annotation.Log;
 import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.common.core.domain.model.LoginUser;
 import com.ledger.common.core.text.Convert;
 import com.ledger.common.enums.BusinessStatus;
+import com.ledger.common.enums.BusinessType;
 import com.ledger.common.enums.HttpMethod;
+import com.ledger.common.enums.OperatorType;
 import com.ledger.common.filter.PropertyPreExcludeFilter;
-import com.ledger.common.utils.ExceptionUtil;
-import com.ledger.common.utils.SecurityUtils;
-import com.ledger.common.utils.ServletUtils;
-import com.ledger.common.utils.StringUtils;
+import com.ledger.common.utils.*;
 import com.ledger.common.utils.ip.IpUtils;
 import com.ledger.framework.manager.AsyncManager;
 import com.ledger.framework.manager.factory.AsyncFactory;
 import com.ledger.system.domain.SysOperLog;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.*;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.NamedThreadLocal;
+import org.springframework.stereotype.Component;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 操作日志记录处理
@@ -42,6 +42,7 @@ import com.ledger.system.domain.SysOperLog;
 @Aspect
 @Component
 public class LogAspect {
+
     private static final Logger log = LoggerFactory.getLogger(LogAspect.class);
     private static final Logger operLogger = LoggerFactory.getLogger("sys-oper-log");
 
@@ -53,38 +54,98 @@ public class LogAspect {
     /**
      * 计算操作消耗时间
      */
-    private static final ThreadLocal<Long> TIME_THREADLOCAL = new NamedThreadLocal<Long>("Cost Time");
+    private static final ThreadLocal<Long> TIME_THREADLOCAL = new NamedThreadLocal<>("Cost Time");
+
+    /* ========================================================================================== */
 
     /**
-     * 处理请求前执行
+     * 规则1：方法上有 @Log 注解
      */
-    @Before(value = "@annotation(controllerLog)")
-    public void doBefore(JoinPoint joinPoint, Log controllerLog) {
+    @Pointcut("@annotation(com.ledger.common.annotation.Log)")
+    public void logAnnotationPointcut() {
+    }
+
+    /**
+     * 规则2：包 com.ledger..* 下，类上有 @RestController 注解的所有方法
+     */
+    @Pointcut("within(@org.springframework.web.bind.annotation.RestController com.ledger..*)")
+    public void restControllerPointcut() {
+    }
+
+    /**
+     * 合并两条规则
+     */
+    @Pointcut("logAnnotationPointcut() || restControllerPointcut()")
+    public void logPointcut() {
+    }
+
+    /**
+     * 环绕通知：记录请求/响应/异常
+     */
+    @Around("logPointcut()")
+    public Object doAround(ProceedingJoinPoint joinPoint) throws Throwable {
         TIME_THREADLOCAL.set(System.currentTimeMillis());
+
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        Method method = methodSignature.getMethod();
+
+        // 1. 尝试从方法上拿 @Log
+        Log logAnnotation = method.getAnnotation(Log.class);
+        // 2. 拿不到再从类上拿
+        if (logAnnotation == null) {
+            logAnnotation = method.getDeclaringClass().getAnnotation(Log.class);
+        }
+        // 3. 还是拿不到，使用默认实例（避免后续 NPE）
+        if (logAnnotation == null) {
+            logAnnotation = DEFAULT_LOG;
+        }
+
+        Object result = null;
+        Exception ex = null;
+        try {
+            result = joinPoint.proceed();
+        } catch (Exception e) {
+            ex = e;
+            throw e;
+        } finally {
+            long cost = System.currentTimeMillis() - TIME_THREADLOCAL.get();
+            handleLog(joinPoint, logAnnotation, ex, result);
+            TIME_THREADLOCAL.remove();
+        }
+        return result;
     }
+
+    /* ========================================================================================== */
 
     /**
-     * 处理完请求后执行
-     *
-     * @param joinPoint 切点
+     * 默认 @Log 实例，仅用于 restControllerPointcut 场景
      */
-    @AfterReturning(pointcut = "@annotation(controllerLog)", returning = "jsonResult")
-    public void doAfterReturning(JoinPoint joinPoint, Log controllerLog, Object jsonResult) {
-        handleLog(joinPoint, controllerLog, null, jsonResult);
-    }
+    private static final Log DEFAULT_LOG = new Log() {
+        @Override
+        public String title() { return ""; }
 
-    /**
-     * 拦截异常操作
-     *
-     * @param joinPoint 切点
-     * @param e         异常
-     */
-    @AfterThrowing(value = "@annotation(controllerLog)", throwing = "e")
-    public void doAfterThrowing(JoinPoint joinPoint, Log controllerLog, Exception e) {
-        handleLog(joinPoint, controllerLog, e, null);
-    }
+        @Override
+        public BusinessType businessType() { return BusinessType.OTHER; }
 
-    protected void handleLog(final JoinPoint joinPoint, Log controllerLog, final Exception e, Object jsonResult) {
+        @Override
+        public OperatorType operatorType() { return OperatorType.MANAGE; }
+
+        @Override
+        public boolean isSaveRequestData() { return true; }
+
+        @Override
+        public boolean isSaveResponseData() { return true; }
+
+        @Override
+        public String[] excludeParamNames() { return new String[0]; }
+
+        @Override
+        public Class<? extends java.lang.annotation.Annotation> annotationType() { return Log.class; }
+    };
+
+    /* ========================================================================================== */
+
+    protected void handleLog(ProceedingJoinPoint joinPoint, Log controllerLog, final Exception e, Object jsonResult) {
         try {
             // 获取当前的用户
             LoginUser loginUser = SecurityUtils.getLoginUser();
@@ -121,23 +182,20 @@ public class LogAspect {
 
             // 记录操作日志到文件
             logOperToFile(operLog, e);
+            if(controllerLog != DEFAULT_LOG){
+                // 保存数据库
+                AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
+            }
 
-            // 保存数据库
-            AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
         } catch (Exception exp) {
             // 记录本地异常日志
             log.error("异常信息:{}", exp.getMessage());
             exp.printStackTrace();
-        } finally {
-            TIME_THREADLOCAL.remove();
         }
     }
 
     /**
      * 将操作日志记录到文件
-     *
-     * @param operLog 操作日志对象
-     * @param e       异常对象
      */
     private void logOperToFile(SysOperLog operLog, Exception e) {
         try {
@@ -169,14 +227,7 @@ public class LogAspect {
         }
     }
 
-    /**
-     * 获取注解中对方法的描述信息 用于Controller层注解
-     *
-     * @param log     日志
-     * @param operLog 操作日志
-     * @throws Exception
-     */
-    public void getControllerMethodDescription(JoinPoint joinPoint, Log log, SysOperLog operLog, Object jsonResult) throws Exception {
+    public void getControllerMethodDescription(ProceedingJoinPoint joinPoint, Log log, SysOperLog operLog, Object jsonResult) throws Exception {
         // 设置action动作
         operLog.setBusinessType(log.businessType().ordinal());
         // 设置标题
@@ -194,13 +245,7 @@ public class LogAspect {
         }
     }
 
-    /**
-     * 获取请求的参数，放到log中
-     *
-     * @param operLog 操作日志
-     * @throws Exception 异常
-     */
-    private void setRequestValue(JoinPoint joinPoint, SysOperLog operLog, String[] excludeParamNames) throws Exception {
+    private void setRequestValue(ProceedingJoinPoint joinPoint, SysOperLog operLog, String[] excludeParamNames) throws Exception {
         Map<?, ?> paramsMap = ServletUtils.getParamMap(ServletUtils.getRequest());
         String requestMethod = operLog.getRequestMethod();
         if (StringUtils.isEmpty(paramsMap) && StringUtils.equalsAny(requestMethod, HttpMethod.PUT.name(), HttpMethod.POST.name(), HttpMethod.DELETE.name())) {
@@ -211,9 +256,6 @@ public class LogAspect {
         }
     }
 
-    /**
-     * 参数拼装
-     */
     private String argsArrayToString(Object[] paramsArray, String[] excludeParamNames) {
         String params = "";
         if (paramsArray != null && paramsArray.length > 0) {
@@ -221,8 +263,8 @@ public class LogAspect {
                 if (StringUtils.isNotNull(o) && !isFilterObject(o)) {
                     try {
                         String jsonObj = JSON.toJSONString(o, excludePropertyPreFilter(excludeParamNames));
-                        params += jsonObj.toString() + " ";
-                    } catch (Exception e) {
+                        params += jsonObj + " ";
+                    } catch (Exception ignored) {
                     }
                 }
             }
@@ -230,33 +272,23 @@ public class LogAspect {
         return params.trim();
     }
 
-    /**
-     * 忽略敏感属性
-     */
     public PropertyPreExcludeFilter excludePropertyPreFilter(String[] excludeParamNames) {
         return new PropertyPreExcludeFilter().addExcludes(ArrayUtils.addAll(EXCLUDE_PROPERTIES, excludeParamNames));
     }
 
-    /**
-     * 判断是否需要过滤的对象。
-     *
-     * @param o 对象信息。
-     * @return 如果是需要过滤的对象，则返回true；否则返回false。
-     */
-    @SuppressWarnings("rawtypes")
     public boolean isFilterObject(final Object o) {
         Class<?> clazz = o.getClass();
         if (clazz.isArray()) {
             return clazz.getComponentType().isAssignableFrom(MultipartFile.class);
         } else if (Collection.class.isAssignableFrom(clazz)) {
-            Collection collection = (Collection) o;
+            Collection<?> collection = (Collection<?>) o;
             for (Object value : collection) {
                 return value instanceof MultipartFile;
             }
         } else if (Map.class.isAssignableFrom(clazz)) {
-            Map map = (Map) o;
+            Map<?, ?> map = (Map<?, ?>) o;
             for (Object value : map.entrySet()) {
-                Map.Entry entry = (Map.Entry) value;
+                Map.Entry<?, ?> entry = (Map.Entry<?, ?>) value;
                 return entry.getValue() instanceof MultipartFile;
             }
         }

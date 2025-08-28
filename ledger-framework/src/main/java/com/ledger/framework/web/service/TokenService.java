@@ -1,6 +1,8 @@
 package com.ledger.framework.web.service;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.http.HttpServletRequest;
@@ -229,4 +231,18 @@ public class TokenService
     {
         return CacheConstants.LOGIN_TOKEN_KEY + uuid;
     }
+
+    public void saveLatestUuidAndDeleteOldUuid(String uuid, String username) {
+        List<Object> usernameUuids = redisCache.getCacheList(getTokenKey(username));
+        for (Object usernameUuid : usernameUuids) {
+            //if (!StringUtils.equals(uuid, (String)usernameUuid)) {
+            redisCache.deleteObject(getTokenKey((String)usernameUuid));
+            //}
+        }
+
+        redisCache.deleteObject(getTokenKey(username));
+
+        redisCache.setCacheList(getTokenKey(username), Arrays.asList(uuid));
+    }
+
 }
