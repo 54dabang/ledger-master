@@ -27,7 +27,7 @@ import io.swagger.annotations.ApiOperation;
  * 
  * @author ledger
  */
-@Api("用户信息管理")
+@Api(value = "用户信息管理", tags = {"测试用户信息管理"})
 @RestController
 @RequestMapping("/test/user")
 public class TestController extends BaseController

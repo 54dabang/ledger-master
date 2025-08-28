@@ -22,6 +22,8 @@ import io.swagger.annotations.Api;
 
 import io.swagger.annotations.ApiOperation;
 
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +72,10 @@ public class ReimbursementController extends BaseController {
             isSaveRequestData = true,           // 保存请求参数
             isSaveResponseData = false          // 保存返回结果
     )
+    @ApiResponses({
+            @ApiResponse(code = 701, message = "同步数据已经存在", response = AjaxResult.class),
+            @ApiResponse(code = 702, message = "同步项目缺失", response = AjaxResult.class)
+    })
     public AjaxResult syncReimbursementData(@RequestBody ReimbursementDTO reimbursementDTO) {
         log.info("reimbursementDTO:{}", reimbursementDTO);
         String reimbursementProjectName = reimbursementDTO.getRsiContractData().getProjectName();
