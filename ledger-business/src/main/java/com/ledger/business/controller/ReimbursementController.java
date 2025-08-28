@@ -64,7 +64,7 @@ public class ReimbursementController extends BaseController {
     @ApiOperation("同步台账基本数据信息")
     @RequestMapping(value = "/white/syncReimbursementData", method = RequestMethod.POST)
     @Log(
-            title = "business",          // 模块名称
+            title = "同步数据",          // 模块名称
             businessType = BusinessType.INSERT, // 业务类型（枚举）
             operatorType = OperatorType.MANAGE, // 操作类别
             isSaveRequestData = true,           // 保存请求参数
@@ -113,6 +113,7 @@ public class ReimbursementController extends BaseController {
     @ApiOperation("导出台账")
     @RequestMapping(value = "/getProjectExpenditureLedger", method = RequestMethod.GET)
     @PreAuthorize("@ss.hasPermi('business:expenditure:exportledger')")
+    @Log(title = "导出台账", businessType = BusinessType.EXPORT)
     public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId) {
         // 使用Calendar获取实际年份
         Calendar calendar = Calendar.getInstance();
