@@ -81,6 +81,15 @@ public class SecurityUtils
         }
     }
 
+    public static LoginUser getLoginUserWithoutEpx() {
+        try {
+            return (LoginUser) getAuthentication().getPrincipal();
+        } catch (Exception e) {
+          return null;
+        }
+    }
+
+
     /**
      * 获取Authentication
      */
