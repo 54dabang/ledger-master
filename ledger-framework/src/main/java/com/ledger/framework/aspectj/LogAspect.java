@@ -200,23 +200,24 @@ public class LogAspect {
     private void logOperToFile(SysOperLog operLog, Exception e) {
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append("操作模块: ").append(operLog.getTitle()).append(", ");
-            sb.append("操作人员: ").append(operLog.getOperName()).append(", ");
-            sb.append("操作IP: ").append(operLog.getOperIp()).append(", ");
-            sb.append("请求URL: ").append(operLog.getOperUrl()).append(", ");
-            sb.append("请求方法: ").append(operLog.getMethod()).append(", ");
-            sb.append("请求方式: ").append(operLog.getRequestMethod()).append(", ");
-            sb.append("操作参数: ").append(operLog.getOperParam()).append(", ");
-            sb.append("返回参数: ").append(operLog.getJsonResult()).append(", ");
-            sb.append("消耗时间: ").append(operLog.getCostTime()).append("毫秒");
+            sb.append("module: ").append(operLog.getTitle()).append(", ");
+            sb.append("user: ").append(operLog.getOperName()).append(", ");
+            sb.append("IP: ").append(operLog.getOperIp()).append(", ");
+            sb.append("URL: ").append(operLog.getOperUrl()).append(", ");
+            sb.append("method: ").append(operLog.getMethod()).append(", ");
+            sb.append("reqMethod: ").append(operLog.getRequestMethod()).append(", ");
+            sb.append("params: ").append(operLog.getOperParam()).append(", ");
+            sb.append("costTime: ").append(operLog.getCostTime()).append("ms");
 
             if (e != null) {
+                sb.append("response: ").append(operLog.getJsonResult()).append(", ");
                 // 错误日志
-                sb.append(", 错误信息: ").append(operLog.getErrorMsg());
+                sb.append(", error: ").append(operLog.getErrorMsg());
                 operLogger.error(sb.toString(), e);
             } else if (operLog.getStatus() != null && operLog.getStatus() == BusinessStatus.FAIL.ordinal()) {
+                sb.append("response: ").append(operLog.getJsonResult()).append(", ");
                 // 失败状态日志
-                sb.append(", 错误信息: ").append(operLog.getErrorMsg());
+                sb.append(", error: ").append(operLog.getErrorMsg());
                 operLogger.warn(sb.toString());
             } else {
                 // 正常日志
