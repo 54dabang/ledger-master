@@ -43,16 +43,12 @@
         <appender-ref ref="console"/>
     </logger>
 
-    <root level="info">
+ <!--   <root level="info" additivity="false">
         <appender-ref ref="file_all"/>
         <appender-ref ref="console"/>
-    </root>
+    </root>-->
 
-    <!--系统操作日志-->
-    <root level="info">
-        <appender-ref ref="file_all"/>
-        <appender-ref ref="console"/>
-    </root>
+
 
     <!--系统用户操作日志-->
     <logger name="sys-user" level="info" additivity="false">

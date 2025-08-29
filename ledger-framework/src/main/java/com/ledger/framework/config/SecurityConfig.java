@@ -37,8 +37,8 @@ public class SecurityConfig {
     public static final List<String> whiteList = Stream.of(
 
             "/api/white/**"
-            ,"/api/**"
-            //, "/**"
+            ,"/oauth2sso/**"
+            ,"/ssoLoginUrl"
     ).collect(Collectors.toList());
 
     /**
