@@ -38,7 +38,7 @@ import java.util.Map;
 
 @RestController
 @Slf4j
-@RequestMapping("/oauth2sso")
+
 public class Oauth2SsoController extends BaseController {
 
     @Value("${oauth2.client_id}")
@@ -66,6 +66,11 @@ public class Oauth2SsoController extends BaseController {
     @Autowired
     private TokenService tokenService;
 
+    @GetMapping("/ssoLoginUrl")
+    public AjaxResult ssoLoginUrl() {
+        return AjaxResult.success("成功", authorizeUri);
+    }
+
     /**
      * 收到授权码后，根据授权码换token, 然后根据token获取用户信息，然后调用spring
      * security登录，然后将生成jwt并将用户信息放到redis中，然后重定向到系统首页并将cookie写入浏览器。
@@ -73,7 +78,7 @@ public class Oauth2SsoController extends BaseController {
      * @param request
      * @throws IOException
      */
-    @GetMapping("/code")
+    @GetMapping("/oauth2sso/code")
     public void code(HttpServletRequest request, HttpServletResponse response, String code) throws IOException {
         if (StringUtils.isBlank(code)) {
 //            AjaxResult ajaxResult = AjaxResult.error("code为空，无法进行登录");
@@ -86,7 +91,7 @@ public class Oauth2SsoController extends BaseController {
         response.sendRedirect(oauth2SsoUrl + "?code=" + code);
     }
 
-    @PostMapping("/login")
+    @PostMapping("/oauth2sso/login")
     public AjaxResult login(@RequestBody Oauth2SsoLogin oauth2SsoLogin) {
         String code = oauth2SsoLogin.getCode();
         if (StringUtils.isBlank(code)) {
