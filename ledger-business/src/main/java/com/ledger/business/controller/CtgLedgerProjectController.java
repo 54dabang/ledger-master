@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
+import com.github.pagehelper.PageInfo;
 import com.ledger.business.domain.CtgLedgerProjectUser;
 import com.ledger.business.service.ICtgLedgerProjectUserService;
 import com.ledger.business.util.InitConstant;
@@ -55,7 +56,7 @@ public class CtgLedgerProjectController extends BaseController {
             startPage();
             List<CtgLedgerProject> list = ctgLedgerProjectService.selectCtgLedgerProjectList(ctgLedgerProject);
             List<CtgLedgerProjectVo> projectVoList = list.stream().map(p->projectUserService.toCtgLedgerProjectVo(p)).collect(Collectors.toList());
-            return getDataTable(projectVoList);
+            return getDataTable(projectVoList,new PageInfo(list).getTotal());
         } else  {
             Long userId = userService.selectUserByUserName(SecurityUtils.getUsername()).getUserId();
             CtgLedgerProjectUser ctgLedgerProjectUser = new CtgLedgerProjectUser();
@@ -71,18 +72,18 @@ public class CtgLedgerProjectController extends BaseController {
             startPage();
             List<CtgLedgerProject> list = ctgLedgerProjectService.selectCtgLedgerProjectList(ctgLedgerProject);
             List<CtgLedgerProjectVo> projectVoList = list.stream().map(p->projectUserService.toCtgLedgerProjectVo(p)).collect(Collectors.toList());
-            return getDataTable(projectVoList);
-
+            return getDataTable(projectVoList,new PageInfo(list).getTotal());
         }
 
     }
     @GetMapping("/listAll")
     @ApiOperation(value = "项目的所有列表信息", notes = "根据条件查询项目基本信息列表，支持分页和条件查询（只有管理员有权限）")
     @PreAuthorize("@ss.hasRole('admin')")
-    public TableDataInfo listAll(CtgLedgerProject ctgLedgerProject){
+    public TableDataInfo listAll(CtgLedgerProject ctgLedgerProject) {
         startPage();
         List<CtgLedgerProject> list = ctgLedgerProjectService.selectCtgLedgerProjectList(ctgLedgerProject);
-        return getDataTable(list);
+        List<CtgLedgerProjectVo> projectVoList = list.stream().map(p -> projectUserService.toCtgLedgerProjectVo(p)).collect(Collectors.toList());
+        return getDataTable(projectVoList, new PageInfo(list).getTotal());
     }
 
 

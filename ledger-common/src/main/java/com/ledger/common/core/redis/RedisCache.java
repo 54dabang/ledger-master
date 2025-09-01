@@ -253,6 +253,7 @@ public class RedisCache
     public boolean deleteCacheMapValue(final String key, final String hKey)
     {
         return redisTemplate.opsForHash().delete(key, hKey) > 0;
+
     }
 
     /**
