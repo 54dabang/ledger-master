@@ -1,11 +1,17 @@
 package com.ledger.business.service.impl;
 
+import java.math.BigDecimal;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import com.ledger.business.domain.CtgLedgerAnnualBudget;
 import com.ledger.business.domain.CtgLedgerProject;
+import com.ledger.business.service.ICtgLedgerAnnualBudgetService;
 import com.ledger.business.service.ICtgLedgerProjectService;
 import com.ledger.business.vo.CtgLedgerProjectVo;
 import com.ledger.business.vo.SysUserVo;
@@ -14,6 +20,7 @@ import com.ledger.common.utils.DateUtils;
 import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.spring.SpringUtils;
 import com.ledger.system.service.ISysUserService;
+import com.sun.jna.platform.win32.COM.IStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ledger.business.mapper.CtgLedgerProjectUserMapper;
@@ -32,11 +39,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserService {
     @Autowired
     private CtgLedgerProjectUserMapper ctgLedgerProjectUserMapper;
+
     @Autowired
     private ISysUserService userService;
 
     @Autowired
     private ICtgLedgerProjectService projectService;
+    @Autowired
+    private ICtgLedgerAnnualBudgetService annualBudgetService;
 
     /**
      * 查询项目用户
@@ -167,8 +177,44 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
                 .userName(user.getUserName())
                 .nickName(user.getNickName())
                 .build();
+        int currentYear = Year.now().getValue();
+        CtgLedgerAnnualBudget ctgLedgerAnnualBudget = annualBudgetService.selectByProjectIdAndYear(project.getId(), currentYear);
+        BigDecimal annualBudgetFee = Optional.ofNullable(ctgLedgerAnnualBudget)
+                .map(this::toAnnualBudgetFee)
+                .orElse(null);
+
+        //设置其他关联信息
         projectVo.setMembers(sysUserVoList);
         projectVo.setManager(manager);
+        projectVo.setYear(currentYear);
+        projectVo.setAnnualBudgetFee(annualBudgetFee);
+        Long  budgetFeeId = Optional.ofNullable(ctgLedgerAnnualBudget).map(CtgLedgerAnnualBudget::getId).orElse(null);
+        projectVo.setAnnualBudgetFeeId(budgetFeeId);
         return projectVo;
+    }
+
+    private BigDecimal toAnnualBudgetFee(CtgLedgerAnnualBudget ctgLedgerAnnualBudget) {
+        if (Objects.isNull(ctgLedgerAnnualBudget)) {
+            return null;
+        }
+        //累加除contractAmount以外的所有费用
+        return Stream.of(
+                        ctgLedgerAnnualBudget.getEquipPurchaseFee(),
+                        ctgLedgerAnnualBudget.getProtoEquipFee(),
+                        ctgLedgerAnnualBudget.getEquipRenovFee(),
+                        ctgLedgerAnnualBudget.getEquipRentFee(),
+                        ctgLedgerAnnualBudget.getMaterialCost(),
+                        ctgLedgerAnnualBudget.getTestProcFee(),
+                        ctgLedgerAnnualBudget.getFuelPowerCost(),
+                        ctgLedgerAnnualBudget.getPubDocIpFee(),
+                        ctgLedgerAnnualBudget.getTravelConfCoopFee(),
+                        ctgLedgerAnnualBudget.getLaborCost(),
+                        ctgLedgerAnnualBudget.getServiceCost(),
+                        ctgLedgerAnnualBudget.getExpertConsultFee(),
+                        ctgLedgerAnnualBudget.getMgmtFee(),
+                        ctgLedgerAnnualBudget.getTaxFee()
+                )
+                .filter(Objects::nonNull) // 过滤掉null值
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }

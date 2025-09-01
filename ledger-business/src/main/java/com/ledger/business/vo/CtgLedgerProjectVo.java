@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -19,5 +20,14 @@ public class CtgLedgerProjectVo extends CtgLedgerProject {
 
     @ApiModelProperty(value = "项目管理员")
     private SysUserVo manager;
+
+    @ApiModelProperty(value = "年度预算")
+    private BigDecimal annualBudgetFee;
+
+    @ApiModelProperty(value = "预算所属年度")
+    private Integer year;
+
+    @ApiModelProperty(value = "年度预算id")
+    private Long annualBudgetFeeId;
 
 }
