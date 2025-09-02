@@ -154,7 +154,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
         return toAjax(ctgLedgerAnnualBudgetService.deleteCtgLedgerAnnualBudgetByIds(ids));
     }
 
-    @ApiOperation("导入excel项目台账")
+    @ApiOperation("导入excel项目台账支出明细Excel")
     @PreAuthorize("@ss.hasPermi('business:budget:import')")
     @Log(title = "导入年度预算台账excel", businessType = BusinessType.DELETE)
     @PostMapping("/importExcelData")
@@ -175,7 +175,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     /**
      * 导出项目支出明细台账列表
      */
-    @ApiOperation("导出项目支出明细台账列表")
+    @ApiOperation("导出项目支出明细台账列表excel")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "projectId", value = "项目ID", dataType = "Long", paramType = "query"),
             @ApiImplicitParam(name = "year", value = "年份", dataType = "Integer", paramType = "query")
