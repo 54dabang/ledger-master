@@ -38,7 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @author ledger
  * @date 2025-08-20
  */
-@Api(tags = "项目总预算台账管理")
+@Api(tags = "项目年度预算接口（含年度预算明细）")
 @RestController
 @RequestMapping("/api/annualBudget")
 @Slf4j
@@ -54,7 +54,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     /**
      * 查询项目总预算台账列表
      */
-    @ApiOperation("查询项目总预算台账列表")
+    @ApiOperation("查询年度预算列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "projectId", value = "项目ID", dataType = "Long", paramType = "query"),
             @ApiImplicitParam(name = "year", value = "年份", dataType = "Integer", paramType = "query"),
@@ -82,7 +82,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     /**
      * 导出项目总预算台账列表
      */
-    @ApiOperation("导出项目总预算台账列表")
+    @ApiOperation("导出年度预算列表")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "projectId", value = "项目ID", dataType = "Long", paramType = "query"),
             @ApiImplicitParam(name = "year", value = "年份", dataType = "Integer", paramType = "query"),
@@ -100,7 +100,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
             @ApiImplicitParam(name = "mgmtFee", value = "税费", dataType = "java.math.BigDecimal", paramType = "query")
     })
     @PreAuthorize("@ss.hasPermi('business:budget:export')")
-    @Log(title = "项目总预算台账", businessType = BusinessType.EXPORT)
+    @Log(title = "导出年度预算excel", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, CtgLedgerAnnualBudget ctgLedgerAnnualBudget) {
         List<CtgLedgerAnnualBudget> list = ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetList(ctgLedgerAnnualBudget);
@@ -111,7 +111,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     /**
      * 获取项目总预算台账详细信息
      */
-    @ApiOperation("获取项目总预算台账详细信息")
+    @ApiOperation("获取年度预算台账详细信息")
     @ApiImplicitParam(name = "id", value = "项目总预算台账主键ID", required = true, dataType = "Long", paramType = "path")
     @PreAuthorize("@ss.hasPermi('business:budget:query')")
     @GetMapping(value = "/{id}")
@@ -181,7 +181,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
             @ApiImplicitParam(name = "year", value = "年份", dataType = "Integer", paramType = "query")
     })
     @PreAuthorize("@ss.hasPermi('business:expense:export')")
-    @Log(title = "导出项目支出明细台账", businessType = BusinessType.EXPORT)
+    @Log(title = "导出项目年度支出明细台账excel", businessType = BusinessType.EXPORT)
     @GetMapping("/exportProjectExpenseDetails")
     public void exportProjectExpenseDetails(HttpServletResponse response,
                                             @ApiParam("项目ID") @RequestParam(required = false) Long projectId,
