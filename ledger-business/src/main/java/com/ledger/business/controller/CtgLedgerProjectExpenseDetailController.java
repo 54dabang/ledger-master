@@ -1,17 +1,14 @@
 package com.ledger.business.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
+
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.ledger.common.annotation.Log;
 import com.ledger.common.core.controller.BaseController;
 import com.ledger.common.core.domain.AjaxResult;
@@ -23,14 +20,13 @@ import com.ledger.common.core.page.TableDataInfo;
 
 /**
  * 项目支出明细Controller
- * 
+ *
  * @author ledger
  * @date 2025-08-21
  */
 @RestController
 @RequestMapping("/api/expenseDetail")
-public class CtgLedgerProjectExpenseDetailController extends BaseController
-{
+public class CtgLedgerProjectExpenseDetailController extends BaseController {
     @Autowired
     private ICtgLedgerProjectExpenseDetailService ctgLedgerProjectExpenseDetailService;
 
@@ -39,21 +35,36 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('business:detail:list')")
     @GetMapping("/list")
-    public TableDataInfo list(CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail)
-    {
+    @ApiOperation("项目支出明细列表")
+    public TableDataInfo list(@ApiParam("项目ID") @RequestParam(required = false) Long projectId,
+                              @ApiParam("年份") @RequestParam(required = false) Integer year) {
         startPage();
-        List<CtgLedgerProjectExpenseDetail> list = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(ctgLedgerProjectExpenseDetail);
+        CtgLedgerProjectExpenseDetail detailParam = new CtgLedgerProjectExpenseDetail();
+        detailParam.setLedgerProjectId(projectId);
+        detailParam.setYear(year);
+        List<CtgLedgerProjectExpenseDetail> list = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(detailParam);
         return getDataTable(list);
     }
+
+    @PreAuthorize("@ss.hasPermi('business:detail:list')")
+    @GetMapping("/getAllDbYears")
+    @ApiOperation("获取数据库中已经导入数据的年份")
+    public AjaxResult getAllDbYears(@ApiParam("项目ID") @RequestParam(required = false) Long projectId){
+        CtgLedgerProjectExpenseDetail detailParam = new CtgLedgerProjectExpenseDetail();
+        detailParam.setLedgerProjectId(projectId);
+        List<CtgLedgerProjectExpenseDetail> list = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(detailParam);
+        List<Integer> years = list.stream().map(e->e.getYear()).distinct().collect(Collectors.toList());
+        return success(years);
+    }
+
 
     /**
      * 导出项目支出明细列表
      */
     @PreAuthorize("@ss.hasPermi('business:detail:export')")
-    @Log(title = "项目支出明细", businessType = BusinessType.EXPORT)
+    @Log(title = "导出项目支出明细excel", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
-    public void export(HttpServletResponse response, CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail)
-    {
+    public void export(HttpServletResponse response, CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail) {
         List<CtgLedgerProjectExpenseDetail> list = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(ctgLedgerProjectExpenseDetail);
         ExcelUtil<CtgLedgerProjectExpenseDetail> util = new ExcelUtil<CtgLedgerProjectExpenseDetail>(CtgLedgerProjectExpenseDetail.class);
         util.exportExcel(response, list, "项目支出明细数据");
@@ -64,8 +75,7 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('business:detail:query')")
     @GetMapping(value = "/{id}")
-    public AjaxResult getInfo(@PathVariable("id") Long id)
-    {
+    public AjaxResult getInfo(@PathVariable("id") Long id) {
         return success(ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailById(id));
     }
 
@@ -75,8 +85,7 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController
     @PreAuthorize("@ss.hasPermi('business:detail:add')")
     @Log(title = "项目支出明细", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult add(@RequestBody CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail)
-    {
+    public AjaxResult add(@RequestBody CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail) {
         return toAjax(ctgLedgerProjectExpenseDetailService.insertCtgLedgerProjectExpenseDetail(ctgLedgerProjectExpenseDetail));
     }
 
@@ -86,8 +95,7 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController
     @PreAuthorize("@ss.hasPermi('business:detail:edit')")
     @Log(title = "项目支出明细", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail)
-    {
+    public AjaxResult edit(@RequestBody CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail) {
         return toAjax(ctgLedgerProjectExpenseDetailService.updateCtgLedgerProjectExpenseDetail(ctgLedgerProjectExpenseDetail));
     }
 
@@ -96,9 +104,8 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('business:detail:remove')")
     @Log(title = "项目支出明细", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids)
-    {
+    @DeleteMapping("/{ids}")
+    public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(ctgLedgerProjectExpenseDetailService.deleteCtgLedgerProjectExpenseDetailByIds(ids));
     }
 }
