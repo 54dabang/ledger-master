@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,6 +27,7 @@ import com.ledger.common.core.page.TableDataInfo;
  */
 @RestController
 @RequestMapping("/api/expenseDetail")
+@Api(tags = "台账明细管理")
 public class CtgLedgerProjectExpenseDetailController extends BaseController {
     @Autowired
     private ICtgLedgerProjectExpenseDetailService ctgLedgerProjectExpenseDetailService;
