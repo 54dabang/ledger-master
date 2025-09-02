@@ -20,33 +20,39 @@ public class CtgLedgerProjectExpenseDetail extends BaseEntity {
     /**
      * 支出明细id,自增
      */
+    @Excel(name = "id")
     private Long id;
 
     /**
      * 台账系统项目id
      */
     @ApiModelProperty(name = "台账系统项目id")
+    @Excel(name = "台账系统项目id")
     private Long ledgerProjectId;
 
     @ApiModelProperty(name = "报销年度")
+    @Excel(name = "报销年度")
     private Integer year;
 
     /**
      * 报销单号，差旅系统支出明细编号，用于去重
      */
     @ApiModelProperty(name = "报销单号，差旅系统支出明细编号，用于去重")
+    @Excel(name = "报销单号")
     private Long expenseReportNumber;
 
     /**
      * 科目名称
      */
     @ApiModelProperty(name = "科目名称")
+    @Excel(name = "科目名称")
     private String subjectName;
 
     /**
      * 费用类型
      */
     @ApiModelProperty(name = "费用类型")
+    @Excel(name = "费用类型")
     private String feeType;
 
 
@@ -54,10 +60,12 @@ public class CtgLedgerProjectExpenseDetail extends BaseEntity {
      * 设备改造费
      */
     @ApiModelProperty(name = "金额")
+    @Excel(name = "金额（万元）")
     private BigDecimal amount;
 
 
     @ApiModelProperty(name = "报销人姓名")
+    @Excel(name = "报销人")
     private String reimburserName;
 
     @ApiModelProperty(name = "报销人登录用户名")
@@ -67,7 +75,10 @@ public class CtgLedgerProjectExpenseDetail extends BaseEntity {
      * 报销次序
      */
     @ApiModelProperty(name = "报销次序")
+    @Excel(name = "第几次报销（输入数字）")
     private Long reimbursementSequenceNo;
+    @Excel(name = "备注")
+    private String remarkTemp;
 
     public void setId(Long id) {
         this.id = id;
@@ -147,6 +158,14 @@ public class CtgLedgerProjectExpenseDetail extends BaseEntity {
 
     public void setYear(Integer year) {
         this.year = year;
+    }
+
+    public String getRemarkTemp() {
+        return remarkTemp;
+    }
+
+    public void setRemarkTemp(String remarkTemp) {
+        this.remarkTemp = remarkTemp;
     }
 
     @Override

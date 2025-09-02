@@ -60,4 +60,7 @@ public interface ICtgLedgerAnnualBudgetService
     public int deleteCtgLedgerAnnualBudgetById(Long id);
 
     CtgLedgerAnnualBudget selectByProjectIdAndYear(Long projectId,Integer year);
+
+
+
 }

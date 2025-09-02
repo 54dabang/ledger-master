@@ -34,28 +34,7 @@ import org.apache.poi.hssf.usermodel.HSSFShape;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ooxml.POIXMLDocumentPart;
-import org.apache.poi.ss.usermodel.BorderStyle;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.ClientAnchor;
-import org.apache.poi.ss.usermodel.DataFormat;
-import org.apache.poi.ss.usermodel.DataValidation;
-import org.apache.poi.ss.usermodel.DataValidationConstraint;
-import org.apache.poi.ss.usermodel.DataValidationHelper;
-import org.apache.poi.ss.usermodel.DateUtil;
-import org.apache.poi.ss.usermodel.Drawing;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Name;
-import org.apache.poi.ss.usermodel.PictureData;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellRangeAddressList;
 import org.apache.poi.util.IOUtils;
@@ -320,7 +299,7 @@ public class ExcelUtil<T>
      */
     public List<T> importExcel(InputStream is, int titleNum)
     {
-        List<T> list = null;
+        List<T> list =  null;
         try
         {
             list = importExcel(StringUtils.EMPTY, is, titleNum);
@@ -1667,58 +1646,74 @@ public class ExcelUtil<T>
      * @param column 获取单元格列号
      * @return 单元格值
      */
-    public Object getCellValue(Row row, int column)
-    {
-        if (row == null)
-        {
-            return row;
+    /**
+     * 获取单元格值
+     *
+     * @param row    获取的行
+     * @param column 获取单元格列号
+     * @return 单元格值
+     */
+    public Object getCellValue(Row row, int column) {
+        if (row == null) {
+            return null;
         }
         Object val = "";
-        try
-        {
+        try {
             Cell cell = row.getCell(column);
-            if (StringUtils.isNotNull(cell))
-            {
-                if (cell.getCellType() == CellType.NUMERIC || cell.getCellType() == CellType.FORMULA)
-                {
-                    val = cell.getNumericCellValue();
-                    if (DateUtil.isCellDateFormatted(cell))
-                    {
-                        val = DateUtil.getJavaDate((Double) val); // POI Excel 日期格式转换
-                    }
-                    else
-                    {
-                        if ((Double) val % 1 != 0)
-                        {
-                            val = new BigDecimal(val.toString());
+            if (cell != null) {
+                switch (cell.getCellType()) {
+                    case NUMERIC:
+                        if (DateUtil.isCellDateFormatted(cell)) {
+                            val = DateUtil.getJavaDate(cell.getNumericCellValue());
+                        } else {
+                            val = cell.getNumericCellValue();
                         }
-                        else
-                        {
-                            val = new DecimalFormat("0").format(val);
-                        }
-                    }
-                }
-                else if (cell.getCellType() == CellType.STRING)
-                {
-                    val = cell.getStringCellValue();
-                }
-                else if (cell.getCellType() == CellType.BOOLEAN)
-                {
-                    val = cell.getBooleanCellValue();
-                }
-                else if (cell.getCellType() == CellType.ERROR)
-                {
-                    val = cell.getErrorCellValue();
-                }
+                        break;
+                    case STRING:
+                        val = cell.getStringCellValue();
+                        break;
+                    case BOOLEAN:
+                        val = cell.getBooleanCellValue();
+                        break;
+                    case FORMULA:
+                        Workbook workbook = cell.getSheet().getWorkbook();
+                        FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+                        CellValue cellValue = evaluator.evaluate(cell);
 
+                        switch (cellValue.getCellType()) {
+                            case NUMERIC:
+                                val = cellValue.getNumberValue();
+                                break;
+                            case STRING:
+                                val = cellValue.getStringValue();
+                                break;
+                            case BOOLEAN:
+                                val = cellValue.getBooleanValue();
+                                break;
+                            case ERROR:
+                                val = "Error in formula: " + cellValue.getErrorValue();
+                                break;
+                            default:
+                                val = "";
+                        }
+                        break;
+                    case BLANK:
+                        val = "";
+                        break;
+                    case ERROR:
+                        val = "Error in cell: " + cell.getErrorCellValue();
+                        break;
+                    default:
+                        val = "";
+                }
             }
-        }
-        catch (Exception e)
-        {
-            return val;
+        } catch (Exception e) {
+            log.error("获取单元格值失败{}", e.getMessage());
+            val = "";
         }
         return val;
     }
+
 
     /**
      * 判断是否是空行

@@ -1,13 +1,22 @@
 package com.ledger.business.controller;
 
+import java.io.IOException;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
+import com.ledger.business.service.ICtgLedgerProjectExpenseDetailService;
+import com.ledger.business.util.LedgerExcelUtil;
+import com.ledger.common.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +35,7 @@ import com.ledger.business.domain.CtgLedgerAnnualBudget;
 import com.ledger.business.service.ICtgLedgerAnnualBudgetService;
 import com.ledger.common.utils.poi.ExcelUtil;
 import com.ledger.common.core.page.TableDataInfo;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 项目总预算台账Controller
@@ -36,9 +46,12 @@ import com.ledger.common.core.page.TableDataInfo;
 @Api(tags = "项目总预算台账管理")
 @RestController
 @RequestMapping("/api/annualBudget")
+@Slf4j
 public class CtgLedgerAnnualBudgetController extends BaseController {
     @Autowired
     private ICtgLedgerAnnualBudgetService ctgLedgerAnnualBudgetService;
+    @Autowired
+    private ICtgLedgerProjectExpenseDetailService projectExpenseDetailService;
 
     /**
      * 查询项目总预算台账列表
@@ -141,4 +154,23 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] ids) {
         return toAjax(ctgLedgerAnnualBudgetService.deleteCtgLedgerAnnualBudgetByIds(ids));
     }
+
+    @ApiOperation("导入excel项目台账")
+    @PreAuthorize("@ss.hasPermi('business:budget:import')")
+    @Log(title = "导入年度预算台账excel", businessType = BusinessType.DELETE)
+    @PostMapping("/importExcelData")
+    public AjaxResult importExcelData(MultipartFile file, Long projectId,Long year) throws Exception {
+        ExcelUtil<CtgLedgerProjectExpenseDetail> util = new ExcelUtil<>(CtgLedgerProjectExpenseDetail.class);
+        Workbook workbook = WorkbookFactory.create(file.getInputStream());
+        Sheet sheet = LedgerExcelUtil.pickSheet(workbook);
+        if (sheet == null) {
+            return AjaxResult.error("没有找到sheet");
+        }
+
+        List<CtgLedgerProjectExpenseDetail> list = util.importExcel(sheet.getSheetName(),file.getInputStream(),0);
+        projectExpenseDetailService.batchSave(list,projectId,year);
+        log.info("成功导入projectId:{},年度：{},{}条数据",projectId,year,list.size());
+        return success(list);
+    }
+
 }

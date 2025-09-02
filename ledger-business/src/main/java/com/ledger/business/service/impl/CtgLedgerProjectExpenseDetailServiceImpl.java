@@ -1,12 +1,20 @@
 package com.ledger.business.service.impl;
 
 import java.util.List;
+import java.util.Objects;
+
+import com.ledger.business.domain.CtgLedgerAnnualBudget;
 import com.ledger.common.utils.DateUtils;
+import com.ledger.common.utils.SecurityUtils;
+import com.ledger.common.utils.StringUtils;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ledger.business.mapper.CtgLedgerProjectExpenseDetailMapper;
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import com.ledger.business.service.ICtgLedgerProjectExpenseDetailService;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 /**
  * 项目支出明细Service业务层处理
@@ -15,6 +23,7 @@ import com.ledger.business.service.ICtgLedgerProjectExpenseDetailService;
  * @date 2025-08-21
  */
 @Service
+@Transactional
 public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProjectExpenseDetailService 
 {
     @Autowired
@@ -116,5 +125,34 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
     public int deleteCtgLedgerProjectExpenseDetailById(Long id)
     {
         return ctgLedgerProjectExpenseDetailMapper.deleteCtgLedgerProjectExpenseDetailById(id);
+    }
+
+    @Override
+    public List<CtgLedgerProjectExpenseDetail> batchSave(List<CtgLedgerProjectExpenseDetail> projectExpenseDetails, Long projectId, Long year) {
+        if (CollectionUtils.isEmpty(projectExpenseDetails)) {
+            throw new RuntimeException("导入数据为空");
+        }
+        List<CtgLedgerProjectExpenseDetail> detailList = Lists.newArrayList();
+        for (CtgLedgerProjectExpenseDetail detail : projectExpenseDetails) {
+            if (StringUtils.isEmpty(detail.getSubjectName())) {
+                break;
+            }
+            detail.setRemark(detail.getRemarkTemp());
+            detail.setLedgerProjectId(projectId);
+            detail.setYear(year.intValue());
+            if (Objects.nonNull(detail.getId())) {
+                detail.setUpdateBy(SecurityUtils.getUsername());
+                detail.setUpdateTime(DateUtils.getNowDate());
+                updateCtgLedgerProjectExpenseDetail(detail);
+            } else {
+                detail.setCreateBy(SecurityUtils.getUsername());
+                detail.setCreateTime(DateUtils.getNowDate());
+                detail.setReimburserLoginName(SecurityUtils.getUsername());
+                ctgLedgerProjectExpenseDetailMapper.insertCtgLedgerProjectExpenseDetail(detail);
+            }
+            detailList.add(detail);
+        }
+
+        return detailList;
     }
 }

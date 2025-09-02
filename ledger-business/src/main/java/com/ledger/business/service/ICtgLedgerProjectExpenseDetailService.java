@@ -1,6 +1,8 @@
 package com.ledger.business.service;
 
 import java.util.List;
+
+import com.ledger.business.domain.CtgLedgerAnnualBudget;
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 
 /**
@@ -74,4 +76,6 @@ public interface ICtgLedgerProjectExpenseDetailService
      * @return 结果
      */
     public int deleteCtgLedgerProjectExpenseDetailById(Long id);
+
+    List<CtgLedgerProjectExpenseDetail> batchSave(List<CtgLedgerProjectExpenseDetail> projectExpenseDetails, Long projectId, Long year);
 }

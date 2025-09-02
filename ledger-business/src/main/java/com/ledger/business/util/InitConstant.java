@@ -18,4 +18,6 @@ public class InitConstant {
     public static final String PROJECT_QUERY_TYPE_MANAGE = "manage";
 
     public static final String USER_EXIST_FLAG = "0";
+
+    public static final String SHEET_NAME_ANNUAL_DETAIL_FLAG = "支出明细";
 }
