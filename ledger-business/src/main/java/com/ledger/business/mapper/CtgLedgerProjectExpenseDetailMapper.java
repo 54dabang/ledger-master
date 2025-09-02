@@ -79,6 +79,7 @@ public interface CtgLedgerProjectExpenseDetailMapper {
     List<CtgLedgerProjectExpenseDetail> selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(@Param("projectId") Long projectId,
                                                                                                   @Param("year") Integer year);
 
+
     Long selectMaxReimbursementSequenceNoByProjectIdAndYear(@Param("projectId") Long projectId,
                                          @Param("year") Integer year);
 }

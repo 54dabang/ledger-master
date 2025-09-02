@@ -77,7 +77,7 @@ public class CtgLedgerProjectExpenseDetail extends BaseEntity {
     @ApiModelProperty(name = "报销次序")
     @Excel(name = "第几次报销（输入数字）")
     private Long reimbursementSequenceNo;
-    @Excel(name = "备注")
+    @Excel(name = "备注（无需填写，自动生成，请将内容复制到支出台账备注中）")
     private String remarkTemp;
 
     public void setId(Long id) {

@@ -533,8 +533,7 @@ public class ExcelUtil<T>
      * @param sheetName 工作表的名称
      * @return 结果
      */
-    public void exportExcel(HttpServletResponse response, List<T> list, String sheetName)
-    {
+    public void exportExcel(HttpServletResponse response, List<T> list, String sheetName) {
         exportExcel(response, list, sheetName, StringUtils.EMPTY);
     }
 

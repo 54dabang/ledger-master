@@ -37,7 +37,7 @@ public class BaseEntity implements Serializable
     private Date updateTime;
 
     /** 备注 */
-    @Excel(name = "备注（无需填写，自动生成，请将内容复制到支出台账备注中）")
+
     private String remark;
 
     /** 请求参数 */

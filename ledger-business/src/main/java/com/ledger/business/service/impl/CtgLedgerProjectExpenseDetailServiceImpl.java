@@ -155,4 +155,9 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
 
         return detailList;
     }
+
+    @Override
+    public List<CtgLedgerProjectExpenseDetail> selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(Long projectId, Integer year) {
+        return ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId,year);
+    }
 }

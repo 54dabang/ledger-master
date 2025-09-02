@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.ledger.business.domain.CtgLedgerAnnualBudget;
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 项目支出明细Service接口
@@ -78,4 +79,7 @@ public interface ICtgLedgerProjectExpenseDetailService
     public int deleteCtgLedgerProjectExpenseDetailById(Long id);
 
     List<CtgLedgerProjectExpenseDetail> batchSave(List<CtgLedgerProjectExpenseDetail> projectExpenseDetails, Long projectId, Long year);
+
+    List<CtgLedgerProjectExpenseDetail> selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(Long projectId,Integer year);
+
 }

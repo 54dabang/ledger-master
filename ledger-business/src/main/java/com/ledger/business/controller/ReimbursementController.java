@@ -16,6 +16,7 @@ import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.common.enums.BusinessType;
 import com.ledger.common.enums.OperatorType;
 import com.ledger.common.utils.DateUtils;
+import com.ledger.common.utils.SecurityUtils;
 import com.ledger.framework.tools.RedisLock;
 import com.ledger.system.service.ISysUserService;
 import io.swagger.annotations.Api;
@@ -121,6 +122,7 @@ public class ReimbursementController extends BaseController {
     @PreAuthorize("@ss.hasPermi('business:expenditure:exportledger')")
     @Log(title = "导出台账", businessType = BusinessType.EXPORT)
     public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId) {
+        reimbursementService.checkPermisson(projectId, SecurityUtils.getUserId());
         // 使用Calendar获取实际年份
         Calendar calendar = Calendar.getInstance();
         Integer year = calendar.get(Calendar.YEAR);

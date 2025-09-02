@@ -6,7 +6,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import com.ledger.business.service.ICtgLedgerProjectExpenseDetailService;
+import com.ledger.business.service.IReimbursementService;
 import com.ledger.business.util.LedgerExcelUtil;
+import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -19,14 +21,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.ledger.common.annotation.Log;
 import com.ledger.common.core.controller.BaseController;
 import com.ledger.common.core.domain.AjaxResult;
@@ -52,6 +47,9 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     private ICtgLedgerAnnualBudgetService ctgLedgerAnnualBudgetService;
     @Autowired
     private ICtgLedgerProjectExpenseDetailService projectExpenseDetailService;
+    @Autowired
+    private IReimbursementService reimbursementService;
+
 
     /**
      * 查询项目总预算台账列表
@@ -152,6 +150,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     @Log(title = "项目总预算台账", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
+
         return toAjax(ctgLedgerAnnualBudgetService.deleteCtgLedgerAnnualBudgetByIds(ids));
     }
 
@@ -160,6 +159,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     @Log(title = "导入年度预算台账excel", businessType = BusinessType.DELETE)
     @PostMapping("/importExcelData")
     public AjaxResult importExcelData(MultipartFile file, Long projectId,Long year) throws Exception {
+        reimbursementService.checkPermisson(projectId, SecurityUtils.getUserId());
         ExcelUtil<CtgLedgerProjectExpenseDetail> util = new ExcelUtil<>(CtgLedgerProjectExpenseDetail.class);
         Workbook workbook = WorkbookFactory.create(file.getInputStream());
         Sheet sheet = LedgerExcelUtil.pickSheet(workbook);
@@ -172,5 +172,33 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
         log.info("成功导入projectId:{},年度：{},{}条数据",projectId,year,list.size());
         return success(list);
     }
+    /**
+     * 导出项目支出明细台账列表
+     */
+    @ApiOperation("导出项目支出明细台账列表")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "projectId", value = "项目ID", dataType = "Long", paramType = "query"),
+            @ApiImplicitParam(name = "year", value = "年份", dataType = "Integer", paramType = "query")
+    })
+    @PreAuthorize("@ss.hasPermi('business:expense:export')")
+    @Log(title = "导出项目支出明细台账", businessType = BusinessType.EXPORT)
+    @GetMapping("/exportProjectExpenseDetails")
+    public void exportProjectExpenseDetails(HttpServletResponse response,
+                                            @ApiParam("项目ID") @RequestParam(required = false) Long projectId,
+                                            @ApiParam("年份") @RequestParam(required = false) Integer year) {
+        try {
+            reimbursementService.checkPermisson(projectId,SecurityUtils.getUserId());
+            // 查询符合条件的项目支出明细数据
+            List<CtgLedgerProjectExpenseDetail> list = projectExpenseDetailService.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
+            list.stream().forEach(e->e.setRemarkTemp(e.getRemark()));
+            // 使用 ExcelUtil 导出数据
+            ExcelUtil<CtgLedgerProjectExpenseDetail> util = new ExcelUtil<>(CtgLedgerProjectExpenseDetail.class);
+            util.exportExcel(response, list, "项目支出明细台账数据");
+        } catch (Exception e) {
+            log.error("导出项目支出明细台账失败：{}", e.getMessage(), e);
+            throw new RuntimeException("导出项目支出明细台账失败，请稍后重试！");
+        }
+    }
+
 
 }

@@ -5,6 +5,7 @@ import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import com.ledger.business.dto.ClaimantDTO;
 import com.ledger.business.dto.ReimbursementDTO;
 import com.ledger.business.mapper.CtgLedgerProjectExpenseDetailMapper;
+import com.ledger.business.mapper.CtgLedgerProjectMapper;
 import com.ledger.business.mapper.CtgLedgerProjectUserMapper;
 import com.ledger.business.service.ICtgLedgerProjectUserService;
 import com.ledger.business.service.IReimbursementService;
@@ -14,11 +15,13 @@ import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.common.utils.DateUtils;
 import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.StringUtils;
+import com.ledger.framework.web.service.PermissionService;
 import com.ledger.system.mapper.SysDeptMapper;
 import com.ledger.system.mapper.SysUserMapper;
 import com.ledger.system.service.ISysDeptService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,20 +41,19 @@ public class ReimbursementServiceImpl implements IReimbursementService {
 
     @Autowired
     private CtgLedgerProjectExpenseDetailMapper expenseDetailMapper;
-
-
     @Autowired
     private ISysDeptService sysDeptService;
-
-
     @Autowired
     private SysDeptMapper deptMapper;
 
     @Autowired
     private SysUserMapper userMapper;
-
     @Autowired
     private CtgLedgerProjectExpenseDetailMapper projectExpenseDetailMapper;
+    @Autowired
+    private CtgLedgerProjectMapper projectMapper;
+    @Autowired
+    private PermissionService permissionService;
 
     @Override
     public void syncReimbursementData(ReimbursementDTO reimbursementDTO, CtgLedgerProject ctgLedgerProject) {
@@ -102,6 +104,29 @@ public class ReimbursementServiceImpl implements IReimbursementService {
             }
         }
         return Pair.of(true, "");
+    }
+
+
+    @Override
+    public boolean hasPermission(Long projectId, Long userId) {
+        SysUser user = userMapper.selectUserById(userId);
+        CtgLedgerProject project = projectMapper.selectCtgLedgerProjectById(projectId);
+        boolean isMember = projectUserService.isProjectUser(projectId, userId);
+        boolean isProjectManager = user.getUserName().equals(project.getProjectManagerLoginName());
+        if (!isMember && !isProjectManager) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void checkPermisson(Long projectId, Long userId) {
+        if(permissionService.hasRole("admin")){
+            return;
+        }
+        if(!hasPermission(projectId,userId)){
+            throw new PermissionDeniedDataAccessException(String.format("您没有项目:%s对应的权限",projectId),null);
+        }
     }
 
     private SysUser createSysUserIfAbsent(ClaimantDTO.UserDetail handler) {
