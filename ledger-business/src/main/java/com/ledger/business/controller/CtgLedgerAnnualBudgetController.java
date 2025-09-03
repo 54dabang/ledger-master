@@ -74,6 +74,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     @PreAuthorize("@ss.hasPermi('business:budget:list')")
     @GetMapping("/list")
     public TableDataInfo list(CtgLedgerAnnualBudget ctgLedgerAnnualBudget) {
+
         startPage();
         List<CtgLedgerAnnualBudget> list = ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetList(ctgLedgerAnnualBudget);
         return getDataTable(list);
@@ -116,6 +117,9 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     @PreAuthorize("@ss.hasPermi('business:budget:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
+        CtgLedgerAnnualBudget budget = ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetById(ctgLedgerAnnualBudget.getProjectId());
+        reimbursementService.checkPermisson(budget.getProjectId(), SecurityUtils.getUserId());
+
         return success(ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetById(id));
     }
 
@@ -138,6 +142,8 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     @Log(title = "项目总预算台账", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@ApiParam("项目总预算台账对象") @RequestBody CtgLedgerAnnualBudget ctgLedgerAnnualBudget) {
+        CtgLedgerAnnualBudget budget = ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetById(ctgLedgerAnnualBudget.getProjectId());
+        reimbursementService.checkPermisson(budget.getProjectId(), SecurityUtils.getUserId());
         return toAjax(ctgLedgerAnnualBudgetService.updateCtgLedgerAnnualBudget(ctgLedgerAnnualBudget));
     }
 
@@ -150,6 +156,11 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     @Log(title = "项目总预算台账", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
+        for(Long id : ids){
+            CtgLedgerAnnualBudget ctgLedgerAnnualBudget = ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetById(id);
+            reimbursementService.checkPermisson(ctgLedgerAnnualBudget.getProjectId(), SecurityUtils.getUserId());
+        }
+
 
         return toAjax(ctgLedgerAnnualBudgetService.deleteCtgLedgerAnnualBudgetByIds(ids));
     }
