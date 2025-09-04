@@ -117,40 +117,41 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     @PreAuthorize("@ss.hasPermi('business:budget:query')")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
-        CtgLedgerAnnualBudget budget = ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetById(ctgLedgerAnnualBudget.getProjectId());
+        CtgLedgerAnnualBudget budget = ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetById(id);
         reimbursementService.checkPermisson(budget.getProjectId(), SecurityUtils.getUserId());
-
         return success(ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetById(id));
     }
 
     /**
      * 新增项目总预算台账
      */
-    @ApiOperation("新增项目总预算台账")
+    @ApiOperation("新增年度预算算台账")
     @PreAuthorize("@ss.hasPermi('business:budget:add')")
     @Log(title = "项目总预算台账", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@ApiParam("项目总预算台账对象") @RequestBody CtgLedgerAnnualBudget ctgLedgerAnnualBudget) {
-        return toAjax(ctgLedgerAnnualBudgetService.insertCtgLedgerAnnualBudget(ctgLedgerAnnualBudget));
+        ctgLedgerAnnualBudgetService.insertCtgLedgerAnnualBudget(ctgLedgerAnnualBudget);
+        return success(ctgLedgerAnnualBudget);
     }
 
     /**
      * 修改项目总预算台账
      */
-    @ApiOperation("修改项目总预算台账")
+    @ApiOperation("修改年度预算算台账")
     @PreAuthorize("@ss.hasPermi('business:budget:edit')")
     @Log(title = "项目总预算台账", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@ApiParam("项目总预算台账对象") @RequestBody CtgLedgerAnnualBudget ctgLedgerAnnualBudget) {
         CtgLedgerAnnualBudget budget = ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetById(ctgLedgerAnnualBudget.getProjectId());
         reimbursementService.checkPermisson(budget.getProjectId(), SecurityUtils.getUserId());
-        return toAjax(ctgLedgerAnnualBudgetService.updateCtgLedgerAnnualBudget(ctgLedgerAnnualBudget));
+        ctgLedgerAnnualBudgetService.updateCtgLedgerAnnualBudget(ctgLedgerAnnualBudget);
+        return success(ctgLedgerAnnualBudget);
     }
 
     /**
      * 删除项目总预算台账
      */
-    @ApiOperation("删除项目总预算台账")
+    @ApiOperation("删除年度预算算台账")
     @ApiImplicitParam(name = "ids", value = "项目总预算台账主键ID数组", required = true, dataType = "Long", paramType = "path")
     @PreAuthorize("@ss.hasPermi('business:budget:remove')")
     @Log(title = "项目总预算台账", businessType = BusinessType.DELETE)
