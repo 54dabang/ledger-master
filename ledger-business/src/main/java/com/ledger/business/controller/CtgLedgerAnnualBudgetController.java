@@ -142,7 +142,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     @Log(title = "项目总预算台账", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@ApiParam("项目总预算台账对象") @RequestBody CtgLedgerAnnualBudget ctgLedgerAnnualBudget) {
-        CtgLedgerAnnualBudget budget = ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetById(ctgLedgerAnnualBudget.getProjectId());
+        CtgLedgerAnnualBudget budget = ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetById(ctgLedgerAnnualBudget.getId());
         reimbursementService.checkPermisson(budget.getProjectId(), SecurityUtils.getUserId());
         ctgLedgerAnnualBudgetService.updateCtgLedgerAnnualBudget(ctgLedgerAnnualBudget);
         return success(ctgLedgerAnnualBudget);
