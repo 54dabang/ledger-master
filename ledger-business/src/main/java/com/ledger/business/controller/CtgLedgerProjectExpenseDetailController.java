@@ -77,6 +77,7 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('business:detail:query')")
     @GetMapping(value = "/{id}")
+    @ApiOperation("获取项目支持明细详情")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return success(ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailById(id));
     }
@@ -85,6 +86,7 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController {
      * 新增项目支出明细
      */
     @PreAuthorize("@ss.hasPermi('business:detail:add')")
+    @ApiOperation("新增项目支持明细详情")
     @Log(title = "项目支出明细", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail) {
@@ -95,6 +97,7 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController {
      * 修改项目支出明细
      */
     @PreAuthorize("@ss.hasPermi('business:detail:edit')")
+    @ApiOperation("修改项目支出明细")
     @Log(title = "项目支出明细", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail) {
@@ -105,6 +108,7 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController {
      * 删除项目支出明细
      */
     @PreAuthorize("@ss.hasPermi('business:detail:remove')")
+    @ApiOperation("删除项目支出明细")
     @Log(title = "项目支出明细", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
