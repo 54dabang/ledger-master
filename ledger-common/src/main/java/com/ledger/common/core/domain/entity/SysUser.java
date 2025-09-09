@@ -3,6 +3,8 @@ package com.ledger.common.core.domain.entity;
 import java.util.Date;
 import java.util.List;
 import javax.validation.constraints.*;
+
+import com.ledger.common.utils.bean.ApplicationContextUtil;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.ledger.common.annotation.Excel;
@@ -11,6 +13,7 @@ import com.ledger.common.annotation.Excel.Type;
 import com.ledger.common.annotation.Excels;
 import com.ledger.common.core.domain.BaseEntity;
 import com.ledger.common.xss.Xss;
+import org.springframework.context.ApplicationContext;
 
 /**
  * 用户对象 sys_user

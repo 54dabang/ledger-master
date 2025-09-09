@@ -7,6 +7,7 @@ import com.ledger.business.service.*;
 import com.ledger.business.util.InitConstant;
 import com.ledger.business.util.Result;
 import com.ledger.business.vo.ProjectExpenditureLedgerVo;
+import com.ledger.business.vo.SyncbackVo;
 import com.ledger.business.vo.SysUserVo;
 import com.ledger.common.annotation.Log;
 import com.ledger.common.constant.HttpStatus;
@@ -18,6 +19,7 @@ import com.ledger.common.enums.OperatorType;
 import com.ledger.common.utils.DateUtils;
 import com.ledger.common.utils.SecurityUtils;
 import com.ledger.framework.tools.RedisLock;
+import com.ledger.framework.web.service.SysLoginService;
 import com.ledger.system.service.ISysUserService;
 import io.swagger.annotations.Api;
 
@@ -62,7 +64,8 @@ public class ReimbursementController extends BaseController {
     private IProjectExpenditureLedgerService projectExpenditureLedgerService;
     @Autowired
     private ISysUserService userService;
-
+    @Autowired
+    private SysLoginService sysLoginService;
 
     @ApiOperation("同步台账基本数据信息")
     @RequestMapping(value = "/white/syncReimbursementData", method = RequestMethod.POST)
@@ -107,26 +110,39 @@ public class ReimbursementController extends BaseController {
             if (!locked) {
                 return AjaxResult.error(HttpStatus.CONFLICT, String.format("项目名称:%s,正在使用，请稍后重试！", reimbursementProjectName));
             }
-            reimbursementService.syncReimbursementData(reimbursementDTO, ctgLedgerProject);
+            Long currentSequenceNo = reimbursementService.syncReimbursementData(reimbursementDTO, ctgLedgerProject);
+            String loginName = reimbursementDTO.getHandler().getLoginName();
+            String token = sysLoginService.getTokenByLoginName(loginName);
+            SyncbackVo syncbackVo = SyncbackVo.builder().
+                    token(token)
+                    .currentSequenceNo(currentSequenceNo)
+                    .projectId(ctgLedgerProject.getId())
+                    .build();
+            log.info("reimbursementDTO:{}sync success! syncbackVo：{}", reimbursementDTO, syncbackVo);
+            return AjaxResult.success(syncbackVo);
+        } catch (Exception e) {
+            log.error("reimbursementDTO:{} sync failed!",e);
+            return AjaxResult.error(e.getMessage());
         } finally {
             if (locked) {
                 redisLock.releaseLock(lockKey);
             }
         }
 
-        return AjaxResult.success("同步台账数据成功");
     }
 
     @ApiOperation("导出台账")
     @RequestMapping(value = "/getProjectExpenditureLedger", method = RequestMethod.GET)
     @PreAuthorize("@ss.hasPermi('business:expenditure:exportledger')")
     @Log(title = "导出台账", businessType = BusinessType.EXPORT)
-    public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId) {
+    public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId, @RequestParam("year") Integer year, @RequestParam("maxReimbursementSequenceNo") Long maxReimbursementSequenceNo) {
         reimbursementService.checkPermisson(projectId, SecurityUtils.getUserId());
         // 使用Calendar获取实际年份
         Calendar calendar = Calendar.getInstance();
-        Integer year = calendar.get(Calendar.YEAR);
-        Long maxReimbursementSequenceNo = projectExpenditureLedgerService.selectMaxReimbursementSequenceNo(projectId, year);
+        year = Optional.ofNullable(year).orElse(calendar.get(Calendar.YEAR));
+        if (Objects.isNull(maxReimbursementSequenceNo)) {
+            maxReimbursementSequenceNo = projectExpenditureLedgerService.selectMaxReimbursementSequenceNo(projectId, year);
+        }
         maxReimbursementSequenceNo = Optional.ofNullable(maxReimbursementSequenceNo).orElse(0L);
         ProjectExpenditureLedgerVo projectExpenditureLedgerVo = projectExpenditureLedgerService.getProjectExpenditureLedgerVo(projectId, year, maxReimbursementSequenceNo);
         return AjaxResult.success(projectExpenditureLedgerVo);
@@ -135,11 +151,11 @@ public class ReimbursementController extends BaseController {
     @ApiOperation("获取所有有效用户")
     @RequestMapping(value = "/loadValidUsers", method = RequestMethod.GET)
     @PreAuthorize("@ss.hasPermi('business:expenditure:userlist')")
-    public AjaxResult loadValidUsers(){
+    public AjaxResult loadValidUsers() {
         SysUser param = new SysUser();
         param.setDelFlag(InitConstant.USER_EXIST_FLAG);
         List<SysUser> userList = userService.selectUserList(param);
-        List<SysUserVo> sysUserVoList = userList.stream().map(u->SysUserVo.toSysUserVo(u)).collect(Collectors.toList());
+        List<SysUserVo> sysUserVoList = userList.stream().map(u -> SysUserVo.toSysUserVo(u)).collect(Collectors.toList());
         return AjaxResult.success(sysUserVoList);
     }
 

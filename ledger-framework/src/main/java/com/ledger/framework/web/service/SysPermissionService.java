@@ -3,6 +3,8 @@ package com.ledger.framework.web.service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import com.ledger.system.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -37,7 +39,7 @@ public class SysPermissionService
     {
         Set<String> roles = new HashSet<String>();
         // 管理员拥有所有权限
-        if (user.isAdmin())
+        if (AdminService.isAdmin(user.getUserId()))
         {
             roles.add("admin");
         }
@@ -58,7 +60,7 @@ public class SysPermissionService
     {
         Set<String> perms = new HashSet<String>();
         // 管理员拥有所有权限
-        if (user.isAdmin())
+        if (AdminService.isAdmin(user.getUserId()))
         {
             perms.add("*:*:*");
         }

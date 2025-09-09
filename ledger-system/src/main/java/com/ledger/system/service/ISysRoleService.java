@@ -28,6 +28,8 @@ public interface ISysRoleService
      */
     public List<SysRole> selectRolesByUserId(Long userId);
 
+    List<SysRole> selectRolesByUserIdWithoutProxy(Long userId);
+
     /**
      * 根据用户ID查询角色权限
      * 

@@ -2,6 +2,8 @@ package com.ledger.web.controller.system;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.ledger.system.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -130,7 +132,7 @@ public class SysRoleController extends BaseController
         {
             // 更新缓存用户权限
             LoginUser loginUser = getLoginUser();
-            if (StringUtils.isNotNull(loginUser.getUser()) && !loginUser.getUser().isAdmin())
+            if (StringUtils.isNotNull(loginUser.getUser()) && !AdminService.isAdmin(loginUser.getUser().getUserId()))
             {
                 loginUser.setUser(userService.selectUserByUserName(loginUser.getUser().getUserName()));
                 loginUser.setPermissions(permissionService.getMenuPermission(loginUser.getUser()));

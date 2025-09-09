@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import com.ledger.common.constant.CacheConstants;
 import com.ledger.common.constant.Constants;
@@ -51,6 +52,10 @@ public class SysLoginService
 
     @Autowired
     private ISysConfigService configService;
+
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
+
 
     /**
      * 登录验证
@@ -99,6 +104,27 @@ public class SysLoginService
         // 生成token
         return tokenService.createToken(loginUser);
     }
+
+    /**
+     * 通过用户名获取token
+     *
+     * @param loginName 用户名
+     * @return token字符串
+     */
+    public String getTokenByLoginName(String loginName) {
+        // 1. 校验用户名是否为空
+        if (StringUtils.isEmpty(loginName)) {
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(loginName, Constants.LOGIN_FAIL, MessageUtils.message("user.not.exists")));
+            throw new UserNotExistsException();
+        }
+
+        // 2. 根据用户名获取用户信息
+        SysUser sysUser = userService.selectUserByUserName(loginName);
+        UserDetails userDetails  = userDetailsService.createLoginUser(sysUser);
+        // 生成token
+        return tokenService.createToken((LoginUser) userDetails);
+    }
+
 
     /**
      * 校验验证码
