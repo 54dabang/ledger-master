@@ -57,32 +57,30 @@ public class ReimbursementServiceImpl implements IReimbursementService {
     private PermissionService permissionService;
 
     @Override
-    public Long  syncReimbursementData(ReimbursementDTO reimbursementDTO, CtgLedgerProject ctgLedgerProject) {
+    public Long syncReimbursementData(ReimbursementDTO reimbursementDTO, CtgLedgerProject ctgLedgerProject) {
 
         CtgLedgerProjectExpenseDetail maxSequenceNoReimbursement = projectExpenseDetailMapper
                 .selectCtgLedgerProjectExpenseDetailWithMaxReimbursementSequenceNoByProjectId(ctgLedgerProject.getId());
         Long currentSequenceNo = Optional.ofNullable(maxSequenceNoReimbursement).map(d -> d.getReimbursementSequenceNo()).map(seq -> seq + 1).orElse(1L);
 
-        for (ClaimantDTO claimantDTO : reimbursementDTO.getClaimantList()) {
-            //填充信息
-            CtgLedgerProjectExpenseDetail expenseDetail = new CtgLedgerProjectExpenseDetail();
 
-            expenseDetail.setYear(reimbursementDTO.getCreateTime().getYear()+1900);
-            expenseDetail.setExpenseReportNumber(reimbursementDTO.getId());
-            expenseDetail.setFeeType(reimbursementDTO.getFeeType());
-            expenseDetail.setSubjectName(reimbursementDTO.getSubjectName());
-            expenseDetail.setRemark(reimbursementDTO.getTitle() + InitConstant.DATA_RESOURCE);
-            expenseDetail.setAmount(reimbursementDTO.getTotalAmount());
-            expenseDetail.setLedgerProjectId(ctgLedgerProject.getId());
-            expenseDetail.setExpenseReportNumber(reimbursementDTO.getId());
-            expenseDetail.setReimbursementSequenceNo(currentSequenceNo);
-            expenseDetail.setReimburserName(claimantDTO.getUser().getName());
-            expenseDetail.setReimburserLoginName(claimantDTO.getUser().getLoginName());
-            expenseDetail.setCreateBy(reimbursementDTO.getHandler().getLoginName());
-            expenseDetail.setCreateTime(DateUtils.getNowDate());
+        CtgLedgerProjectExpenseDetail expenseDetail = new CtgLedgerProjectExpenseDetail();
 
-            expenseDetailMapper.insertCtgLedgerProjectExpenseDetail(expenseDetail);
-        }
+        expenseDetail.setYear(reimbursementDTO.getCreateTime().getYear()+1900);
+        expenseDetail.setExpenseReportNumber(reimbursementDTO.getId());
+        expenseDetail.setFeeType(reimbursementDTO.getFeeType());
+        expenseDetail.setSubjectName(reimbursementDTO.getSubjectName());
+        expenseDetail.setRemark(reimbursementDTO.getTitle() + InitConstant.DATA_RESOURCE);
+        expenseDetail.setAmount(reimbursementDTO.getTotalAmount());
+        expenseDetail.setLedgerProjectId(ctgLedgerProject.getId());
+        expenseDetail.setExpenseReportNumber(reimbursementDTO.getId());
+        expenseDetail.setReimbursementSequenceNo(currentSequenceNo);
+        expenseDetail.setReimburserName(reimbursementDTO.getHandler().getName());
+        expenseDetail.setReimburserLoginName(reimbursementDTO.getHandler().getLoginName());
+        expenseDetail.setCreateBy(reimbursementDTO.getHandler().getLoginName());
+        expenseDetail.setCreateTime(DateUtils.getNowDate());
+
+        expenseDetailMapper.insertCtgLedgerProjectExpenseDetail(expenseDetail);
         return currentSequenceNo;
     }
 
