@@ -118,10 +118,10 @@ public class ReimbursementController extends BaseController {
                     .currentSequenceNo(currentSequenceNo)
                     .projectId(ctgLedgerProject.getId())
                     .build();
-            log.info("reimbursementDTO:{}sync success! syncbackVo：{}", reimbursementDTO, syncbackVo);
+            log.info("reimbursementDTO:{} sync success! syncbackVo：{}", reimbursementDTO, syncbackVo);
             return AjaxResult.success(syncbackVo);
         } catch (Exception e) {
-            log.error("reimbursementDTO:{} sync failed!",e);
+            log.error("reimbursementDTO:{} sync failed!",reimbursementDTO,e);
             return AjaxResult.error(e.getMessage());
         } finally {
             if (locked) {
