@@ -25,6 +25,7 @@ import org.springframework.dao.PermissionDeniedDataAccessException;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -106,6 +107,17 @@ public class ReimbursementServiceImpl implements IReimbursementService {
         return Pair.of(true, "");
     }
 
+    @Override
+    public boolean isHandlerProjectMember(ReimbursementDTO reimbursementDTO, CtgLedgerProject ctgLedgerProject) {
+
+        SysUser user = userMapper.selectUserByUserName(reimbursementDTO.getHandler().getLoginName());
+        boolean isMember = projectUserService.isProjectUser(ctgLedgerProject.getId(), user.getUserId());
+        boolean isProjectManager = reimbursementDTO.getHandler().equals(ctgLedgerProject.getProjectManagerLoginName());
+        if (!isMember && !isProjectManager) {
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public boolean hasPermission(Long projectId, Long userId) {
@@ -130,6 +142,9 @@ public class ReimbursementServiceImpl implements IReimbursementService {
     }
 
     private SysUser createSysUserIfAbsent(ClaimantDTO.UserDetail handler) {
+        if(Objects.isNull(handler)){
+            return null;
+        }
         SysDept currentUserDept = createSysDeptIfAbsent(handler.getDepartment(),handler.getLoginName());
         SysUser user = buildByUserDetail(handler);
         SysUser dbUser = userMapper.checkUserNameUnique(user.getUserName());
@@ -144,6 +159,9 @@ public class ReimbursementServiceImpl implements IReimbursementService {
     }
 
     private void createClaimantUsersIfAbsent(List<ClaimantDTO> claimantList) {
+        if(CollectionUtils.isEmpty(claimantList)){
+            return;
+        }
         for (ClaimantDTO claimantDTO : claimantList) {
             createSysUserIfAbsent(claimantDTO.getUser());
         }

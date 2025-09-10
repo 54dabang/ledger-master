@@ -16,6 +16,8 @@ public interface IReimbursementService {
 
     Pair<Boolean,String> isClaimantsProjectMember(ReimbursementDTO reimbursementDTO, CtgLedgerProject ctgLedgerProject);
 
+    boolean isHandlerProjectMember(ReimbursementDTO reimbursementDTO, CtgLedgerProject ctgLedgerProject);
+
     boolean hasPermission(Long projectId, Long userId);
 
     void checkPermisson(Long projectId, Long userId);
