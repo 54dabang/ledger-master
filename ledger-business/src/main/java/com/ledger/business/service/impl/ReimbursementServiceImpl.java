@@ -110,8 +110,8 @@ public class ReimbursementServiceImpl implements IReimbursementService {
 
         SysUser user = userMapper.selectUserByUserName(reimbursementDTO.getHandler().getLoginName());
         boolean isMember = projectUserService.isProjectUser(ctgLedgerProject.getId(), user.getUserId());
-        boolean isProjectManager = reimbursementDTO.getHandler().equals(ctgLedgerProject.getProjectManagerLoginName());
-        if (!isMember && !isProjectManager) {
+        boolean isProjectManager = reimbursementDTO.getHandler().getLoginName().trim().equals(ctgLedgerProject.getProjectManagerLoginName().trim());
+        if(!isMember && !isProjectManager) {
             return false;
         }
         return true;
