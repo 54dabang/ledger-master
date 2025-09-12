@@ -99,7 +99,7 @@ public class ReimbursementController extends BaseController {
         //检测用户是否是项目成员
         boolean isMember = reimbursementService.isHandlerProjectMember(reimbursementDTO,ctgLedgerProject);
         if (!isMember) {
-            return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("用户:%s，不是项目：%s 成员，请联系管理员添加！", reimbursementDTO.getHandler().getLoginName(), ctgLedgerProject.getProjectName()));
+            return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("用户:%s，不是项目：《%s》 成员，请联系项目管理员添加！", reimbursementDTO.getHandler().getLoginName(), ctgLedgerProject.getProjectName()));
         }
 
         //资源加锁，防止并发冲突
@@ -108,7 +108,7 @@ public class ReimbursementController extends BaseController {
         try {
             locked = redisLock.tryLock(lockKey, 2, TimeUnit.MINUTES);
             if (!locked) {
-                return AjaxResult.error(HttpStatus.CONFLICT, String.format("项目名称:%s,正在使用，请稍后重试！", reimbursementProjectName));
+                return AjaxResult.error(HttpStatus.CONFLICT, String.format("项目名称:《%s》,正在使用，请稍后重试！", reimbursementProjectName));
             }
             Long currentSequenceNo = reimbursementService.syncReimbursementData(reimbursementDTO, ctgLedgerProject);
             String loginName = reimbursementDTO.getHandler().getLoginName();
