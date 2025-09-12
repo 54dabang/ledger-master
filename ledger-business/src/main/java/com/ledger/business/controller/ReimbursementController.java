@@ -113,8 +113,8 @@ public class ReimbursementController extends BaseController {
             Long currentSequenceNo = reimbursementService.syncReimbursementData(reimbursementDTO, ctgLedgerProject);
             String loginName = reimbursementDTO.getHandler().getLoginName();
             String token = sysLoginService.getTokenByLoginName(loginName);
-            SyncbackVo syncbackVo = SyncbackVo.builder().
-                    token(token)
+            SyncbackVo syncbackVo = SyncbackVo.builder()
+                    .token(token)
                     .currentSequenceNo(currentSequenceNo)
                     .projectId(ctgLedgerProject.getId())
                     .build();

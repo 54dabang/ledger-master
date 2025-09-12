@@ -121,6 +121,8 @@ public class SysLoginService
         // 2. 根据用户名获取用户信息
         SysUser sysUser = userService.selectUserByUserName(loginName);
         UserDetails userDetails  = userDetailsService.createLoginUser(sysUser);
+        //更新用户登录时间，避免token过期失效
+        recordLoginInfo(sysUser.getUserId());
         // 生成token
         return tokenService.createToken((LoginUser) userDetails);
     }
