@@ -12,6 +12,17 @@ ledger:
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
+  env: leixingbang
+chatbot:
+  config:
+    - env: leixingbang
+      useCase: legerRationalityAnalysis
+      url: http://localhost:3020/chat/share?shareId=lwfjchp53hqdbjtoombb0hlw
+    - env: qinwei
+      useCase: legerRationalityAnalysis
+      url: http://localhost:3020/chat/share?shareId=lwfjchp53hqdbjtoombb0hlw
+
+
 
 # 开发环境配置
 server:
@@ -137,5 +148,5 @@ oauth2:
 
   redirect_uri: http://127.0.0.1:6060/oauth2sso/code
 url:
-    oauth2SsoUrl: http://127.0.0.1:1024/oauth2SsoLogin
-    mySystemHomeUrl: http://127.0.0.1:1024/index
+  oauth2SsoUrl: http://127.0.0.1:1024/oauth2SsoLogin
+  mySystemHomeUrl: http://127.0.0.1:1024/index

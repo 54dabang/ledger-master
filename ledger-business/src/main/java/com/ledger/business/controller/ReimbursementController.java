@@ -1,5 +1,8 @@
 package com.ledger.business.controller;
 
+import com.ledger.business.config.ChatbotConfig;
+import com.ledger.business.config.LegerConfig;
+import com.ledger.business.config.po.ChatbotProperty;
 import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import com.ledger.business.dto.ReimbursementDTO;
@@ -52,20 +55,33 @@ public class ReimbursementController extends BaseController {
 
     @Autowired
     private IReimbursementService reimbursementService;
+
     @Autowired
     private ICtgLedgerProjectService projectService;
+
     @Autowired
     private ICtgLedgerProjectExpenseDetailService expenseDetailService;
+
     @Autowired
     private ICtgLedgerProjectUserService projectUserService;
+
     @Autowired
     private RedisLock redisLock;
+
     @Autowired
     private IProjectExpenditureLedgerService projectExpenditureLedgerService;
+
     @Autowired
     private ISysUserService userService;
+
     @Autowired
     private SysLoginService sysLoginService;
+
+    @Autowired
+    private ChatbotConfig chatbotConfig;
+
+    @Autowired
+    private LegerConfig legerConfig;
 
     @ApiOperation("同步台账基本数据信息")
     @RequestMapping(value = "/white/syncReimbursementData", method = RequestMethod.POST)
@@ -97,7 +113,7 @@ public class ReimbursementController extends BaseController {
         reimbursementService.syncUsersReimbursementData(reimbursementDTO);
 
         //检测用户是否是项目成员
-        boolean isMember = reimbursementService.isHandlerProjectMember(reimbursementDTO,ctgLedgerProject);
+        boolean isMember = reimbursementService.isHandlerProjectMember(reimbursementDTO, ctgLedgerProject);
         if (!isMember) {
             return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("用户:%s，不是项目：《%s》 成员，请联系项目管理员添加！", reimbursementDTO.getHandler().getLoginName(), ctgLedgerProject.getProjectName()));
         }
@@ -121,7 +137,7 @@ public class ReimbursementController extends BaseController {
             log.info("reimbursementDTO:{} sync success! syncbackVo：{}", reimbursementDTO, syncbackVo);
             return AjaxResult.success(syncbackVo);
         } catch (Exception e) {
-            log.error("reimbursementDTO:{} sync failed!",reimbursementDTO,e);
+            log.error("reimbursementDTO:{} sync failed!", reimbursementDTO, e);
             return AjaxResult.error(e.getMessage());
         } finally {
             if (locked) {
@@ -157,6 +173,15 @@ public class ReimbursementController extends BaseController {
         List<SysUser> userList = userService.selectUserList(param);
         List<SysUserVo> sysUserVoList = userList.stream().map(u -> SysUserVo.toSysUserVo(u)).collect(Collectors.toList());
         return AjaxResult.success(sysUserVoList);
+    }
+
+    @ApiOperation("获取聊天机器人")
+    @RequestMapping(value = "/getChatbotUrl", method = RequestMethod.GET)
+    @Log(title = "聊天机器人", businessType = BusinessType.OTHER)
+    public AjaxResult getChatbotUrl(@RequestParam("useCase") String useCase) {
+        String url = chatbotConfig.getConfig().stream().filter(c -> c.getEnv().equals(legerConfig.getEnv())).map(c -> c.getUrl()).findFirst()
+                .orElse(null);
+        return AjaxResult.success(url);
     }
 
 }
