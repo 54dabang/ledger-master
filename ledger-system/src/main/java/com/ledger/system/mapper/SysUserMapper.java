@@ -20,6 +20,22 @@ public interface SysUserMapper
     public List<SysUser> selectUserList(SysUser sysUser);
 
     /**
+     * 批量新增用户信息
+     *
+     * @param userList 用户信息列表
+     * @return 结果
+     */
+    public int insertUserBatch(List<SysUser> userList);
+
+    /**
+     * 批量修改用户信息
+     *
+     * @param userList 用户信息列表
+     * @return 结果
+     */
+    public int updateUserBatch(List<SysUser> userList);
+
+    /**
      * 根据条件分页查询已配用户角色列表
      * 
      * @param user 用户信息

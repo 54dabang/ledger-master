@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ledger.business.mapper.BimOrgMapper">
+
+    <resultMap type="com.ledger.business.domain.BimOrg" id="BimOrgResult">
+        <result property="id" column="id"/>
+        <result property="depId" column="dep_id"/>
+        <result property="depPid" column="dep_pid"/>
+        <result property="hrDeptPk" column="hr_dept_pk"/>
+        <result property="depShortName" column="dep_short_name"/>
+        <result property="depFullName" column="dep_full_name"/>
+        <result property="depFullPath" column="depFullPath"/>
+        <result property="enable" column="enable"/>
+        <result property="depType" column="dep_type"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="delFlag" column="del_flag"/>
+    </resultMap>
+
+    <sql id="selectBimOrgVo">
+        SELECT id, dep_id, dep_pid, hr_dept_pk, dep_short_name, dep_full_name, depFullPath, enable, dep_type, create_time, update_time, del_flag
+        FROM bim_org
+    </sql>
+
+    <select id="selectBimOrgList" parameterType="com.ledger.business.domain.BimOrg" resultMap="BimOrgResult">
+        <include refid="selectBimOrgVo"/>
+        <where>
+            <if test="depId != null and depId != ''">
+                AND dep_id = #{depId}
+            </if>
+            <if test="depPid != null and depPid != ''">
+                AND dep_pid = #{depPid}
+            </if>
+            <if test="hrDeptPk != null and hrDeptPk != ''">
+                AND hr_dept_pk = #{hrDeptPk}
+            </if>
+            <if test="depShortName != null and depShortName != ''">
+                AND dep_short_name = #{depShortName}
+            </if>
+            <if test="depFullName != null and depFullName != ''">
+                AND dep_full_name = #{depFullName}
+            </if>
+            <if test="depFullPath != null and depFullPath != ''">
+                AND depFullPath = #{depFullPath}
+            </if>
+            <if test="enable != null and enable != ''">
+                AND enable = #{enable}
+            </if>
+            <if test="depType != null and depType != ''">
+                AND dep_type = #{depType}
+            </if>
+            <if test="delFlag != null and delFlag != ''">
+                AND del_flag = #{delFlag}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectBimOrgById" parameterType="String" resultMap="BimOrgResult">
+        <include refid="selectBimOrgVo"/>
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertBimOrg" parameterType="com.ledger.business.domain.BimOrg">
+        INSERT INTO bim_org
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null and id != ''">id,</if>
+            <if test="depId != null and depId != ''">dep_id,</if>
+            <if test="depPid != null and depPid != ''">dep_pid,</if>
+            <if test="hrDeptPk != null and hrDeptPk != ''">hr_dept_pk,</if>
+            <if test="depShortName != null and depShortName != ''">dep_short_name,</if>
+            <if test="depFullName != null and depFullName != ''">dep_full_name,</if>
+            <if test="depFullPath != null and depFullPath != ''">depFullPath,</if>
+            <if test="enable != null and enable != ''">enable,</if>
+            <if test="depType != null and depType != ''">dep_type,</if>
+            create_time,
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null and id != ''">#{id},</if>
+            <if test="depId != null and depId != ''">#{depId},</if>
+            <if test="depPid != null and depPid != ''">#{depPid},</if>
+            <if test="hrDeptPk != null and hrDeptPk != ''">#{hrDeptPk},</if>
+            <if test="depShortName != null and depShortName != ''">#{depShortName},</if>
+            <if test="depFullName != null and depFullName != ''">#{depFullName},</if>
+            <if test="depFullPath != null and depFullPath != ''">#{depFullPath},</if>
+            <if test="enable != null and enable != ''">#{enable},</if>
+            <if test="depType != null and depType != ''">#{depType},</if>
+            NOW(),
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+        </trim>
+    </insert>
+
+    <update id="updateBimOrg" parameterType="com.ledger.business.domain.BimOrg">
+        UPDATE bim_org
+        <set>
+            <if test="depId != null and depId != ''">dep_id = #{depId},</if>
+            <if test="depPid != null and depPid != ''">dep_pid = #{depPid},</if>
+            <if test="hrDeptPk != null and hrDeptPk != ''">hr_dept_pk = #{hrDeptPk},</if>
+            <if test="depShortName != null and depShortName != ''">dep_short_name = #{depShortName},</if>
+            <if test="depFullName != null and depFullName != ''">dep_full_name = #{depFullName},</if>
+            <if test="depFullPath != null and depFullPath != ''">depFullPath = #{depFullPath},</if>
+            <if test="enable != null and enable != ''">enable = #{enable},</if>
+            <if test="depType != null and depType != ''">dep_type = #{depType},</if>
+            update_time = NOW(),
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteBimOrgById" parameterType="String">
+        DELETE FROM bim_org WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteBimOrgByIds" parameterType="String">
+        DELETE FROM bim_org WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

@@ -56,16 +56,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		    left join sys_user_role ur on u.user_id = ur.user_id
 		    left join sys_role r on r.role_id = ur.role_id
     </sql>
-    
-    <select id="selectUserList" parameterType="SysUser" resultMap="SysUserResult">
-		select u.user_id, u.dept_id, u.nick_name, u.user_name, u.email, u.avatar, u.phonenumber, u.sex, u.status, u.del_flag, u.login_ip, u.login_date, u.create_by, u.create_time, u.remark, d.dept_name, d.leader from sys_user u
-		left join sys_dept d on u.dept_id = d.dept_id
+
+	<select id="selectUserList" parameterType="SysUser" resultMap="SysUserResult">
+		<include refid="selectUserVo"/>
 		where u.del_flag = '0'
 		<if test="userId != null and userId != 0">
 			AND u.user_id = #{userId}
 		</if>
 		<if test="userName != null and userName != ''">
 			AND u.user_name like concat('%', #{userName}, '%')
+		</if>
+		<if test="nickName != null and nickName != ''">
+			AND u.nick_name like concat('%', #{nickName}, '%')
 		</if>
 		<if test="status != null and status != ''">
 			AND u.status = #{status}
@@ -82,10 +84,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<if test="deptId != null and deptId != 0">
 			AND (u.dept_id = #{deptId} OR u.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE find_in_set(#{deptId}, ancestors) ))
 		</if>
-		<!-- 数据范围过滤 -->
-		${params.dataScope}
+		<if test="params.dataScope != null and params.dataScope != ''">
+			AND ${params.dataScope}
+		</if>
+		order by u.user_id
 	</select>
-	
+
+
 	<select id="selectByDelFlag" parameterType="Integer" resultMap="SysUserResult">
 		<include refid="selectUserVo"/>
 		where u.del_flag = #{delFlag}
@@ -200,6 +205,66 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			update_time = sysdate()
  		</set>
  		where user_id = #{userId}
+	</update>
+
+	<insert id="insertUserBatch" parameterType="java.util.List">
+		INSERT INTO sys_user(
+		user_id,
+		dept_id,
+		user_name,
+		nick_name,
+		email,
+		avatar,
+		phonenumber,
+		sex,
+		password,
+		status,
+		pwd_update_date,
+		create_by,
+		remark,
+		create_time
+		) VALUES
+		<foreach collection="list" item="user" separator=",">
+			(
+			#{user.userId},
+			#{user.deptId},
+			#{user.userName},
+			#{user.nickName},
+			#{user.email},
+			#{user.avatar},
+			#{user.phonenumber},
+			#{user.sex},
+			#{user.password},
+			#{user.status},
+			#{user.pwdUpdateDate},
+			#{user.createBy},
+			#{user.remark},
+			SYSDATE()
+			)
+		</foreach>
+	</insert>
+
+	<!-- 批量更新用户 -->
+	<update id="updateUserBatch" parameterType="java.util.List">
+		<foreach collection="list" item="user" separator=";">
+			UPDATE sys_user
+			<set>
+				<if test="user.deptId != null and user.deptId != 0">dept_id = #{user.deptId},</if>
+				<if test="user.nickName != null and user.nickName != ''">nick_name = #{user.nickName},</if>
+				<if test="user.email != null">email = #{user.email},</if>
+				<if test="user.phonenumber != null">phonenumber = #{user.phonenumber},</if>
+				<if test="user.sex != null and user.sex != ''">sex = #{user.sex},</if>
+				<if test="user.avatar != null and user.avatar != ''">avatar = #{user.avatar},</if>
+				<if test="user.password != null and user.password != ''">password = #{user.password},</if>
+				<if test="user.status != null and user.status != ''">status = #{user.status},</if>
+				<if test="user.loginIp != null and user.loginIp != ''">login_ip = #{user.loginIp},</if>
+				<if test="user.loginDate != null">login_date = #{user.loginDate},</if>
+				<if test="user.updateBy != null and user.updateBy != ''">update_by = #{user.updateBy},</if>
+				<if test="user.remark != null">remark = #{user.remark},</if>
+				update_time = SYSDATE()
+			</set>
+			WHERE user_id = #{user.userId}
+		</foreach>
 	</update>
 	
 	<update id="updateUserStatus" parameterType="SysUser">

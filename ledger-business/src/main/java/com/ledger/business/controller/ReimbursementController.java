@@ -9,6 +9,7 @@ import com.ledger.business.dto.ReimbursementDTO;
 import com.ledger.business.service.*;
 import com.ledger.business.util.InitConstant;
 import com.ledger.business.util.Result;
+import com.ledger.business.util.StringUtil;
 import com.ledger.business.vo.ProjectExpenditureLedgerVo;
 import com.ledger.business.vo.SyncbackVo;
 import com.ledger.business.vo.SysUserVo;
@@ -21,6 +22,7 @@ import com.ledger.common.enums.BusinessType;
 import com.ledger.common.enums.OperatorType;
 import com.ledger.common.utils.DateUtils;
 import com.ledger.common.utils.SecurityUtils;
+import com.ledger.common.utils.StringUtils;
 import com.ledger.framework.tools.RedisLock;
 import com.ledger.framework.web.service.SysLoginService;
 import com.ledger.system.service.ISysUserService;
@@ -167,9 +169,21 @@ public class ReimbursementController extends BaseController {
     @ApiOperation("获取所有有效用户")
     @RequestMapping(value = "/loadValidUsers", method = RequestMethod.GET)
     @PreAuthorize("@ss.hasPermi('business:expenditure:userlist')")
-    public AjaxResult loadValidUsers() {
+    public AjaxResult loadValidUsers(@RequestParam(name = "name",required = false) String name) {
+        startPage();
         SysUser param = new SysUser();
         param.setDelFlag(InitConstant.USER_EXIST_FLAG);
+        Optional.ofNullable(name)
+                .filter(n -> !n.isEmpty())
+                .ifPresent(n -> {
+                    boolean startEnglish = StringUtil.startWithEnglish(n);
+                    if (startEnglish) {
+                        param.setUserName(n);
+                    } else {
+                        param.setUserName(n);
+                    }
+                });
+
         List<SysUser> userList = userService.selectUserList(param);
         List<SysUserVo> sysUserVoList = userList.stream().map(u -> SysUserVo.toSysUserVo(u)).collect(Collectors.toList());
         return AjaxResult.success(sysUserVoList);

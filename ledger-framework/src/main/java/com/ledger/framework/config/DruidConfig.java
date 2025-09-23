@@ -30,6 +30,7 @@ import com.ledger.framework.datasource.DynamicDataSource;
  * @author ledger
  */
 @Configuration
+
 public class DruidConfig
 {
     @Bean
@@ -75,6 +76,7 @@ public class DruidConfig
         }
         catch (Exception e)
         {
+            System.out.println(e);
         }
     }
 

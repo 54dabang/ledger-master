@@ -168,15 +168,21 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
         CtgLedgerProjectUser param = new CtgLedgerProjectUser();
         param.setCtgLedgerProjectId(project.getId());
         List<CtgLedgerProjectUser> projectUserList = ctgLedgerProjectUserMapper.selectCtgLedgerProjectUserList(param);
-        List<SysUser> members = projectUserList.stream().map(p -> p.getSysUserId()).map(uid -> userService.selectUserById(uid)).collect(Collectors.toList());
+        List<SysUser> members = projectUserList.stream().map(p -> p.getSysUserId()).map(uid -> userService.selectUserById(uid))
+                .filter(u->Objects.nonNull(u))
+                .collect(Collectors.toList());
         List<SysUserVo> sysUserVoList = members.stream().map(m -> SysUserVo.builder().userId(m.getUserId())
                 .userName(m.getUserName())
                 .nickName(m.getNickName()).build()).collect(Collectors.toList());
         SysUser user = userService.selectUserByUserName(project.getProjectManagerLoginName());
-        SysUserVo manager = SysUserVo.builder().userId(user.getUserId())
-                .userName(user.getUserName())
-                .nickName(user.getNickName())
-                .build();
+
+        SysUserVo manager = null;
+        if(Objects.nonNull(user)){
+            SysUserVo.builder().userId(user.getUserId())
+                    .userName(user.getUserName())
+                    .nickName(user.getNickName())
+                    .build();
+        }
         int currentYear = Year.now().getValue();
         CtgLedgerAnnualBudget ctgLedgerAnnualBudget = annualBudgetService.selectByProjectIdAndYear(project.getId(), currentYear);
         BigDecimal annualBudgetFee = Optional.ofNullable(ctgLedgerAnnualBudget)

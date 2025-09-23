@@ -2,6 +2,7 @@ package com.ledger.common.utils.ip;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Objects;
 import javax.servlet.http.HttpServletRequest;
 import com.ledger.common.utils.ServletUtils;
 import com.ledger.common.utils.StringUtils;
@@ -131,6 +132,9 @@ public class IpUtils
      */
     public static byte[] textToNumericFormatV4(String text)
     {
+        if(Objects.isNull(text)){
+            return null;
+        }
         if (text.length() == 0)
         {
             return null;

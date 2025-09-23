@@ -5,6 +5,8 @@ public class InitConstant {
     //科学技术研究院id
     public static final Long SCIENCE_AND_TECHNOLOGY_RESEARCH_INSTITUTE_DEPARTMENT_ID = 200L;
 
+    public static final String SCIENCE_AND_TECHNOLOGY_RESEARCH_INSTITUTE_DEPARTMENT_NAME = "科学技术研究院";
+
     public static final String USER_REMARK = "报销系统同步自动创建用户";
 
     public static final String USER_PASSWORD = "1&*^%123dacvdsYDSA";

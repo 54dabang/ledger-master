@@ -8,6 +8,7 @@ import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -74,6 +75,11 @@ public class GlobalExceptionHandler
         return AjaxResult.error(String.format("请求路径中缺少必需的路径变量[%s]", e.getVariableName()));
     }
 
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public AjaxResult handleMissingServletRequestParameterException(MissingServletRequestParameterException e, HttpServletRequest request) {
+        log.warn("请求参数缺失: {} (参数名: {})", request.getRequestURI(), e.getParameterName());
+        return AjaxResult.error("请求参数缺失: " + e.getParameterName());
+    }
     /**
      * 请求参数类型不匹配
      */

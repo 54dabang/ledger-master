@@ -34,6 +34,10 @@
             <groupId>com.ledger</groupId>
             <artifactId>ledger-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.ledger</groupId>
+            <artifactId>ledger-business</artifactId>
+        </dependency>
 
     </dependencies>
 

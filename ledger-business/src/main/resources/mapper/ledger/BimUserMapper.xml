@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ledger.business.mapper.BimUserMapper">
+
+    <resultMap type="com.ledger.business.domain.BimUser" id="BimUserResult">
+        <result property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="username" column="username"/>
+        <result property="name" column="name"/>
+        <result property="enable" column="enable"/>
+        <result property="type" column="type"/>
+        <result property="idcard" column="idcard"/>
+        <result property="ehrUserCode" column="ehr_user_code"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="phonenumber" column="phonenumber"/>
+        <result property="email" column="email"/>
+        <result property="telphone" column="telphone"/>
+        <result property="sex" column="sex"/>
+        <result property="posts" column="posts"/>
+    </resultMap>
+
+    <sql id="selectBimUserVo">
+        SELECT id, user_id, dept_id, username, name, enable, type, idcard, ehr_user_code, create_time, update_time, del_flag, phonenumber, email, telphone, sex, posts
+        FROM bim_user
+    </sql>
+
+    <select id="selectBimUserList" parameterType="com.ledger.business.domain.BimUser" resultMap="BimUserResult">
+        <include refid="selectBimUserVo"/>
+        <where>
+            <if test="userId != null and userId != ''">
+                AND user_id = #{userId}
+            </if>
+            <if test="deptId != null and deptId != ''">
+                AND dept_id = #{deptId}
+            </if>
+            <if test="username != null and username != ''">
+                AND username = #{username}
+            </if>
+            <if test="name != null and name != ''">
+                AND name = #{name}
+            </if>
+            <if test="enable != null and enable != ''">
+                AND enable = #{enable}
+            </if>
+            <if test="type != null and type != ''">
+                AND type = #{type}
+            </if>
+            <if test="idcard != null and idcard != ''">
+                AND idcard = #{idcard}
+            </if>
+            <if test="ehrUserCode != null and ehrUserCode != ''">
+                AND ehr_user_code = #{ehrUserCode}
+            </if>
+            <if test="delFlag != null and delFlag != ''">
+                AND del_flag = #{delFlag}
+            </if>
+            <if test="phonenumber != null and phonenumber != ''">
+                AND phonenumber = #{phonenumber}
+            </if>
+            <if test="email != null and email != ''">
+                AND email = #{email}
+            </if>
+            <if test="telphone != null and telphone != ''">
+                AND telphone = #{telphone}
+            </if>
+            <if test="sex != null and sex != ''">
+                AND sex = #{sex}
+            </if>
+            <if test="posts != null and posts != ''">
+                AND posts = #{posts}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectBimUserById" parameterType="String" resultMap="BimUserResult">
+        <include refid="selectBimUserVo"/>
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertBimUser" parameterType="com.ledger.business.domain.BimUser">
+        INSERT INTO bim_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null and id != ''">id,</if>
+            <if test="userId != null and userId != ''">user_id,</if>
+            <if test="deptId != null and deptId != ''">dept_id,</if>
+            <if test="username != null and username != ''">username,</if>
+            <if test="name != null and name != ''">name,</if>
+            <if test="enable != null and enable != ''">enable,</if>
+            <if test="type != null and type != ''">type,</if>
+            <if test="idcard != null and idcard != ''">idcard,</if>
+            <if test="ehrUserCode != null and ehrUserCode != ''">ehr_user_code,</if>
+            create_time,
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+            <if test="phonenumber != null and phonenumber != ''">phonenumber,</if>
+            <if test="email != null and email != ''">email,</if>
+            <if test="telphone != null and telphone != ''">telphone,</if>
+            <if test="sex != null and sex != ''">sex,</if>
+            <if test="posts != null and posts != ''">posts,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null and id != ''">#{id},</if>
+            <if test="userId != null and userId != ''">#{userId},</if>
+            <if test="deptId != null and deptId != ''">#{deptId},</if>
+            <if test="username != null and username != ''">#{username},</if>
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="enable != null and enable != ''">#{enable},</if>
+            <if test="type != null and type != ''">#{type},</if>
+            <if test="idcard != null and idcard != ''">#{idcard},</if>
+            <if test="ehrUserCode != null and ehrUserCode != ''">#{ehrUserCode},</if>
+            NOW(),
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+            <if test="phonenumber != null and phonenumber != ''">#{phonenumber},</if>
+            <if test="email != null and email != ''">#{email},</if>
+            <if test="telphone != null and telphone != ''">#{telphone},</if>
+            <if test="sex != null and sex != ''">#{sex},</if>
+            <if test="posts != null and posts != ''">#{posts},</if>
+        </trim>
+    </insert>
+
+    <update id="updateBimUser" parameterType="com.ledger.business.domain.BimUser">
+        UPDATE bim_user
+        <set>
+            <if test="userId != null and userId != ''">user_id = #{userId},</if>
+            <if test="deptId != null and deptId != ''">dept_id = #{deptId},</if>
+            <if test="username != null and username != ''">username = #{username},</if>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="enable != null and enable != ''">enable = #{enable},</if>
+            <if test="type != null and type != ''">type = #{type},</if>
+            <if test="idcard != null and idcard != ''">idcard = #{idcard},</if>
+            <if test="ehrUserCode != null and ehrUserCode != ''">ehr_user_code = #{ehrUserCode},</if>
+            update_time = NOW(),
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+            <if test="phonenumber != null and phonenumber != ''">phonenumber = #{phonenumber},</if>
+            <if test="email != null and email != ''">email = #{email},</if>
+            <if test="telphone != null and telphone != ''">telphone = #{telphone},</if>
+            <if test="sex != null and sex != ''">sex = #{sex},</if>
+            <if test="posts != null and posts != ''">posts = #{posts},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteBimUserById" parameterType="String">
+        DELETE FROM bim_user WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteBimUserByIds" parameterType="String">
+        DELETE FROM bim_user WHERE id IN
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>
