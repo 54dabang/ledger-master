@@ -14,6 +14,8 @@ import com.ledger.common.utils.StringUtils;
 import com.ledger.framework.manager.AsyncManager;
 import com.ledger.framework.manager.factory.AsyncFactory;
 import com.ledger.system.domain.SysOperLog;
+import com.ledger.system.domain.SysPost;
+import com.ledger.system.mapper.SysPostMapper;
 import com.ledger.system.mapper.SysUserMapper;
 import com.ledger.system.mapper.SysDeptMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -22,10 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service("syncBimUserService")
@@ -39,6 +38,8 @@ public class SyncBimUserService {
     private SysUserMapper sysUserMapper;
     @Autowired
     private SysDeptMapper sysDeptMapper;
+    @Autowired
+    private SysPostMapper sysPostMapper;
 
     public void syncUsersAndDepts() {
         log.info("开始同步bim用户和组织机构数据");
@@ -49,6 +50,7 @@ public class SyncBimUserService {
             syncDept(bimOrgList, existingDeptList);*/
 
             List<BimUser> bimUserList = iBimUserService.selectBimUserList(new BimUser());
+            syncPosts(bimUserList);
             syncUsers(bimUserList);
 
             log.info("bim用户和组织机构数据同步完成");
@@ -57,6 +59,85 @@ public class SyncBimUserService {
             throw new RuntimeException("bim用户和组织机构数据同步失败", e);
         }
     }
+
+    /**
+     * 同步BIM系统中的岗位信息到系统岗位表
+     *
+     * @param bimUserList BIM用户列表
+     */
+    public void syncPosts(List<BimUser> bimUserList) {
+        log.info("开始同步bim用户岗位数据");
+        SysOperLog operLog = new SysOperLog();
+        operLog.setStatus(BusinessStatus.SUCCESS.ordinal());
+        operLog.setOperatorType(OperatorType.OTHER.ordinal());
+        operLog.setTitle("同步bim用户岗位数据");
+        try {
+            if (CollectionUtils.isEmpty(bimUserList)) {
+                log.info("没有需要同步的bim用户岗位数据");
+                operLog.setErrorMsg("没有需要同步的bim用户岗位数据");
+                AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
+                return;
+            }
+
+            // 提取所有唯一的职位名称
+            Set<String> postNames = new HashSet<>();
+            for (BimUser bimUser : bimUserList) {
+                if (StringUtils.isNotEmpty(bimUser.getPosts())) {
+                    postNames.add(bimUser.getPosts());
+                }
+            }
+
+            if (postNames.isEmpty()) {
+                log.info("没有需要同步的bim用户岗位数据");
+                operLog.setErrorMsg("没有需要同步的bim用户岗位数据");
+                AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
+                return;
+            }
+
+            // 获取数据库中已有的所有岗位
+            List<SysPost> dbPosts = sysPostMapper.selectPostAll();
+            Set<String> existingPostNames = dbPosts.stream()
+                    .map(SysPost::getPostName)
+                    .collect(Collectors.toSet());
+
+            int insertCount = 0;
+            int skipCount = 0;
+
+            for (String postName : postNames) {
+                // 检查职位名称是否已经存在
+                if (existingPostNames.contains(postName)) {
+                    log.debug("跳过已存在的岗位: {}", postName);
+                    skipCount++;
+                    continue;
+                }
+
+                // 创建新的岗位
+                SysPost newPost = new SysPost();
+                newPost.setPostName(postName);
+                newPost.setPostCode(postName); // 根据需求，postCode和postName值相同
+                newPost.setPostSort(100); // 默认排序
+                newPost.setStatus("1"); // 默认启用
+                newPost.setCreateBy("系统自动同步");
+                newPost.setCreateTime(DateUtils.getNowDate());
+
+                sysPostMapper.insertPost(newPost);
+                insertCount++;
+                log.debug("新增岗位: {}", postName);
+            }
+
+            log.info("bim用户岗位数据同步成功,新增{}个岗位,跳过{}个已存在岗位,总计{}个唯一岗位",
+                    insertCount, skipCount, postNames.size());
+            operLog.setErrorMsg("bim用户岗位数据同步成功,新增" + insertCount + "个岗位,跳过" + skipCount + "个已存在岗位,总计" + postNames.size() + "个唯一岗位");
+            AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
+        } catch (Exception e) {
+            operLog.setStatus(BusinessStatus.FAIL.ordinal());
+            operLog.setErrorMsg(StringUtils.substring(Convert.toStr(e.getMessage(), ExceptionUtil.getExceptionMessage(e)), 0, 2000));
+            AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
+            log.error("bim用户岗位数据同步失败", e);
+            throw new RuntimeException("bim用户岗位数据同步失败", e);
+        }
+    }
+
 
 
     public void syncUsers(List<BimUser> bimUserList) {
@@ -280,9 +361,9 @@ public class SyncBimUserService {
 
         sysDept.setParentId(parentId != null ? parentId : 0L);
         sysDept.setDeptName(StringUtils.isNotEmpty(bimOrg.getDepShortName()) ? bimOrg.getDepShortName() : bimOrg.getDepFullName());
-        if(InitConstant.CHINA_THREE_GORGES_CORPORATION_NAME.equals(sysDept.getDeptName()) || InitConstant.SCIENCE_AND_TECHNOLOGY_RESEARCH_INSTITUTE_DEPARTMENT_NAME.equals(sysDept.getDeptName())){
+        if (InitConstant.CHINA_THREE_GORGES_CORPORATION_NAME.equals(sysDept.getDeptName()) || InitConstant.SCIENCE_AND_TECHNOLOGY_RESEARCH_INSTITUTE_DEPARTMENT_NAME.equals(sysDept.getDeptName())) {
             sysDept.setOrderNum(0);
-        }else {
+        } else {
             sysDept.setOrderNum(100);
         }
 
@@ -370,9 +451,9 @@ public class SyncBimUserService {
         SysDept param = new SysDept();
         param.setBimDeptId(bimUser.getDeptId());
         List<SysDept> deptList = sysDeptMapper.selectDeptList(param);
-        if(!CollectionUtils.isEmpty(deptList)){
-          SysDept sysDept = deptList.get(0);
-          sysUser.setDeptId(sysDept.getDeptId());
+        if (!CollectionUtils.isEmpty(deptList)) {
+            SysDept sysDept = deptList.get(0);
+            sysUser.setDeptId(sysDept.getDeptId());
         }
 
         // 设置默认密码（如果需要）

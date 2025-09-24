@@ -87,6 +87,8 @@ public class SysDept extends BaseEntity {
      */
     private String parentName;
 
+    private boolean hasChild;
+
     /**
      * 子部门
      */
@@ -115,6 +117,7 @@ public class SysDept extends BaseEntity {
     public void setAncestors(String ancestors) {
         this.ancestors = ancestors;
     }
+
 
     @NotBlank(message = "部门名称不能为空")
     @Size(min = 0, max = 30, message = "部门名称长度不能超过30个字符")
@@ -216,6 +219,14 @@ public class SysDept extends BaseEntity {
 
     public void setBimDeptId(String bimDeptId) {
         this.bimDeptId = bimDeptId;
+    }
+
+    public boolean isHasChild() {
+        return hasChild;
+    }
+
+    public void setHasChild(boolean hasChild) {
+        this.hasChild = hasChild;
     }
 
     @Override

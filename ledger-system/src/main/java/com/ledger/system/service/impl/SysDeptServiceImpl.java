@@ -47,7 +47,11 @@ public class SysDeptServiceImpl implements ISysDeptService
     @DataScope(deptAlias = "d")
     public List<SysDept> selectDeptList(SysDept dept)
     {
-        return deptMapper.selectDeptList(dept);
+        List<SysDept> sysDeptList = deptMapper.selectDeptList(dept);
+        for(SysDept d : sysDeptList){
+            d.setHasChild(hasChildByDeptId(d.getDeptId()));
+        }
+        return sysDeptList;
     }
 
     /**
