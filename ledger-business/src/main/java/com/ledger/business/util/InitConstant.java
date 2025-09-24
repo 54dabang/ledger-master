@@ -6,6 +6,7 @@ public class InitConstant {
     public static final Long SCIENCE_AND_TECHNOLOGY_RESEARCH_INSTITUTE_DEPARTMENT_ID = 200L;
 
     public static final String SCIENCE_AND_TECHNOLOGY_RESEARCH_INSTITUTE_DEPARTMENT_NAME = "科学技术研究院";
+    public static final String CHINA_THREE_GORGES_CORPORATION_NAME = "中国三峡集团";
 
     public static final String USER_REMARK = "报销系统同步自动创建用户";
 

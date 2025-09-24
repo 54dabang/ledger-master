@@ -2,6 +2,7 @@ package com.ledger.business.service;
 
 import com.ledger.business.domain.BimUser;
 import com.ledger.business.domain.BimOrg;
+import com.ledger.business.util.InitConstant;
 import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.common.core.domain.entity.SysDept;
 import com.ledger.common.core.text.Convert;
@@ -279,7 +280,12 @@ public class SyncBimUserService {
 
         sysDept.setParentId(parentId != null ? parentId : 0L);
         sysDept.setDeptName(StringUtils.isNotEmpty(bimOrg.getDepShortName()) ? bimOrg.getDepShortName() : bimOrg.getDepFullName());
-        sysDept.setOrderNum(0);
+        if(InitConstant.CHINA_THREE_GORGES_CORPORATION_NAME.equals(sysDept.getDeptName()) || InitConstant.SCIENCE_AND_TECHNOLOGY_RESEARCH_INSTITUTE_DEPARTMENT_NAME.equals(sysDept.getDeptName())){
+            sysDept.setOrderNum(0);
+        }else {
+            sysDept.setOrderNum(100);
+        }
+
         sysDept.setLeader("");
         sysDept.setPhone("");
         sysDept.setEmail("");
