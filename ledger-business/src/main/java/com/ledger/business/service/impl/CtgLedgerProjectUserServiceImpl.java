@@ -177,8 +177,8 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
         SysUser user = userService.selectUserByUserName(project.getProjectManagerLoginName());
 
         SysUserVo manager = null;
-        if(Objects.nonNull(user)){
-            SysUserVo.builder().userId(user.getUserId())
+        if (Objects.nonNull(user)) {
+            manager = SysUserVo.builder().userId(user.getUserId())
                     .userName(user.getUserName())
                     .nickName(user.getNickName())
                     .build();
