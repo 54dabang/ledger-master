@@ -3,6 +3,7 @@ package com.ledger.business.service;
 import com.ledger.business.domain.BimUser;
 import com.ledger.business.domain.BimOrg;
 import com.ledger.business.util.InitConstant;
+import com.ledger.common.core.domain.entity.SysRole;
 import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.common.core.domain.entity.SysDept;
 import com.ledger.common.core.text.Convert;
@@ -16,12 +17,14 @@ import com.ledger.framework.manager.factory.AsyncFactory;
 import com.ledger.system.domain.SysOperLog;
 import com.ledger.system.domain.SysPost;
 import com.ledger.system.mapper.SysPostMapper;
-import com.ledger.system.mapper.SysUserMapper;
 import com.ledger.system.mapper.SysDeptMapper;
+import com.ledger.system.mapper.SysRoleMapper;
+import com.ledger.system.service.ISysRoleService;
+import com.ledger.system.service.ISysUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
@@ -35,13 +38,15 @@ public class SyncBimUserService {
     @Autowired
     private IBimOrgService bimOrgService;
     @Autowired
-    private SysUserMapper sysUserMapper;
+    private ISysUserService sysUserservice;
     @Autowired
     private SysDeptMapper sysDeptMapper;
     @Autowired
     private SysPostMapper sysPostMapper;
+    @Autowired
+    private SysRoleMapper iSysRoleService;
 
-    public void syncUsersAndDepts() {
+    public synchronized void syncUsersAndDepts() {
         log.info("开始同步bim用户和组织机构数据");
         try {
             // 查询所有BimOrg数据
@@ -59,7 +64,11 @@ public class SyncBimUserService {
             throw new RuntimeException("bim用户和组织机构数据同步失败", e);
         }
     }
-
+    /**
+     * 同步BIM系统中的岗位信息到系统岗位表
+     *
+     * @param bimUserList BIM用户列表
+     */
     /**
      * 同步BIM系统中的岗位信息到系统岗位表
      *
@@ -80,12 +89,10 @@ public class SyncBimUserService {
             }
 
             // 提取所有唯一的职位名称
-            Set<String> postNames = new HashSet<>();
-            for (BimUser bimUser : bimUserList) {
-                if (StringUtils.isNotEmpty(bimUser.getPosts())) {
-                    postNames.add(bimUser.getPosts());
-                }
-            }
+            Set<String> postNames = bimUserList.stream()
+                    .map(BimUser::getPosts)
+                    .filter(StringUtils::isNotEmpty)
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
             if (postNames.isEmpty()) {
                 log.info("没有需要同步的bim用户岗位数据");
@@ -94,35 +101,38 @@ public class SyncBimUserService {
                 return;
             }
 
-            // 获取数据库中已有的所有岗位
-            List<SysPost> dbPosts = sysPostMapper.selectPostAll();
-            Set<String> existingPostNames = dbPosts.stream()
-                    .map(SysPost::getPostName)
-                    .collect(Collectors.toSet());
-
             int insertCount = 0;
             int skipCount = 0;
 
             for (String postName : postNames) {
-                // 检查职位名称是否已经存在
-                if (existingPostNames.contains(postName)) {
-                    log.debug("跳过已存在的岗位: {}", postName);
+                try {
+                    // 1. 实时检查数据库是否存在（关键修复点）
+                    // 即使在单线程环境下，也必须检查数据库当前状态
+                    if (sysPostMapper.checkPostNameUnique(postName) != null) {
+                        log.debug("跳过已存在的岗位: {}", postName);
+                        skipCount++;
+                        continue;
+                    }
+
+                    // 2. 创建新岗位
+                    SysPost newPost = new SysPost();
+                    newPost.setPostName(postName);
+                    newPost.setPostCode(postName);
+                    newPost.setPostSort(100);
+                    newPost.setStatus(InitConstant.VALID_FLAG);
+                    newPost.setCreateBy("系统自动同步");
+                    newPost.setCreateTime(DateUtils.getNowDate());
+
+                    // 3. 执行插入
+                    sysPostMapper.insertPost(newPost);
+                    insertCount++;
+                    log.debug("新增岗位: {}", postName);
+                } catch (DuplicateKeyException e) {
+                    // 4. 处理并发插入冲突（双重保险）
+                    // 即使是单线程执行，也可能存在外部操作导致的冲突
+                    log.warn("岗位名称已存在（可能由外部操作创建），跳过: {}", postName);
                     skipCount++;
-                    continue;
                 }
-
-                // 创建新的岗位
-                SysPost newPost = new SysPost();
-                newPost.setPostName(postName);
-                newPost.setPostCode(postName); // 根据需求，postCode和postName值相同
-                newPost.setPostSort(100); // 默认排序
-                newPost.setStatus("1"); // 默认启用
-                newPost.setCreateBy("系统自动同步");
-                newPost.setCreateTime(DateUtils.getNowDate());
-
-                sysPostMapper.insertPost(newPost);
-                insertCount++;
-                log.debug("新增岗位: {}", postName);
             }
 
             log.info("bim用户岗位数据同步成功,新增{}个岗位,跳过{}个已存在岗位,总计{}个唯一岗位",
@@ -139,7 +149,6 @@ public class SyncBimUserService {
     }
 
 
-
     public void syncUsers(List<BimUser> bimUserList) {
         log.info("开始同步bim用户数据");
         SysOperLog operLog = new SysOperLog();
@@ -153,7 +162,8 @@ public class SyncBimUserService {
                 AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
                 return;
             }
-
+            List<SysRole> roleList = iSysRoleService.selectRoleAll();
+            SysRole commonRole = roleList.stream().filter(r -> r.getRoleName().equals(InitConstant.ROLE_COMMON)).findFirst().get();
             for (BimUser bimUser : bimUserList) {
                 // 检查用户名是否为空
                 if (bimUser.getUsername() == null || bimUser.getUsername().isEmpty()) {
@@ -161,20 +171,22 @@ public class SyncBimUserService {
                     continue;
                 }
 
-                SysUser sysUser = sysUserMapper.selectUserByUserName(bimUser.getUsername());
+                SysUser sysUser = sysUserservice.selectUserByUserName(bimUser.getUsername());
                 if (Objects.isNull(sysUser)) {
                     sysUser = new SysUser();
+                    sysUser.setRoleIds(new Long[]{commonRole.getRoleId()});
                     sysUser.setCreateBy("系统自动同步");
                     sysUser.setCreateTime(DateUtils.getNowDate());
                     sysUser.setUpdateTime(DateUtils.getNowDate());
                     copyBimUserToSysUser(bimUser, sysUser);
-                    sysUserMapper.insertUser(sysUser);
-                    log.debug("新增用户: {}", bimUser.getUsername());
+
+                    sysUserservice.insertUser(sysUser);
+                    log.info("新增用户: {}", bimUser.getUsername());
                 } else {
                     copyBimUserToSysUser(bimUser, sysUser);
                     sysUser.setUpdateTime(DateUtils.getNowDate());
-                    sysUserMapper.updateUser(sysUser);
-                    log.debug("更新用户: {}", bimUser.getUsername());
+                    sysUserservice.updateUser(sysUser);
+                    log.info("更新用户: {},post:{}", bimUser.getUsername(),sysUser.getPostIds());
                 }
             }
             log.info("bim用户数据同步成功,累计同步{}个用户", bimUserList.size());
@@ -455,6 +467,19 @@ public class SyncBimUserService {
             SysDept sysDept = deptList.get(0);
             sysUser.setDeptId(sysDept.getDeptId());
         }
+
+        if (StringUtils.isNotEmpty(bimUser.getPosts())) {
+            SysPost post = sysPostMapper.checkPostNameUnique(bimUser.getPosts());
+            Long postId = (post != null) ? post.getPostId() : null;
+            if (postId != null) {
+                sysUser.setPostIds(new Long[]{postId});
+            } else {
+                sysUser.setPostIds(new Long[]{});
+            }
+        } else {
+            sysUser.setPostIds(new Long[]{});
+        }
+
 
         // 设置默认密码（如果需要）
         if (sysUser.getPassword() == null || sysUser.getPassword().isEmpty()) {

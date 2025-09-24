@@ -36,6 +36,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 			</if>
 		</where>
 	</select>
+
+	<select id="selectPostListByName" parameterType="SysPost" resultMap="SysPostResult">
+		<include refid="selectPostVo"/>
+		<where>
+			<if test="postCode != null and postCode != ''">
+				AND post_code like concat('%', #{postCode}, '%')
+			</if>
+			<if test="status != null and status != ''">
+				AND status = #{status}
+			</if>
+			<if test="postName != null and postName != ''">
+				AND post_name = #{postName}
+			</if>
+		</where>
+	</select>
 	
 	<select id="selectPostAll" resultMap="SysPostResult">
 		<include refid="selectPostVo"/>
