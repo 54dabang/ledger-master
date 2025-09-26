@@ -87,7 +87,7 @@ public class SysDeptController extends BaseController
         }
         dept.setCreateBy(getUsername());
         int count =  deptService.insertDept(dept);
-        redisCache.deleteByPrefix(CACHE_KEY_DEPT_PREFIX);
+
         return toAjax(count);
     }
 
@@ -115,7 +115,7 @@ public class SysDeptController extends BaseController
         }
         dept.setUpdateBy(getUsername());
         int count = deptService.updateDept(dept);
-        redisCache.deleteByPrefix(CACHE_KEY_DEPT_PREFIX);
+
         return toAjax(count);
     }
 
@@ -137,7 +137,6 @@ public class SysDeptController extends BaseController
         }
         deptService.checkDeptDataScope(deptId);
         int count = deptService.deleteDeptById(deptId);
-        redisCache.deleteByPrefix(CACHE_KEY_DEPT_PREFIX);
         return toAjax(count);
     }
 }

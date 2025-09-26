@@ -240,7 +240,7 @@ public class SysUserController extends BaseController {
     @PreAuthorize("@ss.hasPermi('system:user:list')")
     @GetMapping("/deptTree")
     public AjaxResult deptTree(SysDept dept) {
-        // 生成唯一缓存key - 基于所有关键查询属性构建
+       /* // 生成唯一缓存key - 基于所有关键查询属性构建
         String keyContent = buildDeptTreeCacheKey(dept);
         String cacheKey = CACHE_KEY_DEPT_PREFIX + keyContent;
 
@@ -248,10 +248,11 @@ public class SysUserController extends BaseController {
         List<TreeSelect> treeList = redisCache.getCacheObject(cacheKey);
         if (treeList == null) {
             // 缓存未命中时查询数据库
-            treeList = deptService.selectDeptTreeList(dept);
+
             // 设置缓存（24小时过期）
             redisCache.setCacheObject(cacheKey, treeList, 24, TimeUnit.HOURS);
-        }
+        }*/
+        List<TreeSelect> treeList = deptService.selectDeptTreeList(dept);
         return success(treeList);
     }
 
