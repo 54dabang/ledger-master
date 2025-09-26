@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -126,15 +127,18 @@ public class SyncBimUserService {
             // 4. 预加载所有现有用户
             Map<String, SysUser> existingUserMap = loadExistingUserMap();
 
-            int insertCount = 0;
-            int updateCount = 0;
 
-            // 5. 处理每个BimUser
-            for (BimUser bimUser : bimUserList) {
+
+
+            AtomicInteger insertCount = new AtomicInteger(0);
+            AtomicInteger updateCount = new AtomicInteger(0);
+
+// 5. 使用Java8并行流并发处理用户
+            bimUserList.parallelStream().forEach(bimUser -> {
                 // 检查用户名是否为空
                 if (StringUtils.isEmpty(bimUser.getUsername())) {
                     log.warn("跳过用户名为空的用户记录: {}", bimUser.getName());
-                    continue;
+                    return;
                 }
 
                 // 查找现有用户
@@ -152,17 +156,17 @@ public class SyncBimUserService {
                 }
 
                 // 复制数据并检查是否变化
-                boolean changed = copyBimUserToSysUser(isNewUser,bimUser, sysUser, deptMap, postMap);
+                boolean changed = copyBimUserToSysUser(isNewUser, bimUser, sysUser, deptMap, postMap);
 
                 if (isNewUser || changed) {
                     if (isNewUser) {
                         sysUserservice.insertUser(sysUser);
-                        insertCount++;
+                        insertCount.incrementAndGet();
                         log.debug("新增用户: {}", bimUser.getUsername());
                     } else {
                         sysUser.setUpdateTime(DateUtils.getNowDate());
                         sysUserservice.updateUser(sysUser);
-                        updateCount++;
+                        updateCount.incrementAndGet();
                         log.info("更新用户: {}", bimUser.getUsername());
                     }
                     // 更新现有用户映射
@@ -170,7 +174,9 @@ public class SyncBimUserService {
                 } else {
                     log.debug("用户数据未变化，跳过更新: {}", bimUser.getUsername());
                 }
-            }
+            });
+
+
 
             log.info("bim用户数据同步成功,新增{}个用户,更新{}个用户,总计{}个用户",
                     insertCount, updateCount, bimUserList.size());

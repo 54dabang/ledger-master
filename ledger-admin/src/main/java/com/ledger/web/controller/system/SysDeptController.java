@@ -1,6 +1,8 @@
 package com.ledger.web.controller.system;
 
 import java.util.List;
+
+import com.ledger.common.core.redis.RedisCache;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,6 +35,8 @@ public class SysDeptController extends BaseController
 {
     @Autowired
     private ISysDeptService deptService;
+    @Autowired
+    private RedisCache redisCache;
 
     /**
      * 获取部门列表
@@ -82,7 +86,9 @@ public class SysDeptController extends BaseController
             return error("新增部门'" + dept.getDeptName() + "'失败，部门名称已存在");
         }
         dept.setCreateBy(getUsername());
-        return toAjax(deptService.insertDept(dept));
+        int count =  deptService.insertDept(dept);
+        redisCache.deleteByPrefix(CACHE_KEY_DEPT_PREFIX);
+        return toAjax(count);
     }
 
     /**
@@ -108,7 +114,9 @@ public class SysDeptController extends BaseController
             return error("该部门包含未停用的子部门！");
         }
         dept.setUpdateBy(getUsername());
-        return toAjax(deptService.updateDept(dept));
+        int count = deptService.updateDept(dept);
+        redisCache.deleteByPrefix(CACHE_KEY_DEPT_PREFIX);
+        return toAjax(count);
     }
 
     /**
@@ -128,6 +136,8 @@ public class SysDeptController extends BaseController
             return warn("部门存在用户,不允许删除");
         }
         deptService.checkDeptDataScope(deptId);
-        return toAjax(deptService.deleteDeptById(deptId));
+        int count = deptService.deleteDeptById(deptId);
+        redisCache.deleteByPrefix(CACHE_KEY_DEPT_PREFIX);
+        return toAjax(count);
     }
 }

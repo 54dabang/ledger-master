@@ -1,16 +1,12 @@
 package com.ledger.common.core.redis;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import com.ledger.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.BoundSetOperations;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 
 /**
@@ -266,4 +262,71 @@ public class RedisCache
     {
         return redisTemplate.keys(pattern);
     }
+
+
+    /**
+     * 根据前缀安全删除Redis缓存（支持大规模数据处理）
+     *
+     * @param prefix 前缀（例如："dept:tree:"）
+     * @return 删除的键数量
+     */
+    public void deleteByPrefix(String prefix) {
+        final String pattern = prefix + "*";
+        final int batchSize = 100; // 每批处理100个键
+        final int maxScanCount = 10000; // 最大扫描数量限制
+
+
+        try {
+
+            redisTemplate.<Long>execute((RedisCallback<Long>) connection -> {
+                long count = 0;
+                int scannedCount = 0;
+                boolean reachedLimit = false;
+
+                try (Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions()
+                        .match(pattern)
+                        .count(batchSize)
+                        .build())) {
+
+                    List<String> keysBatch = new ArrayList<>(batchSize);
+                    while (cursor.hasNext()) {
+                        // 检查是否达到最大扫描限制
+                        if (++scannedCount > maxScanCount) {
+                            reachedLimit = true;
+                            break;
+                        }
+
+                        // 添加当前键到批次
+                        String key = new String(cursor.next(), StandardCharsets.UTF_8);
+                        keysBatch.add(key);
+
+                        // 批量删除
+                        if (keysBatch.size() >= batchSize) {
+                            count += redisTemplate.delete(keysBatch);
+                            keysBatch.clear();
+                        }
+                    }
+
+                    // 处理剩余键
+                    if (!keysBatch.isEmpty()) {
+                        count += redisTemplate.delete(keysBatch);
+                    }
+
+
+                    return count;
+                } catch (Exception e) {
+
+                    throw new RuntimeException("Redis键扫描失败", e);
+                }
+            });
+
+
+        } catch (Exception e) {
+
+            throw new RuntimeException("Redis键删除失败", e);
+        }
+
+
+    }
 }
+

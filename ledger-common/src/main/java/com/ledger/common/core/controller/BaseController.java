@@ -31,7 +31,7 @@ import javax.security.auth.Subject;
 public class BaseController
 {
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
-
+    public static final String CACHE_KEY_DEPT_PREFIX = "dept:tree:";
     /**
      * 将前台传递过来的日期格式的字符串，自动转化为Date类型
      */
