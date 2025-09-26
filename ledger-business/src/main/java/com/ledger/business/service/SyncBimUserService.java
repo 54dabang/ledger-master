@@ -8,6 +8,7 @@ import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.common.core.domain.entity.SysDept;
 import com.ledger.common.core.text.Convert;
 import com.ledger.common.enums.BusinessStatus;
+import com.ledger.common.enums.BusinessType;
 import com.ledger.common.enums.OperatorType;
 import com.ledger.common.exception.ServiceException;
 import com.ledger.common.utils.DateUtils;
@@ -102,6 +103,9 @@ public class SyncBimUserService {
         operLog.setStatus(BusinessStatus.SUCCESS.ordinal());
         operLog.setOperatorType(OperatorType.OTHER.ordinal());
         operLog.setTitle("同步bim用户数据");
+        operLog.setBusinessType(BusinessType.OTHER.ordinal());
+        operLog.setOperName("系统定时任务");
+        Long start = System.currentTimeMillis();
 
         try {
             if (CollectionUtils.isEmpty(bimUserList)) {
@@ -133,7 +137,7 @@ public class SyncBimUserService {
             AtomicInteger insertCount = new AtomicInteger(0);
             AtomicInteger updateCount = new AtomicInteger(0);
 
-// 5. 使用Java8并行流并发处理用户
+           // 5. 使用Java8并行流并发处理用户
             bimUserList.parallelStream().forEach(bimUser -> {
                 // 检查用户名是否为空
                 if (StringUtils.isEmpty(bimUser.getUsername())) {
@@ -180,8 +184,7 @@ public class SyncBimUserService {
 
             log.info("bim用户数据同步成功,新增{}个用户,更新{}个用户,总计{}个用户",
                     insertCount, updateCount, bimUserList.size());
-            operLog.setErrorMsg("bim用户数据同步成功,新增" + insertCount + "个用户,更新" + updateCount +
-                    "个用户,总计" + bimUserList.size() + "个用户");
+            operLog.setCostTime(System.currentTimeMillis()-start);
             AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
         } catch (Exception e) {
             operLog.setStatus(BusinessStatus.FAIL.ordinal());
@@ -361,6 +364,8 @@ public class SyncBimUserService {
         operLog.setStatus(BusinessStatus.SUCCESS.ordinal());
         operLog.setOperatorType(OperatorType.OTHER.ordinal());
         operLog.setTitle("同步bim岗位数据");
+        operLog.setOperName("系统定时任务");
+        long start = System.currentTimeMillis();
 
         try {
             if (CollectionUtils.isEmpty(bimUserList)) {
@@ -418,12 +423,13 @@ public class SyncBimUserService {
 
             log.info("bim岗位数据同步成功,新增{}个岗位,跳过{}个已存在岗位,总计{}个唯一岗位",
                     insertCount, skipCount, allPostNames.size());
-            operLog.setErrorMsg("bim岗位数据同步成功,新增" + insertCount + "个岗位,跳过" + skipCount +
+            operLog.setJsonResult("bim岗位数据同步成功,新增" + insertCount + "个岗位,跳过" + skipCount +
                     "个已存在岗位,总计" + allPostNames.size() + "个唯一岗位");
+            operLog.setCostTime(System.currentTimeMillis()-start);
             AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
         } catch (Exception e) {
             operLog.setStatus(BusinessStatus.FAIL.ordinal());
-            operLog.setErrorMsg(StringUtils.substring(Convert.toStr(e.getMessage(),
+            operLog.setJsonResult(StringUtils.substring(Convert.toStr(e.getMessage(),
                     ExceptionUtil.getExceptionMessage(e)), 0, 2000));
             AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
             log.error("bim岗位数据同步失败", e);
@@ -491,10 +497,13 @@ public class SyncBimUserService {
         operLog.setStatus(BusinessStatus.SUCCESS.ordinal());
         operLog.setOperatorType(OperatorType.OTHER.ordinal());
         operLog.setTitle("同步bim组织机构数据");
+        operLog.setOperName("系统定时任务");
+        long start = System.currentTimeMillis();
+
         try {
             if (CollectionUtils.isEmpty(bimOrgList)) {
                 log.info("没有需要同步的bim组织机构数据");
-                operLog.setErrorMsg("没有需要同步的bim组织机构数据");
+                operLog.setJsonResult("没有需要同步的bim组织机构数据");
                 AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
                 return;
             }
@@ -633,11 +642,12 @@ public class SyncBimUserService {
 
             log.info("bim组织机构数据同步成功,新增{}个组织机构,更新{}个组织机构,总计{}个组织机构",
                     insertCount, updateCount, bimOrgList.size());
-            operLog.setErrorMsg("bim组织机构数据同步成功,新增" + insertCount + "个组织机构,更新" + updateCount + "个组织机构,总计" + bimOrgList.size() + "个组织机构");
+            operLog.setCostTime(System.currentTimeMillis()-start);
+            operLog.setJsonResult("bim组织机构数据同步成功,新增" + insertCount + "个组织机构,更新" + updateCount + "个组织机构,总计" + bimOrgList.size() + "个组织机构");
             AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
         } catch (Exception e) {
             operLog.setStatus(BusinessStatus.FAIL.ordinal());
-            operLog.setErrorMsg(StringUtils.substring(Convert.toStr(e.getMessage(), ExceptionUtil.getExceptionMessage(e)), 0, 2000));
+            operLog.setJsonResult(StringUtils.substring(Convert.toStr(e.getMessage(), ExceptionUtil.getExceptionMessage(e)), 0, 2000));
             AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
             log.error("bim组织机构数据同步失败", e);
             throw new RuntimeException("bim组织机构数据同步失败", e);
