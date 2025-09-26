@@ -8,6 +8,7 @@ import com.ledger.common.constant.UserConstants;
 import com.ledger.common.core.domain.entity.SysDept;
 import com.ledger.common.core.domain.entity.SysMenu;
 import com.ledger.common.utils.StringUtils;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Treeselect树结构实体类
@@ -27,6 +28,8 @@ public class TreeSelect implements Serializable
     /** 节点禁用 */
     private boolean disabled = false;
 
+    private boolean hasChild = false;
+
     /** 子节点 */
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<TreeSelect> children;
@@ -40,6 +43,7 @@ public class TreeSelect implements Serializable
     {
         this.id = dept.getDeptId();
         this.label = dept.getDeptName();
+        this.hasChild = dept.isHasChild();
         this.disabled = StringUtils.equals(UserConstants.DEPT_DISABLE, dept.getStatus());
         this.children = dept.getChildren().stream().map(TreeSelect::new).collect(Collectors.toList());
     }
@@ -49,6 +53,7 @@ public class TreeSelect implements Serializable
         this.id = menu.getMenuId();
         this.label = menu.getMenuName();
         this.children = menu.getChildren().stream().map(TreeSelect::new).collect(Collectors.toList());
+        this.hasChild = !CollectionUtils.isEmpty(this.children);
     }
 
     public Long getId()
@@ -89,5 +94,13 @@ public class TreeSelect implements Serializable
     public void setChildren(List<TreeSelect> children)
     {
         this.children = children;
+    }
+
+    public boolean isHasChild() {
+        return hasChild;
+    }
+
+    public void setHasChild(boolean hasChild) {
+        this.hasChild = hasChild;
     }
 }
