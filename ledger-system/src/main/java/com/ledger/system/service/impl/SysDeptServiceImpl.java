@@ -1,8 +1,6 @@
 package com.ledger.system.service.impl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.ledger.system.AdminService;
@@ -65,6 +63,20 @@ public class SysDeptServiceImpl implements ISysDeptService
     {
        // List<SysDept> depts = SpringUtils.getAopProxy(this).selectDeptList(dept);
         List<SysDept> depts = selectDeptList(dept);
+        if(StringUtils.isNotEmpty(dept.getDeptName())){
+            List<Long> ancestorsIdList = depts.stream()
+                    .map(SysDept::getAncestors)  // 获取每个部门的 ancestors 字符串
+                    .filter(StringUtils::isNotEmpty)  // 过滤掉空字符串
+                    .flatMap(ancestors -> Arrays.stream(ancestors.split(",")))  // 按逗号分割并展平
+                    .map(String::trim)  // 去除空格
+                    .filter(s -> !s.isEmpty())  // 过滤空字符串
+                    .map(Long::valueOf)  // 转换为 Long 类型
+                    .distinct()  // 去重
+                    .collect(Collectors.toList());  // 收集为 List
+            List<SysDept> ancestors = this.deptMapper.selectDepts(ancestorsIdList);
+            ancestors = ancestors.stream().filter(a-> Objects.nonNull(a)).collect(Collectors.toList());
+            depts.addAll(ancestors);
+        }
         return buildDeptTreeSelect(depts);
     }
 
