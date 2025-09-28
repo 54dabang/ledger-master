@@ -1,5 +1,6 @@
 package com.ledger.business.controller;
 
+import com.github.pagehelper.PageHelper;
 import com.ledger.business.config.ChatbotConfig;
 import com.ledger.business.config.LegerConfig;
 import com.ledger.business.config.po.ChatbotProperty;
@@ -21,6 +22,7 @@ import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.common.enums.BusinessType;
 import com.ledger.common.enums.OperatorType;
 import com.ledger.common.utils.DateUtils;
+import com.ledger.common.utils.PageUtils;
 import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.StringUtils;
 import com.ledger.framework.tools.RedisLock;
@@ -169,8 +171,8 @@ public class ReimbursementController extends BaseController {
     @ApiOperation("获取所有有效用户")
     @RequestMapping(value = "/loadValidUsers", method = RequestMethod.GET)
     @PreAuthorize("@ss.hasPermi('business:expenditure:userlist')")
-    public AjaxResult loadValidUsers(@RequestParam(name = "name",required = false) String name) {
-        startPage();
+    public AjaxResult loadValidUsers(@RequestParam(name = "name",required = false) String name,@RequestParam(name = "pageSize",required = false,defaultValue = "200") Integer pageSize) {
+        PageUtils.startPage(pageSize);
         SysUser param = new SysUser();
         param.setDelFlag(InitConstant.USER_EXIST_FLAG);
         Optional.ofNullable(name)

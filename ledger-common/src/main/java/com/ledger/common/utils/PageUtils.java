@@ -24,10 +24,17 @@ public class PageUtils extends PageHelper
         Boolean reasonable = pageDomain.getReasonable();
         PageHelper.startPage(pageNum, pageSize, orderBy).setReasonable(reasonable);
     }
+    public static void startPage(Integer pageSize) {
+        PageDomain pageDomain = TableSupport.buildPageRequest();
+        Integer pageNum = pageDomain.getPageNum();
+        String orderBy = SqlUtil.escapeOrderBySql(pageDomain.getOrderBy());
+        Boolean reasonable = pageDomain.getReasonable();
+        PageHelper.startPage(pageNum, pageSize, orderBy).setReasonable(reasonable);
+    }
 
-    /**
-     * 清理分页的线程变量
-     */
+        /**
+         * 清理分页的线程变量
+         */
     public static void clearPage()
     {
         PageHelper.clearPage();
