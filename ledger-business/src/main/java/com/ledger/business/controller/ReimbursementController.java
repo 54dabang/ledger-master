@@ -180,7 +180,7 @@ public class ReimbursementController extends BaseController {
                     if (startEnglish) {
                         param.setUserName(n);
                     } else {
-                        param.setUserName(n);
+                        param.setNickName(n);
                     }
                 });
 
