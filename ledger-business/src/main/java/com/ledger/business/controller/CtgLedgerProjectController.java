@@ -6,17 +6,21 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 import com.github.pagehelper.PageInfo;
+import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import com.ledger.business.domain.CtgLedgerProjectUser;
+import com.ledger.business.service.ICtgLedgerProjectExpenseDetailService;
 import com.ledger.business.service.ICtgLedgerProjectUserService;
 import com.ledger.business.util.InitConstant;
 import com.ledger.business.vo.CtgLedgerProjectVo;
 import com.ledger.common.utils.SecurityUtils;
+import com.ledger.common.utils.StringUtils;
 import com.ledger.system.service.ISysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import com.ledger.common.annotation.Log;
 import com.ledger.common.core.controller.BaseController;
@@ -43,6 +47,8 @@ public class CtgLedgerProjectController extends BaseController {
     private ISysUserService userService;
     @Autowired
     private ICtgLedgerProjectUserService projectUserService;
+    @Autowired
+    private ICtgLedgerProjectExpenseDetailService iCtgLedgerProjectExpenseDetailService;
 
     /**
      * 查询项目管理列表
@@ -141,6 +147,15 @@ public class CtgLedgerProjectController extends BaseController {
     @DeleteMapping("/{ids}")
     @ApiOperation("删除项目")
     public AjaxResult remove(@PathVariable Long[] ids) {
+        for(Long id : ids){
+            CtgLedgerProjectExpenseDetail queryParam = new CtgLedgerProjectExpenseDetail();
+            queryParam.setLedgerProjectId(id);
+            List<CtgLedgerProjectExpenseDetail> selectCtgLedgerProjectExpenseDetailList = iCtgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(queryParam);
+            if(!CollectionUtils.isEmpty(selectCtgLedgerProjectExpenseDetailList)){
+                CtgLedgerProject project= ctgLedgerProjectService.selectCtgLedgerProjectById(id);
+                return error(String.format("项目《%s》存在报销明细，无法删除！",project.getProjectName()));
+            }
+        }
         return toAjax(ctgLedgerProjectService.deleteCtgLedgerProjectByIds(ids));
     }
 }
