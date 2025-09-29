@@ -2,7 +2,10 @@ package com.ledger.common.core.controller;
 
 import java.beans.PropertyEditorSupport;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.WebDataBinder;
@@ -133,6 +136,8 @@ public class BaseController
     {
         return AjaxResult.success(data);
     }
+
+
 
     /**
      * 返回失败消息

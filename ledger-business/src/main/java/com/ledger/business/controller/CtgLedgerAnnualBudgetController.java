@@ -1,13 +1,18 @@
 package com.ledger.business.controller;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import com.ledger.business.service.ICtgLedgerProjectExpenseDetailService;
+import com.ledger.business.service.ICtgLedgerProjectService;
 import com.ledger.business.service.IReimbursementService;
 import com.ledger.business.util.LedgerExcelUtil;
+import com.ledger.common.core.domain.model.LoginUser;
 import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.StringUtils;
 import io.swagger.annotations.Api;
@@ -49,6 +54,9 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     private ICtgLedgerProjectExpenseDetailService projectExpenseDetailService;
     @Autowired
     private IReimbursementService reimbursementService;
+
+    @Autowired
+    private ICtgLedgerProjectService ctgLedgerProjectService;
 
 
     /**
@@ -210,6 +218,27 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
             log.error("导出项目支出明细台账失败：{}", e.getMessage(), e);
             throw new RuntimeException("导出项目支出明细台账失败，请稍后重试！");
         }
+    }
+    /**
+     * 根据项目ID查询项目支出明细列表
+     */
+    @ApiOperation("根据项目ID查询项目支出明细列表")
+    @ApiImplicitParam(name = "projectId", value = "项目ID", required = true, dataType = "Long", paramType = "query")
+    @PreAuthorize("@ss.hasPermi('business:expense:list')")
+    @GetMapping("/selectProjectExpenseDetail")
+    public AjaxResult selectCtgLedgerProjectExpenseDetail(@RequestParam(required = true) Long projectId){
+        // 获取当前年份
+        Integer year = java.time.LocalDate.now().getYear();
+        CtgLedgerProject ctgLedgerProject = ctgLedgerProjectService.selectCtgLedgerProjectById(projectId);
+        // 根据项目ID和年份查询支出明细列表
+        List<CtgLedgerProjectExpenseDetail> list = projectExpenseDetailService.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
+        Map<String,Object> dataDetail = new HashMap<String,Object>();
+        LoginUser user =  SecurityUtils.getLoginUserWithoutEpx();
+        dataDetail.put("当前登录用户的基本信息",user);
+        dataDetail.put("当前项目的报销数据",list);
+        dataDetail.put("当前项目信息",ctgLedgerProject);
+
+        return success(dataDetail);
     }
 
 
