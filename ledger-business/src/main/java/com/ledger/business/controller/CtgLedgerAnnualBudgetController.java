@@ -8,10 +8,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
-import com.ledger.business.service.ICtgLedgerProjectExpenseDetailService;
-import com.ledger.business.service.ICtgLedgerProjectService;
-import com.ledger.business.service.IReimbursementService;
+import com.ledger.business.service.*;
 import com.ledger.business.util.LedgerExcelUtil;
+import com.ledger.business.vo.CtgLedgerProjectVo;
 import com.ledger.common.constant.HttpStatus;
 import com.ledger.common.core.domain.model.LoginUser;
 import com.ledger.common.utils.SecurityUtils;
@@ -33,7 +32,6 @@ import com.ledger.common.core.controller.BaseController;
 import com.ledger.common.core.domain.AjaxResult;
 import com.ledger.common.enums.BusinessType;
 import com.ledger.business.domain.CtgLedgerAnnualBudget;
-import com.ledger.business.service.ICtgLedgerAnnualBudgetService;
 import com.ledger.common.utils.poi.ExcelUtil;
 import com.ledger.common.core.page.TableDataInfo;
 import org.springframework.web.multipart.MultipartFile;
@@ -58,6 +56,8 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
 
     @Autowired
     private ICtgLedgerProjectService ctgLedgerProjectService;
+    @Autowired
+    private ICtgLedgerProjectUserService projectUserService;
 
 
     /**
@@ -223,7 +223,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     /**
      * 根据项目ID查询项目支出明细列表
      */
-    @ApiOperation("根据项目ID查询项目支出明细列表")
+    @ApiOperation("在智能对话中获取项目信息以及用户基本信息")
     @ApiImplicitParam(name = "projectId", value = "项目ID", required = true, dataType = "Long", paramType = "query")
     @PreAuthorize("@ss.hasPermi('business:expense:list')")
     @GetMapping("/selectProjectExpenseDetail")
@@ -236,13 +236,14 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
         if (!isMember) {
             return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("用户:%s，不是项目：《%s》 成员，请联系项目管理员添加！", SecurityUtils.getUsername(), ctgLedgerProject.getProjectName()));
         }
+        CtgLedgerProjectVo ctgLedgerProjectVo = projectUserService.toCtgLedgerProjectVo(ctgLedgerProject);
         // 根据项目ID和年份查询支出明细列表
         List<CtgLedgerProjectExpenseDetail> list = projectExpenseDetailService.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
         Map<String,Object> dataDetail = new HashMap<String,Object>();
         LoginUser user =  SecurityUtils.getLoginUserWithoutEpx();
         dataDetail.put("当前登录用户的基本信息",user);
         dataDetail.put("当前项目的报销数据",list);
-        dataDetail.put("当前项目信息",ctgLedgerProject);
+        dataDetail.put("当前项目信息",ctgLedgerProjectVo);
 
         return success(dataDetail);
     }
