@@ -108,14 +108,21 @@ public class ReimbursementServiceImpl implements IReimbursementService {
     @Override
     public boolean isHandlerProjectMember(ReimbursementDTO reimbursementDTO, CtgLedgerProject ctgLedgerProject) {
 
-        SysUser user = userMapper.selectUserByUserName(reimbursementDTO.getHandler().getLoginName());
-        boolean isMember = projectUserService.isProjectUser(ctgLedgerProject.getId(), user.getUserId());
-        boolean isProjectManager = reimbursementDTO.getHandler().getLoginName().trim().equals(ctgLedgerProject.getProjectManagerLoginName().trim());
-        if(!isMember && !isProjectManager) {
+       return  isProjectMember(reimbursementDTO.getHandler().getLoginName(),ctgLedgerProject);
+    }
+
+    @Override
+    public boolean isProjectMember(String loginName, CtgLedgerProject ctgLedgerProject) {
+        // 复用已有逻辑：检查用户是否为项目成员或项目经理
+        SysUser user = userMapper.selectUserByUserName(loginName);
+        if (user == null) {
             return false;
         }
-        return true;
+        boolean isMember = projectUserService.isProjectUser(ctgLedgerProject.getId(), user.getUserId());
+        boolean isProjectManager = loginName.trim().equals(ctgLedgerProject.getProjectManagerLoginName().trim());
+        return isMember || isProjectManager;
     }
+
 
     @Override
     public boolean hasPermission(Long projectId, Long userId) {

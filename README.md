@@ -6,5 +6,5 @@ mvn clean package -Dmaven.test.skip=true
 
 ### 请求token示例
 ~~~curl
-http://localhost:3020/chat/share?shareId=8fymqruveg60zv93drc1n6np&projectId=10&token=eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImxvZ2luX3VzZXJfa2V5IjoiMzlkNWQwMmMtMzliNC00NWRmLWI4NWYtNWQ2ODg2OTlhODI3In0.wRgcV26nr_0YEAfRMrZxkUcaEOjRi8W-M--xdZDabSYJ42GiXbUglj5x00ex4br9HMPoE7VpK5oafHLBQASChg
+ http://localhost:3020/chat/share?shareId=8fymqruveg60zv93drc1n6np&projectId=10&token=Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJsaXVfY2hhbzEwIiwibG9naW5fdXNlcl9rZXkiOiJjMjMzNjg3ZC03MDc3LTRlNTItOGIxMy1iNDE4MGE2ZGEzNGMifQ.GF1A4mpfkk4zn0MZLel2GK9-F58Lax7ycN_QCp_TnRA4mT8XVTnK1RRpxhkt01-mwNgW0o40hU9PpL-6DAal2Q
 ~~~

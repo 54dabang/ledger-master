@@ -12,6 +12,7 @@ import com.ledger.business.service.ICtgLedgerProjectExpenseDetailService;
 import com.ledger.business.service.ICtgLedgerProjectService;
 import com.ledger.business.service.IReimbursementService;
 import com.ledger.business.util.LedgerExcelUtil;
+import com.ledger.common.constant.HttpStatus;
 import com.ledger.common.core.domain.model.LoginUser;
 import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.StringUtils;
@@ -230,6 +231,11 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
         // 获取当前年份
         Integer year = java.time.LocalDate.now().getYear();
         CtgLedgerProject ctgLedgerProject = ctgLedgerProjectService.selectCtgLedgerProjectById(projectId);
+        //检测用户是否是项目成员
+        boolean isMember = reimbursementService.isProjectMember(SecurityUtils.getUsername(), ctgLedgerProject);
+        if (!isMember) {
+            return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("用户:%s，不是项目：《%s》 成员，请联系项目管理员添加！", SecurityUtils.getUsername(), ctgLedgerProject.getProjectName()));
+        }
         // 根据项目ID和年份查询支出明细列表
         List<CtgLedgerProjectExpenseDetail> list = projectExpenseDetailService.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
         Map<String,Object> dataDetail = new HashMap<String,Object>();
