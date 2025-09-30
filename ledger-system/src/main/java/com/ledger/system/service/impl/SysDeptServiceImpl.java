@@ -74,6 +74,9 @@ public class SysDeptServiceImpl implements ISysDeptService
                     .distinct()  // 去重
                     .collect(Collectors.toList());  // 收集为 List
             List<SysDept> ancestors = this.deptMapper.selectDepts(ancestorsIdList);
+            for(SysDept d : ancestors){
+                d.setHasChild(hasChildByDeptId(d.getDeptId()));
+            }
             ancestors = ancestors.stream().filter(a-> Objects.nonNull(a)).collect(Collectors.toList());
             depts.addAll(ancestors);
         }
@@ -344,6 +347,12 @@ public class SysDeptServiceImpl implements ISysDeptService
                 tlist.add(n);
             }
         }
+        // 按照orderNum升序排序tlist，如果orderNum为空则设置为最大值
+        tlist.sort(Comparator.comparing(
+                SysDept::getOrderNum,
+                Comparator.nullsLast(Comparator.naturalOrder())
+        ));
+
         return tlist;
     }
 
