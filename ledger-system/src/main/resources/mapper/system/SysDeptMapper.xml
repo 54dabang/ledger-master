@@ -24,6 +24,7 @@
 		<result property="depFullPath" column="dep_full_path" />
 		<!-- 修复：添加缺失的bimDeptId字段映射 -->
 		<result property="bimDeptId" column="bim_dept_id" />
+		<result property="bimImmutableDeptId" column="bim_immutable_dept_id" />
 	</resultMap>
 	<select id="selectDepts" parameterType="java.util.List" resultMap="SysDeptResult">
 		<include refid="selectDeptVo"/>
@@ -36,8 +37,7 @@
 	<sql id="selectDeptVo">
 		select d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader, d.phone, d.email, d.status, d.del_flag,
 		d.create_by, d.create_time, d.dep_full_name, d.dep_full_path,
-		<!-- 修复：添加缺失的bim_dept_id字段 -->
-		d.bim_dept_id
+		d.bim_dept_id, d.bim_immutable_dept_id
 		from sys_dept d
 	</sql>
 
@@ -85,6 +85,7 @@
 		select d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader, d.phone, d.email, d.status,
 		<!-- 修复：添加缺失的bim_dept_id字段 -->
 		d.bim_dept_id,
+		d.bim_immutable_dept_id,
 		(select dept_name from sys_dept where dept_id = d.parent_id) parent_name,
 		d.dep_full_name, d.dep_full_path
 		from sys_dept d
@@ -128,6 +129,7 @@
 		<if test="depFullPath != null and depFullPath != ''">dep_full_path,</if>
 		<!-- 修复：添加缺失的bim_dept_id字段处理 -->
 		<if test="bimDeptId != null and bimDeptId != ''">bim_dept_id,</if>
+		<if test="bimImmutableDeptId != null and bimImmutableDeptId != ''">bim_immutable_dept_id,</if>
 		<if test="createBy != null and createBy != ''">create_by,</if>
 		create_time
 		)values(
@@ -144,6 +146,7 @@
 		<if test="depFullPath != null and depFullPath != ''">#{depFullPath},</if>
 		<!-- 修复：添加缺失的bim_dept_id字段处理 -->
 		<if test="bimDeptId != null and bimDeptId != ''">#{bimDeptId},</if>
+		<if test="bimImmutableDeptId != null and bimImmutableDeptId != ''">#{bimImmutableDeptId},</if>
 		<if test="createBy != null and createBy != ''">#{createBy},</if>
 		sysdate()
 		)
@@ -164,6 +167,7 @@
 			<if test="depFullPath != null and depFullPath != ''">dep_full_path = #{depFullPath},</if>
 			<!-- 修复：添加缺失的bim_dept_id字段处理 -->
 			<if test="bimDeptId != null and bimDeptId != ''">bim_dept_id = #{bimDeptId},</if>
+			<if test="bimImmutableDeptId != null and bimImmutableDeptId != ''">bim_immutable_dept_id = #{bimImmutableDeptId},</if>
 			<if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
 			update_time = sysdate()
 		</set>

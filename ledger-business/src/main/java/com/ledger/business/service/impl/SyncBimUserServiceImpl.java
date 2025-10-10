@@ -521,10 +521,10 @@ public class SyncBimUserServiceImpl implements SyncBimUserService {
                     .filter(org -> org.getId() != null && !org.getId().isEmpty())
                     .collect(Collectors.toMap(BimOrg::getId, bimOrg -> bimOrg, (existing, replacement) -> existing));
 
-            // 创建SysDept映射：SysDept.bimDeptId -> SysDept (用于根据bimOrg.id查找已存在的部门)
+            // 创建SysDept映射：SysDept.bimImmutableDeptId -> SysDept (用于根据bimOrg.id查找已存在的部门)
             Map<String, SysDept> bimDeptIdToSysDeptMap = existingDeptList.stream()
                     .filter(dept -> dept.getBimDeptId() != null && !dept.getBimDeptId().isEmpty())
-                    .collect(Collectors.toMap(SysDept::getBimDeptId, dept -> dept, (existing, replacement) -> existing));
+                    .collect(Collectors.toMap(SysDept::getBimImmutableDeptId, dept -> dept, (existing, replacement) -> existing));
 
             int insertCount = 0;
             int updateCount = 0;
@@ -541,7 +541,7 @@ public class SyncBimUserServiceImpl implements SyncBimUserService {
                         "0".equals(bimOrg.getDepPid()) || !bimOrgIdMap.containsKey(bimOrg.getDepPid())) {
 
                     // 根据bimOrg.id查找已存在的SysDept
-                    SysDept sysDept = bimDeptIdToSysDeptMap.get(bimOrg.getId());
+                    SysDept sysDept = bimDeptIdToSysDeptMap.get(bimOrg.getDepId());
 
                     if (sysDept == null) {
                         // 新增部门
@@ -589,7 +589,7 @@ public class SyncBimUserServiceImpl implements SyncBimUserService {
                             bimOrgIdToSysDeptIdMap.containsKey(bimOrg.getDepPid())) {
 
                         // 根据bimOrg.id查找已存在的SysDept
-                        SysDept sysDept = bimDeptIdToSysDeptMap.get(bimOrg.getId());
+                        SysDept sysDept = bimDeptIdToSysDeptMap.get(bimOrg.getDepId());
 
                         Long parentId = bimOrgIdToSysDeptIdMap.get(bimOrg.getDepPid());
 
@@ -717,6 +717,7 @@ public class SyncBimUserServiceImpl implements SyncBimUserService {
         changed |= updateField(sysDept::getDepFullName, sysDept::setDepFullName, bimOrg.getDepFullName());
         changed |= updateField(sysDept::getDepFullPath, sysDept::setDepFullPath, bimOrg.getDepFullPath());
         changed |= updateField(sysDept::getBimDeptId, sysDept::setBimDeptId, bimOrg.getId());
+        changed |= updateField(sysDept::getBimImmutableDeptId, sysDept::setBimImmutableDeptId, bimOrg.getDepId());
 
 
         // 7. 处理状态信息

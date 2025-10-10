@@ -3,6 +3,11 @@ package com.ledger.web.controller.system;
 import java.util.List;
 
 import com.ledger.common.core.redis.RedisCache;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,11 +31,12 @@ import com.ledger.system.service.ISysDeptService;
 
 /**
  * 部门信息
- * 
+ *
  * @author ledger
  */
 @RestController
 @RequestMapping("/system/dept")
+@Api(tags = "部门管理接口")
 public class SysDeptController extends BaseController
 {
     @Autowired
@@ -43,18 +49,20 @@ public class SysDeptController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:dept:list')")
     @GetMapping("/list")
+    @ApiOperation("获取部门列表")
+    @ApiImplicitParam(name = "dept", value = "部门信息", dataType = "SysDept", paramType = "query")
     public AjaxResult list(SysDept dept) {
         List<SysDept> depts = deptService.selectDeptList(dept);
         return success(depts);
     }
-
-
 
     /**
      * 查询部门列表（排除节点）
      */
     @PreAuthorize("@ss.hasPermi('system:dept:list')")
     @GetMapping("/list/exclude/{deptId}")
+    @ApiOperation("查询部门列表（排除节点）")
+    @ApiImplicitParam(name = "deptId", value = "部门ID", dataType = "Long", paramType = "path")
     public AjaxResult excludeChild(@PathVariable(value = "deptId", required = false) Long deptId)
     {
         List<SysDept> depts = deptService.selectDeptList(new SysDept());
@@ -67,6 +75,8 @@ public class SysDeptController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:dept:query')")
     @GetMapping(value = "/{deptId}")
+    @ApiOperation("根据部门编号获取详细信息")
+    @ApiImplicitParam(name = "deptId", value = "部门ID", required = true, dataType = "Long", paramType = "path")
     public AjaxResult getInfo(@PathVariable Long deptId)
     {
         deptService.checkDeptDataScope(deptId);
@@ -79,6 +89,8 @@ public class SysDeptController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:dept:add')")
     @Log(title = "部门管理", businessType = BusinessType.INSERT)
     @PostMapping
+    @ApiOperation("新增部门")
+    @ApiParam(name = "dept", value = "部门信息", required = true)
     public AjaxResult add(@Validated @RequestBody SysDept dept)
     {
         if (!deptService.checkDeptNameUnique(dept))
@@ -97,6 +109,8 @@ public class SysDeptController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:dept:edit')")
     @Log(title = "部门管理", businessType = BusinessType.UPDATE)
     @PutMapping
+    @ApiOperation("修改部门")
+    @ApiParam(name = "dept", value = "部门信息", required = true)
     public AjaxResult edit(@Validated @RequestBody SysDept dept)
     {
         Long deptId = dept.getDeptId();
@@ -125,6 +139,8 @@ public class SysDeptController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:dept:remove')")
     @Log(title = "部门管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{deptId}")
+    @ApiOperation("删除部门")
+    @ApiImplicitParam(name = "deptId", value = "部门ID", required = true, dataType = "Long", paramType = "path")
     public AjaxResult remove(@PathVariable Long deptId)
     {
         if (deptService.hasChildByDeptId(deptId))

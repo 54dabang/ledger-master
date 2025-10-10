@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.ledger.common.core.domain.TreeSelect;
 import com.ledger.common.core.redis.RedisCache;
 import com.ledger.system.AdminService;
+import com.ledger.system.domain.SysPost;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -102,26 +104,52 @@ public class SysUserController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('system:user:query')")
     @GetMapping(value = {"/", "/{userId}"})
+    @ApiOperation("获取用户信息")
     public AjaxResult getInfo(@PathVariable(value = "userId", required = false) Long userId) {
         AjaxResult ajax = AjaxResult.success();
         if (StringUtils.isNotNull(userId)) {
             userService.checkUserDataScope(userId);
             SysUser sysUser = userService.selectUserById(userId);
             ajax.put(AjaxResult.DATA_TAG, sysUser);
-            ajax.put("postIds", postService.selectPostListByUserId(userId));
-            ajax.put("roleIds", sysUser.getRoles().stream().map(SysRole::getRoleId).collect(Collectors.toList()));
-
+            //ajax.put("postIds", postService.selectPostListByUserId(userId));
+            List<Long> postIds = postService.selectPostListByUserId(userId);
+            List<SysPost> posts = postIds.stream().filter(id->id !=null).map(postId->postService.selectPostById(postId)).collect(Collectors.toList());
+            ajax.put("posts",posts);
+            List<Long> roleIds = sysUser.getRoles().stream().map(SysRole::getRoleId).collect(Collectors.toList());
+            List<SysRole> roles = roleIds.stream().filter(id->id !=null).map(roleId->roleService.selectRoleById(roleId)).collect(Collectors.toList());
+            ajax.put("roles", roles);
             if (sysUser.getDeptId() != null) {
                 SysDept dept = deptService.selectDeptById(sysUser.getDeptId());
                 ajax.put("dept", dept);
             }
         }
-        List<SysRole> roles = roleService.selectRoleAll();
-        // ajax.put("roles", AdminService.isAdmin(userId) ? roles : roles.stream().filter(r -> !r.isAdmin()).collect(Collectors.toList()));
-        ajax.put("roles", roles);
-        ajax.put("posts", postService.selectPostAll());
+
         return ajax;
     }
+
+    /**
+     * 获取所有角色列表
+     */
+
+    @GetMapping("/allRoles")
+    @ApiOperation("获取所有角色列表")
+    public AjaxResult getAllRoles() {
+        List<SysRole> roles = roleService.selectRoleAll();
+        return success(roles);
+    }
+
+    /**
+     * 获取所有岗位列表
+     */
+
+    @GetMapping("/allPosts")
+    @ApiOperation("获取所有岗位列表")
+    public AjaxResult getAllPosts() {
+        List<SysPost> posts = postService.selectPostAll();
+        return success(posts);
+    }
+
+
 
     /**
      * 新增用户

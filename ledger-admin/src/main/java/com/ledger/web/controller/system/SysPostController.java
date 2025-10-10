@@ -2,6 +2,12 @@ package com.ledger.web.controller.system;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -24,11 +30,12 @@ import com.ledger.system.service.ISysPostService;
 
 /**
  * 岗位信息操作处理
- * 
+ *
  * @author ledger
  */
 @RestController
 @RequestMapping("/system/post")
+@Api(tags = "岗位管理接口")
 public class SysPostController extends BaseController
 {
     @Autowired
@@ -39,16 +46,20 @@ public class SysPostController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:post:list')")
     @GetMapping("/list")
+    @ApiOperation("获取岗位列表")
+    @ApiImplicitParam(name = "post", value = "岗位信息", dataType = "SysPost", paramType = "query")
     public TableDataInfo list(SysPost post)
     {
         startPage();
         List<SysPost> list = postService.selectPostList(post);
         return getDataTable(list);
     }
-    
+
     @Log(title = "岗位管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:post:export')")
     @PostMapping("/export")
+    @ApiOperation("导出岗位列表")
+    @ApiImplicitParam(name = "post", value = "岗位信息", dataType = "SysPost", paramType = "query")
     public void export(HttpServletResponse response, SysPost post)
     {
         List<SysPost> list = postService.selectPostList(post);
@@ -61,6 +72,8 @@ public class SysPostController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:post:query')")
     @GetMapping(value = "/{postId}")
+    @ApiOperation("根据岗位编号获取详细信息")
+    @ApiImplicitParam(name = "postId", value = "岗位ID", required = true, dataType = "Long", paramType = "path")
     public AjaxResult getInfo(@PathVariable Long postId)
     {
         return success(postService.selectPostById(postId));
@@ -72,6 +85,8 @@ public class SysPostController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:post:add')")
     @Log(title = "岗位管理", businessType = BusinessType.INSERT)
     @PostMapping
+    @ApiOperation("新增岗位")
+    @ApiParam(name = "post", value = "岗位信息", required = true)
     public AjaxResult add(@Validated @RequestBody SysPost post)
     {
         if (!postService.checkPostNameUnique(post))
@@ -92,6 +107,8 @@ public class SysPostController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:post:edit')")
     @Log(title = "岗位管理", businessType = BusinessType.UPDATE)
     @PutMapping
+    @ApiOperation("修改岗位")
+    @ApiParam(name = "post", value = "岗位信息", required = true)
     public AjaxResult edit(@Validated @RequestBody SysPost post)
     {
         if (!postService.checkPostNameUnique(post))
@@ -112,6 +129,8 @@ public class SysPostController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:post:remove')")
     @Log(title = "岗位管理", businessType = BusinessType.DELETE)
     @DeleteMapping("/{postIds}")
+    @ApiOperation("删除岗位")
+    @ApiImplicitParam(name = "postIds", value = "岗位ID数组", required = true, dataType = "Long", paramType = "path")
     public AjaxResult remove(@PathVariable Long[] postIds)
     {
         return toAjax(postService.deletePostByIds(postIds));
@@ -121,6 +140,7 @@ public class SysPostController extends BaseController
      * 获取岗位选择框列表
      */
     @GetMapping("/optionselect")
+    @ApiOperation("获取岗位选择框列表")
     public AjaxResult optionselect()
     {
         List<SysPost> posts = postService.selectPostAll();

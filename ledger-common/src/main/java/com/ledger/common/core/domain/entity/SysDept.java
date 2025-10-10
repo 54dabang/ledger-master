@@ -24,7 +24,16 @@ public class SysDept extends BaseEntity {
      */
     private Long deptId;
 
+    /**
+     * bimOrg.id
+     */
     private String bimDeptId;
+
+    /**
+     * bimOrg.dep_id
+     */
+
+    private String bimImmutableDeptId;
 
     /**
      * 父部门ID
@@ -118,6 +127,13 @@ public class SysDept extends BaseEntity {
         this.ancestors = ancestors;
     }
 
+    public String getBimImmutableDeptId() {
+        return bimImmutableDeptId;
+    }
+
+    public void setBimImmutableDeptId(String bimImmutableDeptId) {
+        this.bimImmutableDeptId = bimImmutableDeptId;
+    }
 
     @NotBlank(message = "部门名称不能为空")
     @Size(min = 0, max = 30, message = "部门名称长度不能超过30个字符")
@@ -249,6 +265,8 @@ public class SysDept extends BaseEntity {
                 .append("updateTime", getUpdateTime())
                 .append("depFullPath", getDepFullPath())
                 .append("depFullName", getDepFullName())
+                .append("bimDeptId",getBimDeptId())
+                .append("bimImmutableDeptId",getBimImmutableDeptId())
                 .toString();
     }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ledger.system.AdminService;
+import io.swagger.annotations.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -40,6 +41,7 @@ import com.ledger.system.service.ISysUserService;
  */
 @RestController
 @RequestMapping("/system/role")
+@Api(tags = "角色管理接口")
 public class SysRoleController extends BaseController
 {
     @Autowired
@@ -59,6 +61,8 @@ public class SysRoleController extends BaseController
 
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/list")
+    @ApiOperation("查询角色列表")
+    @ApiImplicitParam(name = "role", value = "角色信息", dataType = "SysRole", paramType = "query")
     public TableDataInfo list(SysRole role)
     {
         startPage();
@@ -81,6 +85,8 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:query')")
     @GetMapping(value = "/{roleId}")
+    @ApiOperation("根据角色编号获取详细信息")
+    @ApiImplicitParam(name = "roleId", value = "角色ID", required = true, dataType = "Long", paramType = "path")
     public AjaxResult getInfo(@PathVariable Long roleId)
     {
         roleService.checkRoleDataScope(roleId);
@@ -93,6 +99,8 @@ public class SysRoleController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:role:add')")
     @Log(title = "角色管理", businessType = BusinessType.INSERT)
     @PostMapping
+    @ApiOperation("新增角色")
+    @ApiParam(name = "role", value = "角色信息", required = true)
     public AjaxResult add(@Validated @RequestBody SysRole role)
     {
         if (!roleService.checkRoleNameUnique(role))
@@ -114,6 +122,8 @@ public class SysRoleController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping
+    @ApiOperation("修改保存角色")
+    @ApiParam(name = "role", value = "角色信息", required = true)
     public AjaxResult edit(@Validated @RequestBody SysRole role)
     {
         roleService.checkRoleAllowed(role);
@@ -149,6 +159,8 @@ public class SysRoleController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping("/dataScope")
+    @ApiOperation("修改保存数据权限")
+    @ApiParam(name = "role", value = "角色信息", required = true)
     public AjaxResult dataScope(@RequestBody SysRole role)
     {
         roleService.checkRoleAllowed(role);
@@ -162,6 +174,8 @@ public class SysRoleController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.UPDATE)
     @PutMapping("/changeStatus")
+    @ApiOperation("状态修改")
+    @ApiParam(name = "role", value = "角色信息", required = true)
     public AjaxResult changeStatus(@RequestBody SysRole role)
     {
         roleService.checkRoleAllowed(role);
@@ -186,6 +200,8 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:query')")
     @GetMapping("/optionselect")
+    @ApiOperation("删除角色")
+    @ApiImplicitParam(name = "roleIds", value = "角色ID数组", required = true, dataType = "Long", paramType = "path")
     public AjaxResult optionselect()
     {
         return success(roleService.selectRoleAll());
@@ -196,6 +212,8 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/authUser/allocatedList")
+    @ApiOperation("获取角色选择框列表")
+
     public TableDataInfo allocatedList(SysUser user)
     {
         startPage();
@@ -208,6 +226,7 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/authUser/unallocatedList")
+    @ApiOperation("查询未分配用户角色列表")
     public TableDataInfo unallocatedList(SysUser user)
     {
         startPage();
@@ -221,6 +240,8 @@ public class SysRoleController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.GRANT)
     @PutMapping("/authUser/cancel")
+    @ApiOperation("取消授权用户")
+    @ApiParam(name = "userRole", value = "用户角色信息", required = true)
     public AjaxResult cancelAuthUser(@RequestBody SysUserRole userRole)
     {
         return toAjax(roleService.deleteAuthUser(userRole));
@@ -232,6 +253,11 @@ public class SysRoleController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.GRANT)
     @PutMapping("/authUser/cancelAll")
+    @ApiOperation("批量取消授权用户")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "roleId", value = "角色ID", required = true, dataType = "Long", paramType = "query"),
+            @ApiImplicitParam(name = "userIds", value = "用户ID数组", required = true, dataType = "Long", paramType = "query")
+    })
     public AjaxResult cancelAuthUserAll(Long roleId, Long[] userIds)
     {
         return toAjax(roleService.deleteAuthUsers(roleId, userIds));
@@ -243,6 +269,11 @@ public class SysRoleController extends BaseController
     @PreAuthorize("@ss.hasPermi('system:role:edit')")
     @Log(title = "角色管理", businessType = BusinessType.GRANT)
     @PutMapping("/authUser/selectAll")
+    @ApiOperation("批量选择用户授权")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "roleId", value = "角色ID", required = true, dataType = "Long", paramType = "query"),
+            @ApiImplicitParam(name = "userIds", value = "用户ID数组", required = true, dataType = "Long", paramType = "query")
+    })
     public AjaxResult selectAuthUserAll(Long roleId, Long[] userIds)
     {
         roleService.checkRoleDataScope(roleId);
@@ -254,6 +285,8 @@ public class SysRoleController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('system:role:query')")
     @GetMapping(value = "/deptTree/{roleId}")
+    @ApiOperation("获取对应角色部门树列表")
+    @ApiImplicitParam(name = "roleId", value = "角色ID", required = true, dataType = "Long", paramType = "path")
     public AjaxResult deptTree(@PathVariable("roleId") Long roleId)
     {
         AjaxResult ajax = AjaxResult.success();
