@@ -113,13 +113,8 @@ public class SysUserController extends BaseController {
             userService.checkUserDataScope(userId);
             SysUser sysUser = userService.selectUserById(userId);
             ajax.put(AjaxResult.DATA_TAG, sysUser);
-            //ajax.put("postIds", postService.selectPostListByUserId(userId));
-            List<Long> postIds = postService.selectPostListByUserId(userId);
-            List<SysPost> posts = postIds.stream().filter(id->id !=null).map(postId->postService.selectPostById(postId)).collect(Collectors.toList());
-            ajax.put("belongedPosts",posts);
-            List<Long> roleIds = sysUser.getRoles().stream().map(SysRole::getRoleId).collect(Collectors.toList());
-            List<SysRole> roles = roleIds.stream().filter(id->id !=null).map(roleId->roleService.selectRoleById(roleId)).collect(Collectors.toList());
-            ajax.put("belongedRoles", roles);
+            ajax.put("postIds", postService.selectPostListByUserId(userId));
+            ajax.put("roleIds", sysUser.getRoles().stream().map(SysRole::getRoleId).collect(Collectors.toList()));
             if (sysUser.getDeptId() != null) {
                 SysDept dept = deptService.selectDeptById(sysUser.getDeptId());
                 ajax.put("dept", dept);
@@ -127,7 +122,6 @@ public class SysUserController extends BaseController {
         }
         List<SysRole> roles = roleService.selectRoleAll();
         ajax.put("roles", roles);
-
         List<SysPost> posts = redisCache.getCacheObject(CACHE_KEY_ALL_POSTS);
         if(CollectionUtils.isEmpty(posts)){
             posts = postService.selectPostAll();
