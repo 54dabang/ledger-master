@@ -64,6 +64,8 @@ public class SysUserController extends BaseController {
     private RedisCache redisCache;
 
 
+
+
     /**
      * 获取用户列表
      */
@@ -110,7 +112,7 @@ public class SysUserController extends BaseController {
     public AjaxResult getInfo(@PathVariable(value = "userId", required = false) Long userId) {
         AjaxResult ajax = AjaxResult.success();
         if (StringUtils.isNotNull(userId)) {
-            userService.checkUserDataScope(userId);
+           //userService.checkUserDataScope(userId);
             SysUser sysUser = userService.selectUserById(userId);
             ajax.put(AjaxResult.DATA_TAG, sysUser);
             ajax.put("postIds", postService.selectPostListByUserId(userId));
