@@ -3,6 +3,7 @@ package com.ledger.web.controller.system;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ledger.common.core.redis.RedisCache;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -40,6 +41,8 @@ public class SysPostController extends BaseController
 {
     @Autowired
     private ISysPostService postService;
+    @Autowired
+    private RedisCache redisCache;
 
     /**
      * 获取岗位列表
@@ -98,6 +101,7 @@ public class SysPostController extends BaseController
             return error("新增岗位'" + post.getPostName() + "'失败，岗位编码已存在");
         }
         post.setCreateBy(getUsername());
+        redisCache.deleteObject(CACHE_KEY_ALL_POSTS);
         return toAjax(postService.insertPost(post));
     }
 
@@ -120,6 +124,7 @@ public class SysPostController extends BaseController
             return error("修改岗位'" + post.getPostName() + "'失败，岗位编码已存在");
         }
         post.setUpdateBy(getUsername());
+        redisCache.deleteObject(CACHE_KEY_ALL_POSTS);
         return toAjax(postService.updatePost(post));
     }
 
@@ -133,7 +138,9 @@ public class SysPostController extends BaseController
     @ApiImplicitParam(name = "postIds", value = "岗位ID数组", required = true, dataType = "Long", paramType = "path")
     public AjaxResult remove(@PathVariable Long[] postIds)
     {
-        return toAjax(postService.deletePostByIds(postIds));
+        int count = postService.deletePostByIds(postIds);
+        redisCache.deleteObject(CACHE_KEY_ALL_POSTS);
+        return toAjax(count);
     }
 
     /**

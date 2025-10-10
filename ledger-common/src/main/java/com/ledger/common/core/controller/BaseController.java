@@ -35,6 +35,10 @@ public class BaseController
 {
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     public static final String CACHE_KEY_DEPT_PREFIX = "dept:tree:";
+
+    public static final String CACHE_KEY_ALL_ROLES = "all:roles";
+
+    public static final String CACHE_KEY_ALL_POSTS = "all:posts";
     /**
      * 将前台传递过来的日期格式的字符串，自动转化为Date类型
      */

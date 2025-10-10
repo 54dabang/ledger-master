@@ -13,6 +13,7 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,6 +62,7 @@ public class SysUserController extends BaseController {
     private ISysPostService postService;
     @Autowired
     private RedisCache redisCache;
+
 
     /**
      * 获取用户列表
@@ -114,15 +116,24 @@ public class SysUserController extends BaseController {
             //ajax.put("postIds", postService.selectPostListByUserId(userId));
             List<Long> postIds = postService.selectPostListByUserId(userId);
             List<SysPost> posts = postIds.stream().filter(id->id !=null).map(postId->postService.selectPostById(postId)).collect(Collectors.toList());
-            ajax.put("posts",posts);
+            ajax.put("belongedPosts",posts);
             List<Long> roleIds = sysUser.getRoles().stream().map(SysRole::getRoleId).collect(Collectors.toList());
             List<SysRole> roles = roleIds.stream().filter(id->id !=null).map(roleId->roleService.selectRoleById(roleId)).collect(Collectors.toList());
-            ajax.put("roles", roles);
+            ajax.put("belongedRoles", roles);
             if (sysUser.getDeptId() != null) {
                 SysDept dept = deptService.selectDeptById(sysUser.getDeptId());
                 ajax.put("dept", dept);
             }
         }
+        List<SysRole> roles = roleService.selectRoleAll();
+        ajax.put("roles", roles);
+
+        List<SysPost> posts = redisCache.getCacheObject(CACHE_KEY_ALL_POSTS);
+        if(CollectionUtils.isEmpty(posts)){
+            posts = postService.selectPostAll();
+            redisCache.setCacheObject(CACHE_KEY_ALL_POSTS,posts,24,TimeUnit.HOURS);
+        }
+        ajax.put("posts", posts);
 
         return ajax;
     }
