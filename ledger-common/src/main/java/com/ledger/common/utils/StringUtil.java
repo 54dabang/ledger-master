@@ -1,4 +1,4 @@
-package com.ledger.business.util;
+package com.ledger.common.utils;
 
 public class StringUtil {
 

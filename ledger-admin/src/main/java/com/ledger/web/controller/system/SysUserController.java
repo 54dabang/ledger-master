@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.ledger.common.core.domain.TreeSelect;
 import com.ledger.common.core.redis.RedisCache;
+import com.ledger.common.utils.StringUtil;
 import com.ledger.system.AdminService;
 import com.ledger.system.domain.SysPost;
 import com.ledger.system.mapper.SysRoleMapper;
@@ -76,6 +77,13 @@ public class SysUserController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo list(SysUser user) {
         startPage();
+        if(StringUtils.isNotNull(user.getUserName())){
+            if(!StringUtil.startWithEnglish(user.getUserName())){
+                user.setNickName(user.getUserName());
+                user.setUserName(null);
+
+            }
+        }
         List<SysUser> list = userService.selectUserList(user);
         return getDataTable(list);
     }
