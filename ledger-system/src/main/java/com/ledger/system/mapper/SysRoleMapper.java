@@ -34,6 +34,16 @@ public interface SysRoleMapper
     public List<SysRole> selectRoleAll();
 
     /**
+     * 不经过任何查询
+     *
+     * @return 角色列表
+     */
+    public List<SysRole> selectAllRoles();
+
+
+
+
+    /**
      * 根据用户ID获取角色选择框列表
      * 
      * @param userId 用户ID

@@ -9,6 +9,7 @@ import com.ledger.common.core.domain.TreeSelect;
 import com.ledger.common.core.redis.RedisCache;
 import com.ledger.system.AdminService;
 import com.ledger.system.domain.SysPost;
+import com.ledger.system.mapper.SysRoleMapper;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,8 @@ public class SysUserController extends BaseController {
     private ISysPostService postService;
     @Autowired
     private RedisCache redisCache;
+    @Autowired
+    private SysRoleMapper roleMapper;
 
 
 
@@ -122,7 +125,7 @@ public class SysUserController extends BaseController {
                 ajax.put("dept", dept);
             }
         }
-        List<SysRole> roles = roleService.selectRoleAll();
+        List<SysRole> roles = roleService.selectAllRoles();
         ajax.put("roles", roles);
         List<SysPost> posts = redisCache.getCacheObject(CACHE_KEY_ALL_POSTS);
         if(CollectionUtils.isEmpty(posts)){

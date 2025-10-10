@@ -64,7 +64,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	<select id="selectRoleAll" resultMap="SysRoleResult">
 		<include refid="selectRoleVo"/>
 	</select>
-	
+
+	<select id="selectAllRoles" resultMap="SysRoleResult">
+		select role_id, role_name, role_key, role_sort, data_scope, menu_check_strictly, dept_check_strictly,
+			   status, del_flag, create_time, remark
+		from sys_role
+		where del_flag = '0'
+	</select>
+
 	<select id="selectRoleListByUserId" parameterType="Long" resultType="Long">
 		select r.role_id
         from sys_role r
@@ -72,7 +79,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	        left join sys_user u on u.user_id = ur.user_id
 	    where u.user_id = #{userId}
 	</select>
-	
+
 	<select id="selectRoleById" parameterType="Long" resultMap="SysRoleResult">
 		<include refid="selectRoleVo"/>
 		where r.role_id = #{roleId}
