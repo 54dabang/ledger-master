@@ -171,9 +171,16 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
         List<SysUser> members = projectUserList.stream().map(p -> p.getSysUserId()).map(uid -> userService.selectUserById(uid))
                 .filter(u->Objects.nonNull(u))
                 .collect(Collectors.toList());
-        List<SysUserVo> sysUserVoList = members.stream().map(m -> SysUserVo.builder().userId(m.getUserId())
-                .userName(m.getUserName())
-                .nickName(m.getNickName()).build()).collect(Collectors.toList());
+
+        List<SysUserVo> sysUserVoList = members.stream().map(m ->
+                        SysUserVo.builder().userId(m.getUserId())
+                                .userName(m.getUserName())
+                                .nickName(m.getNickName())
+                                .deptName(Optional.ofNullable(m.getDept()).map(d -> d.getDeptName()).orElse("")) // 添加部门名称
+                                .deptId(Optional.ofNullable(m.getDept()).map(d -> d.getDeptId()).orElse(null))   // 添加部门ID
+                                .build())
+                .collect(Collectors.toList());
+
         SysUser user = userService.selectUserByUserName(project.getProjectManagerLoginName());
 
         SysUserVo manager = null;
