@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 
 import com.ledger.business.domain.CtgLedgerAnnualBudget;
 import com.ledger.business.domain.CtgLedgerProject;
+import com.ledger.business.dto.ProjectUsersDTO;
 import com.ledger.business.service.ICtgLedgerAnnualBudgetService;
 import com.ledger.business.service.ICtgLedgerProjectService;
 import com.ledger.business.vo.CtgLedgerProjectVo;
@@ -149,11 +150,16 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
     }
 
     @Override
-    public List<CtgLedgerProjectUser> batchInsertCtgLedgerProjectUser(List<CtgLedgerProjectUser> ctgLedgerProjectUsers) {
-        Long projectId = Optional.ofNullable(ctgLedgerProjectUsers).map(pus -> pus.get(0)).map(p -> p.getCtgLedgerProjectId()).orElse(null);
+    public List<CtgLedgerProjectUser> batchInsertCtgLedgerProjectUser(ProjectUsersDTO projectUsersDTO) {
+        Long projectId = projectUsersDTO.getProjectId();
         ctgLedgerProjectUserMapper.deleteByCtgLedgerProjectIdInt(projectId);
-        List<CtgLedgerProjectUser> ctgLedgerProjectUsersIndb = new ArrayList<>(ctgLedgerProjectUsers.size());
-        for (CtgLedgerProjectUser u : ctgLedgerProjectUsers) {
+        List<CtgLedgerProjectUser> ctgLedgerProjectUsersIndb = new ArrayList<>();
+        for (Long sysUserId : projectUsersDTO.getProjectUserIdList()) {
+            CtgLedgerProjectUser u = new CtgLedgerProjectUser();
+            u.setCtgLedgerProjectId(projectId);
+            u.setSysUserId(sysUserId);
+            u.setCreateBy(SecurityUtils.getUsername());
+            u.setCreateTime(DateUtils.getNowDate());
             insertCtgLedgerProjectUser(u);
             ctgLedgerProjectUsersIndb.add(u);
         }

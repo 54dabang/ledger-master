@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.domain.CtgLedgerProjectUser;
+import com.ledger.business.dto.ProjectUsersDTO;
 import com.ledger.business.vo.CtgLedgerProjectVo;
 
 /**
@@ -78,7 +79,7 @@ public interface ICtgLedgerProjectUserService
 
     boolean isProjectMember(Long projectId,String loginName);
 
-    public List<CtgLedgerProjectUser> batchInsertCtgLedgerProjectUser( List<CtgLedgerProjectUser>  ctgLedgerProjectUsers);
+    public List<CtgLedgerProjectUser> batchInsertCtgLedgerProjectUser(ProjectUsersDTO projectUsersDTO);
 
     CtgLedgerProjectVo toCtgLedgerProjectVo(CtgLedgerProject project);
 }

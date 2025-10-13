@@ -5,6 +5,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 
 import com.ledger.business.domain.CtgLedgerProject;
+import com.ledger.business.dto.ProjectUsersDTO;
 import com.ledger.business.service.ICtgLedgerProjectService;
 import com.ledger.common.constant.Constants;
 import com.ledger.common.constant.HttpStatus;
@@ -105,18 +106,15 @@ public class CtgLedgerProjectUserController extends BaseController {
     @PreAuthorize("@ss.hasPermi('business:user:add')")
     @Log(title = "添加项目用户", businessType = BusinessType.INSERT)
     @PostMapping
-    public AjaxResult batchAdd(@ApiParam("项目用户对象列表") @RequestBody List<CtgLedgerProjectUser> ctgLedgerProjectUsers) {
-        if (CollectionUtils.isEmpty(ctgLedgerProjectUsers)) {
-            AjaxResult.error(HttpStatus.BAD_REQUEST, String.format("数据不能为空！"));
-        }
-        CtgLedgerProjectUser ctgLedgerProjectUser = ctgLedgerProjectUsers.get(0);
-        Long projectId = ctgLedgerProjectUser.getCtgLedgerProjectId();
+    public AjaxResult batchAdd(@ApiParam("项目用户对象列表") @RequestBody ProjectUsersDTO projectUsersDTO) {
+
+        Long projectId = projectUsersDTO.getProjectId();
         boolean isProjectManager = ctgLedgerProjectUserService.isProjectManager(projectId, SecurityUtils.getUsername());
         boolean isAdmin = permissionService.hasRole(Constants.SUPER_ADMIN);
         if (!isProjectManager && !isAdmin) {
             AjaxResult.error(HttpStatus.UNAUTHORIZED, String.format("只有项目管理员或系统管理员可添加用户！"));
         }
-        List<CtgLedgerProjectUser> projectUsers = ctgLedgerProjectUserService.batchInsertCtgLedgerProjectUser(ctgLedgerProjectUsers);
+        List<CtgLedgerProjectUser> projectUsers = ctgLedgerProjectUserService.batchInsertCtgLedgerProjectUser(projectUsersDTO);
         return success(projectUsers);
     }
 
