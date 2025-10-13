@@ -225,7 +225,8 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
                         ctgLedgerAnnualBudget.getServiceCost(),
                         ctgLedgerAnnualBudget.getExpertConsultFee(),
                         ctgLedgerAnnualBudget.getMgmtFee(),
-                        ctgLedgerAnnualBudget.getTaxFee()
+                        ctgLedgerAnnualBudget.getTaxFee(),
+                        ctgLedgerAnnualBudget.getContractAmount()
                 )
                 .filter(Objects::nonNull) // 过滤掉null值
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
