@@ -11,10 +11,12 @@ import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import com.ledger.business.service.*;
 import com.ledger.business.util.LedgerExcelUtil;
 import com.ledger.business.vo.CtgLedgerProjectVo;
+import com.ledger.common.constant.Constants;
 import com.ledger.common.constant.HttpStatus;
 import com.ledger.common.core.domain.model.LoginUser;
 import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.StringUtils;
+import com.ledger.framework.web.service.PermissionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -53,11 +55,12 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     private ICtgLedgerProjectExpenseDetailService projectExpenseDetailService;
     @Autowired
     private IReimbursementService reimbursementService;
-
     @Autowired
     private ICtgLedgerProjectService ctgLedgerProjectService;
     @Autowired
     private ICtgLedgerProjectUserService projectUserService;
+    @Autowired
+    private PermissionService permissionService;
 
 
     /**
@@ -233,8 +236,9 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
         CtgLedgerProject ctgLedgerProject = ctgLedgerProjectService.selectCtgLedgerProjectById(projectId);
         //检测用户是否是项目成员
         boolean isMember = reimbursementService.isProjectMember(SecurityUtils.getUsername(), ctgLedgerProject);
-        if (!isMember) {
-            return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("用户:%s，不是项目：《%s》 成员，请联系项目管理员添加！", SecurityUtils.getUsername(), ctgLedgerProject.getProjectName()));
+        boolean isAdmin = permissionService.hasRole(Constants.SUPER_ADMIN);
+        if (!isMember && !isAdmin) {
+            return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("用户:%s，不是项目：《%s》 成员或者管理员角色，请联系项目管理员添加！", SecurityUtils.getUsername(), ctgLedgerProject.getProjectName()));
         }
         CtgLedgerProjectVo ctgLedgerProjectVo = projectUserService.toCtgLedgerProjectVo(ctgLedgerProject);
         // 根据项目ID和年份查询支出明细列表
