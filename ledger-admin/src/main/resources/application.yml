@@ -17,7 +17,7 @@ chatbot:
   config:
     - env: leixingbang
       useCase: legerRationalityAnalysis
-      url: http://localhost:3020/chat/share?shareId=lwfjchp53hqdbjtoombb0hlw
+      url: http://localhost:3020/chat/share?shareId=8fymqruveg60zv93drc1n6np
     - env: qinwei
       useCase: legerRationalityAnalysis
       url: http://localhost:3020/chat/share?shareId=lwfjchp53hqdbjtoombb0hlw
