@@ -13,6 +13,8 @@ ledger:
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
   env: leixingbang
+  #host: 192.168.0.100
+  host: localhost
 chatbot:
   config:
     - env: leixingbang
@@ -20,7 +22,7 @@ chatbot:
       url: http://localhost:3020/chat/share?shareId=8fymqruveg60zv93drc1n6np
     - env: qinwei
       useCase: legerRationalityAnalysis
-      url: http://localhost:3020/chat/share?shareId=lwfjchp53hqdbjtoombb0hlw
+      url: http://${ledger.host}:3020/chat/share?shareId=lwfjchp53hqdbjtoombb0hlw
 
 
 
@@ -79,7 +81,7 @@ spring:
   # redis 配置
   redis:
     # 地址
-    host: localhost
+    host: ${ledger.host}
     # 端口，默认为6379
     port: 6379
     # 数据库索引
