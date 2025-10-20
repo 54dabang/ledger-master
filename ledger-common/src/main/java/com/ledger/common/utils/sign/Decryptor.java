@@ -83,7 +83,7 @@ public class Decryptor {
     /* 与 Decryptor 中完全一致的 EVP_BytesToKey 实现 */
     /* ------ 简单自测 ------ */
     public static void main(String[] args) throws Exception {
-        String json = "{\"userId\":\"U123456\",\"amount\":1200.50,\"currency\":\"CNY\"}";
+        String json = "liu_jinling";
         String pwd = "Ledger^Y&U*I2026";
 
         String ct = encrypt(json, pwd);

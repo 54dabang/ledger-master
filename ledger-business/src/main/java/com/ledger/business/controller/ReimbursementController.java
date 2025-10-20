@@ -6,8 +6,10 @@ import com.ledger.business.config.LegerConfig;
 import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import com.ledger.business.dto.ReimbursementDTO;
+import com.ledger.business.dto.TokenValidDTO;
 import com.ledger.business.service.*;
 import com.ledger.business.util.InitConstant;
+import com.ledger.common.core.domain.model.LoginUser;
 import com.ledger.common.utils.StringUtil;
 import com.ledger.business.vo.ProjectExpenditureLedgerVo;
 import com.ledger.business.vo.SyncbackVo;
@@ -24,6 +26,7 @@ import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.sign.Decryptor;
 import com.ledger.framework.tools.RedisLock;
 import com.ledger.framework.web.service.SysLoginService;
+import com.ledger.framework.web.service.TokenService;
 import com.ledger.system.service.ISysUserService;
 import io.swagger.annotations.Api;
 
@@ -81,6 +84,8 @@ public class ReimbursementController extends BaseController {
 
     @Autowired
     private LegerConfig legerConfig;
+    @Autowired
+    private TokenService tokenService;
 
     @ApiOperation("同步台账基本数据信息")
     @RequestMapping(value = "/white/syncReimbursementData", method = RequestMethod.POST)
@@ -152,6 +157,58 @@ public class ReimbursementController extends BaseController {
             if (locked) {
                 redisLock.releaseLock(lockKey);
             }
+        }
+
+    }
+
+    @ApiOperation("登录获取token")
+    @RequestMapping(value = "/white/loadByEncryptData", method = RequestMethod.POST)
+    @Log(
+            title = "获取token",          // 模块名称
+            businessType = BusinessType.INSERT, // 业务类型（枚举）
+            operatorType = OperatorType.MANAGE, // 操作类别
+            isSaveRequestData = true,           // 保存请求参数
+            isSaveResponseData = false          // 保存返回结果
+    )
+    @ApiResponses({
+            @ApiResponse(code = 400, message = "获取token数据信息无效", response = AjaxResult.class)
+    })
+
+    public AjaxResult loadByEncryptData(@RequestBody String encryptData){
+        try {
+            String decryptStr = Decryptor.decrypt(encryptData, legerConfig.getSignPassword());
+            String token = sysLoginService.getTokenByLoginName(decryptStr);
+            return  AjaxResult.success(token);
+
+        } catch (Exception e) {
+            log.error("获取token信息无效！body:{}", encryptData, e);
+            return AjaxResult.error(HttpStatus.BAD_REQUEST, "获取token信息无效！");
+        }
+    }
+
+
+
+    @ApiOperation("校验token有效性")
+    @RequestMapping(value = "/white/checkTokenValid", method = RequestMethod.POST)
+    @Log(
+            title = "校验token有效性",          // 模块名称
+            businessType = BusinessType.OTHER, // 业务类型（枚举）
+            operatorType = OperatorType.MANAGE, // 操作类别
+            isSaveRequestData = true,           // 保存请求参数
+            isSaveResponseData = false          // 保存返回结果
+    )
+    public AjaxResult checkTokenValid(@RequestBody String token){
+        TokenValidDTO invalidDTO = TokenValidDTO.builder().tokenValid(false).build();
+        TokenValidDTO validDTO = TokenValidDTO.builder().tokenValid(true).build();
+        try{
+            LoginUser loginUser = tokenService.getLoginUserByToken(token);
+            if(Objects.isNull(loginUser)){
+                return AjaxResult.success(invalidDTO);
+            }
+            return AjaxResult.success(validDTO);
+        }catch (Exception e){
+            log.error("token无效，token:{}",token);
+            return AjaxResult.success(invalidDTO);
         }
 
     }
