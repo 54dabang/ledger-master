@@ -1,5 +1,6 @@
 package com.ledger.business.controller;
 
+import com.alibaba.fastjson2.JSON;
 import com.ledger.business.config.ChatbotConfig;
 import com.ledger.business.config.LegerConfig;
 import com.ledger.business.domain.CtgLedgerProject;
@@ -20,6 +21,7 @@ import com.ledger.common.enums.BusinessType;
 import com.ledger.common.enums.OperatorType;
 import com.ledger.common.utils.PageUtils;
 import com.ledger.common.utils.SecurityUtils;
+import com.ledger.common.utils.sign.Decryptor;
 import com.ledger.framework.tools.RedisLock;
 import com.ledger.framework.web.service.SysLoginService;
 import com.ledger.system.service.ISysUserService;
@@ -93,8 +95,18 @@ public class ReimbursementController extends BaseController {
             @ApiResponse(code = 701, message = "同步数据已经存在", response = AjaxResult.class),
             @ApiResponse(code = 702, message = "同步项目缺失", response = AjaxResult.class)
     })
-    public AjaxResult syncReimbursementData(@RequestBody ReimbursementDTO reimbursementDTO) {
-        log.info("reimbursementDTO:{}", reimbursementDTO);
+    public AjaxResult syncReimbursementData(@RequestBody String body) {
+        ReimbursementDTO reimbursementDTO = null;
+        try {
+            String decryptStr = Decryptor.decrypt(body, legerConfig.getSignPassword());
+            reimbursementDTO = JSON.parseObject(decryptStr, ReimbursementDTO.class);
+            log.info("reimbursementDTO:{}", reimbursementDTO);
+        } catch (Exception e) {
+            log.error("加密信息无效！body:{}", body, e);
+            return AjaxResult.error(HttpStatus.BAD_REQUEST, "加密信息无效！");
+        }
+
+
         String reimbursementProjectName = reimbursementDTO.getRsiContractData().getProjectName();
         CtgLedgerProject ctgLedgerProject = projectService.selectCtgLedgerProjectByProjectName(reimbursementProjectName);
         //数据检查
@@ -164,7 +176,7 @@ public class ReimbursementController extends BaseController {
     @ApiOperation("获取所有有效用户")
     @RequestMapping(value = "/loadValidUsers", method = RequestMethod.GET)
     @PreAuthorize("@ss.hasPermi('business:expenditure:userlist')")
-    public AjaxResult loadValidUsers(@RequestParam(name = "name",required = false) String name,@RequestParam(name = "pageSize",required = false,defaultValue = "200") Integer pageSize) {
+    public AjaxResult loadValidUsers(@RequestParam(name = "name", required = false) String name, @RequestParam(name = "pageSize", required = false, defaultValue = "200") Integer pageSize) {
         PageUtils.startPage(pageSize);
         SysUser param = new SysUser();
         param.setDelFlag(InitConstant.USER_EXIST_FLAG);

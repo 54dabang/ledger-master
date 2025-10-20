@@ -9,4 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class LegerConfig {
     @Value("${ledger.env}")
     private String env;
+
+    @Value("${ledger.sign.password}")
+    private String signPassword;
 }
