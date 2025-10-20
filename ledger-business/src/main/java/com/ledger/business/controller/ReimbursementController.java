@@ -124,7 +124,7 @@ public class ReimbursementController extends BaseController {
         }
 
         //如果用户不存在，则在数据库中创建、新增用户以及对应的部门，避免脏数据出现
-        reimbursementService.syncUsersReimbursementData(reimbursementDTO);
+       // reimbursementService.syncUsersReimbursementData(reimbursementDTO);
 
         //检测用户是否是项目成员
         boolean isMember = reimbursementService.isHandlerProjectMember(reimbursementDTO, ctgLedgerProject);
