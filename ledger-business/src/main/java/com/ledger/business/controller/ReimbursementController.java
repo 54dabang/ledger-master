@@ -1,10 +1,12 @@
 package com.ledger.business.controller;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.ledger.business.config.ChatbotConfig;
 import com.ledger.business.config.LegerConfig;
 import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
+import com.ledger.business.dto.EncryptDTO;
 import com.ledger.business.dto.ReimbursementDTO;
 import com.ledger.business.dto.TokenValidDTO;
 import com.ledger.business.service.*;
@@ -100,14 +102,14 @@ public class ReimbursementController extends BaseController {
             @ApiResponse(code = 701, message = "同步数据已经存在", response = AjaxResult.class),
             @ApiResponse(code = 702, message = "同步项目缺失", response = AjaxResult.class)
     })
-    public AjaxResult syncReimbursementData(@RequestBody String body) {
+    public AjaxResult syncReimbursementData(@RequestBody EncryptDTO encryptDTO) {
         ReimbursementDTO reimbursementDTO = null;
         try {
-            String decryptStr = Decryptor.decrypt(body, legerConfig.getSignPassword());
+            String decryptStr = Decryptor.decrypt(encryptDTO.getData(), legerConfig.getSignPassword());
             reimbursementDTO = JSON.parseObject(decryptStr, ReimbursementDTO.class);
-            log.info("reimbursementDTO:{}", reimbursementDTO);
+            log.info("reimbursementDTO:{}", JSON.toJSON(reimbursementDTO));
         } catch (Exception e) {
-            log.error("加密信息无效！body:{}", body, e);
+            log.error("加密信息无效！body:{}", encryptDTO, e);
             return AjaxResult.error(HttpStatus.BAD_REQUEST, "加密信息无效！");
         }
 
