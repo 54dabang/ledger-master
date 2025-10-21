@@ -176,14 +176,14 @@ public class ReimbursementController extends BaseController {
             @ApiResponse(code = 400, message = "获取token数据信息无效", response = AjaxResult.class)
     })
 
-    public AjaxResult loadByEncryptData(@RequestBody String encryptData){
+    public AjaxResult loadByEncryptData(@RequestBody EncryptDTO encryptDTO){
         try {
-            String decryptStr = Decryptor.decrypt(encryptData, legerConfig.getSignPassword());
+            String decryptStr = Decryptor.decrypt(encryptDTO.getData(), legerConfig.getSignPassword());
             String token = sysLoginService.getTokenByLoginName(decryptStr);
             return  AjaxResult.success(token);
 
         } catch (Exception e) {
-            log.error("获取token信息无效！body:{}", encryptData, e);
+            log.error("获取token信息无效！body:{}", encryptDTO, e);
             return AjaxResult.error(HttpStatus.BAD_REQUEST, "获取token信息无效！");
         }
     }
@@ -199,17 +199,17 @@ public class ReimbursementController extends BaseController {
             isSaveRequestData = true,           // 保存请求参数
             isSaveResponseData = false          // 保存返回结果
     )
-    public AjaxResult checkTokenValid(@RequestBody String token){
+    public AjaxResult checkTokenValid(@RequestBody  EncryptDTO encryptDTO){
         TokenValidDTO invalidDTO = TokenValidDTO.builder().tokenValid(false).build();
         TokenValidDTO validDTO = TokenValidDTO.builder().tokenValid(true).build();
         try{
-            LoginUser loginUser = tokenService.getLoginUserByToken(token);
+            LoginUser loginUser = tokenService.getLoginUserByToken(encryptDTO.getData());
             if(Objects.isNull(loginUser)){
                 return AjaxResult.success(invalidDTO);
             }
             return AjaxResult.success(validDTO);
         }catch (Exception e){
-            log.error("token无效，token:{}",token);
+            log.error("token无效，token:{}",encryptDTO);
             return AjaxResult.success(invalidDTO);
         }
 
