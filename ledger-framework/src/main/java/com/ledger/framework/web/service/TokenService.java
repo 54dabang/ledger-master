@@ -110,6 +110,13 @@ public class TokenService {
      */
     public String createToken(LoginUser loginUser) {
         String token = IdUtils.fastUUID();
+        return createToken(loginUser,token);
+    }
+    public String createToken(LoginUser loginUser,String token) {
+        if(StringUtils.isEmpty(token)){
+            token = IdUtils.fastUUID();
+        }
+
         loginUser.setToken(token);
         setUserAgent(loginUser);
         refreshToken(loginUser);
@@ -119,6 +126,7 @@ public class TokenService {
         claims.put(Constants.JWT_USERNAME, loginUser.getUsername());
         return createToken(claims);
     }
+
 
     /**
      * 验证令牌有效期，相差不足20分钟，自动刷新缓存

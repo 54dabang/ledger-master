@@ -66,7 +66,7 @@ spring:
     # 国际化资源文件路径
     basename: i18n/messages
   profiles:
-    active: druid
+    active: prod
   # 文件上传
   servlet:
     multipart:
@@ -74,6 +74,67 @@ spring:
       max-file-size: 10MB
       # 设置总上传的文件大小
       max-request-size: 20MB
+
+  datasource:
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      # 主库数据源
+      master:
+        url: jdbc:mysql://${ledger.host}:3306/ledger?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+        username: root
+        password: oneapimmysql
+        driverClassName: com.mysql.cj.jdbc.Driver
+      # 从库数据源
+      slave:
+        # 从数据源开关/默认关闭
+        enabled: true
+        url: jdbc:mysql://${ledger.host}:3306/manager?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+        username: root
+        password: oneapimmysql
+        driverClassName: com.mysql.cj.jdbc.Driver
+      # 初始连接数
+      initialSize: 5
+      # 最小连接池数量
+      minIdle: 10
+      # 最大连接池数量
+      maxActive: 20
+      # 配置获取连接等待超时的时间
+      maxWait: 60000
+      # 配置连接超时时间
+      connectTimeout: 30000
+      # 配置网络超时时间
+      socketTimeout: 60000
+      # 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      timeBetweenEvictionRunsMillis: 60000
+      # 配置一个连接在池中最小生存的时间，单位是毫秒
+      minEvictableIdleTimeMillis: 300000
+      # 配置一个连接在池中最大生存的时间，单位是毫秒
+      maxEvictableIdleTimeMillis: 900000
+      # 配置检测连接是否有效
+      validationQuery: SELECT 1 FROM DUAL
+      testWhileIdle: true
+      testOnBorrow: false
+      testOnReturn: false
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        # 设置白名单，不填则允许所有访问
+        allow:
+        url-pattern: /druid/*
+        # 控制台管理用户名和密码
+        login-username: ledger
+        login-password: 123456
+      filter:
+        stat:
+          enabled: true
+          # 慢SQL记录
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true
   # 服务模块
   devtools:
     restart:
@@ -154,3 +215,8 @@ oauth2:
 url:
   oauth2SsoUrl: http://127.0.0.1:1024/oauth2SsoLogin
   mySystemHomeUrl: http://127.0.0.1:1024/index
+# 数据源配置
+#打包部署
+#cd /Users/leixingbang/sanxiaProject/ledger-master && mvn clean install -U
+#启动命令
+#java -jar ledger-admin.jar --spring.profiles.active=prod
