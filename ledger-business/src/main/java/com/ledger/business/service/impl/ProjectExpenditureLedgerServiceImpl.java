@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,6 +38,9 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
     public ProjectExpenditureLedgerVo getProjectExpenditureLedgerVo(Long projectId, Integer year, Long reimbursementSequenceNo) {
         CtgLedgerProject ctgLedgerProject = ctgLedgerProjectMapper.selectCtgLedgerProjectById(projectId);
         CtgLedgerAnnualBudget annualBudget = CtgLedgerAnnualBudgetMapper.selectByProjectIdAndYear(projectId, year);
+        if(Objects.isNull(annualBudget)){
+            throw new IllegalStateException("年度预算不存在，请联系管理员新增！");
+        }
         List<CtgLedgerProjectExpenseDetail> detailList = ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
         detailList = detailList.stream().filter(d -> d.getReimbursementSequenceNo() <= reimbursementSequenceNo).collect(Collectors.toList());
         //项目经费执行情况

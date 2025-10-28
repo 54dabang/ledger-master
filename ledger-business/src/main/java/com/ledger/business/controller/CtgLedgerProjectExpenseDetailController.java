@@ -1,5 +1,6 @@
 package com.ledger.business.controller;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
@@ -7,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.models.auth.In;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -90,7 +92,18 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController {
     @Log(title = "项目支出明细", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail) {
-        return toAjax(ctgLedgerProjectExpenseDetailService.insertCtgLedgerProjectExpenseDetail(ctgLedgerProjectExpenseDetail));
+        int count = 0;
+        try {
+            count = ctgLedgerProjectExpenseDetailService.insertCtgLedgerProjectExpenseDetail(ctgLedgerProjectExpenseDetail);
+        } catch (Exception ex) {
+            for (Throwable cur = ex; cur != null; cur = cur.getCause()) {
+                if (cur instanceof SQLIntegrityConstraintViolationException) {
+                    return error("报销单号重复！NO:" + ctgLedgerProjectExpenseDetail.getExpenseReportNumber());
+                }
+            }
+            throw ex;
+        }
+        return toAjax(count);
     }
 
     /**
