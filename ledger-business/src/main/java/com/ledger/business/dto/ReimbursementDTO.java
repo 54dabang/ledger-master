@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ReimbursementDTO {
     @ApiModelProperty(value = "唯一编号，用于后续的去重")
-    private Long id;
+    private Long billCode;
 
     @ApiModelProperty(value = "报销标题")
     private String title;

@@ -120,13 +120,13 @@ public class ReimbursementController extends BaseController {
         if (Objects.isNull(ctgLedgerProject)) {
             return AjaxResult.error(HttpStatus.DATA_PROJECT_MISSING, String.format("同步的项目信息不存在，请联系管理员添加项目:%s", reimbursementProjectName));
         }
-        CtgLedgerProjectExpenseDetail expenseDetail = expenseDetailService.selectCtgLedgerProjectExpenseDetailByExpenseReportNumber(reimbursementDTO.getId());
+        /*CtgLedgerProjectExpenseDetail expenseDetail = expenseDetailService.selectCtgLedgerProjectExpenseDetailByExpenseReportNumber(reimbursementDTO.getBillCode());
         if (Objects.nonNull(expenseDetail)) {
-            return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("该笔费用明细已经同步过！费用编号:%s", reimbursementDTO.getId()));
-        }
+            return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("该笔费用明细已经同步过！费用编号:%s", reimbursementDTO.getBillCode()));
+        }*/
 
         //如果用户不存在，则在数据库中创建、新增用户以及对应的部门，避免脏数据出现
-       // reimbursementService.syncUsersReimbursementData(reimbursementDTO);
+        // reimbursementService.syncUsersReimbursementData(reimbursementDTO);
 
         //检测用户是否是项目成员
         boolean isMember = reimbursementService.isHandlerProjectMember(reimbursementDTO, ctgLedgerProject);
@@ -176,18 +176,17 @@ public class ReimbursementController extends BaseController {
             @ApiResponse(code = 400, message = "获取token数据信息无效", response = AjaxResult.class)
     })
 
-    public AjaxResult loadByEncryptData(@RequestBody EncryptDTO encryptDTO){
+    public AjaxResult loadByEncryptData(@RequestBody EncryptDTO encryptDTO) {
         try {
             String decryptStr = Decryptor.decrypt(encryptDTO.getData(), legerConfig.getSignPassword());
             String token = sysLoginService.getTokenByLoginName(decryptStr);
-            return  AjaxResult.success(token);
+            return AjaxResult.success(token);
 
         } catch (Exception e) {
             log.error("获取token信息无效！body:{}", encryptDTO, e);
             return AjaxResult.error(HttpStatus.BAD_REQUEST, "获取token信息无效！");
         }
     }
-
 
 
     @ApiOperation("校验token有效性")
@@ -199,17 +198,17 @@ public class ReimbursementController extends BaseController {
             isSaveRequestData = true,           // 保存请求参数
             isSaveResponseData = false          // 保存返回结果
     )
-    public AjaxResult checkTokenValid(@RequestBody  EncryptDTO encryptDTO){
+    public AjaxResult checkTokenValid(@RequestBody EncryptDTO encryptDTO) {
         TokenValidDTO invalidDTO = TokenValidDTO.builder().tokenValid(false).build();
         TokenValidDTO validDTO = TokenValidDTO.builder().tokenValid(true).build();
-        try{
+        try {
             LoginUser loginUser = tokenService.getLoginUserByToken(encryptDTO.getData());
-            if(Objects.isNull(loginUser)){
+            if (Objects.isNull(loginUser)) {
                 return AjaxResult.success(invalidDTO);
             }
             return AjaxResult.success(validDTO);
-        }catch (Exception e){
-            log.error("token无效，token:{}",encryptDTO);
+        } catch (Exception e) {
+            log.error("token无效，token:{}", encryptDTO);
             return AjaxResult.success(invalidDTO);
         }
 

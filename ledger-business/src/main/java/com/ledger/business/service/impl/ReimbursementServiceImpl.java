@@ -56,31 +56,45 @@ public class ReimbursementServiceImpl implements IReimbursementService {
     @Autowired
     private PermissionService permissionService;
 
+
     @Override
     public Long syncReimbursementData(ReimbursementDTO reimbursementDTO, CtgLedgerProject ctgLedgerProject) {
 
         CtgLedgerProjectExpenseDetail maxSequenceNoReimbursement = projectExpenseDetailMapper
                 .selectCtgLedgerProjectExpenseDetailWithMaxReimbursementSequenceNoByProjectId(ctgLedgerProject.getId());
-        Long currentSequenceNo = Optional.ofNullable(maxSequenceNoReimbursement).map(d -> d.getReimbursementSequenceNo()).map(seq -> seq + 1).orElse(1L);
 
+        CtgLedgerProjectExpenseDetail expenseDetail = projectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailByExpenseReportNumber(reimbursementDTO.getBillCode());
+        Long currentSequenceNo = null;
+        boolean isNewData = false;
+        if (Objects.isNull(expenseDetail)) {
+            expenseDetail = new CtgLedgerProjectExpenseDetail();
+            currentSequenceNo = Optional.ofNullable(maxSequenceNoReimbursement).map(d -> d.getReimbursementSequenceNo()).map(seq -> seq + 1).orElse(1L);
+            expenseDetail.setReimbursementSequenceNo(currentSequenceNo);
+            isNewData = true;
+        } else {
+            currentSequenceNo = expenseDetail.getReimbursementSequenceNo();
+        }
 
-        CtgLedgerProjectExpenseDetail expenseDetail = new CtgLedgerProjectExpenseDetail();
-
-        expenseDetail.setYear(reimbursementDTO.getCreateTime().getYear()+1900);
-        expenseDetail.setExpenseReportNumber(reimbursementDTO.getId());
+        //设置同步属性值
+        expenseDetail.setYear(reimbursementDTO.getCreateTime().getYear() + 1900);
+        expenseDetail.setExpenseReportNumber(reimbursementDTO.getBillCode());
         expenseDetail.setFeeType(reimbursementDTO.getFeeType());
         expenseDetail.setSubjectName(reimbursementDTO.getSubjectName());
         expenseDetail.setRemark(reimbursementDTO.getTitle() + InitConstant.DATA_RESOURCE);
         expenseDetail.setAmount(reimbursementDTO.getTotalAmount());
         expenseDetail.setLedgerProjectId(ctgLedgerProject.getId());
-        expenseDetail.setExpenseReportNumber(reimbursementDTO.getId());
-        expenseDetail.setReimbursementSequenceNo(currentSequenceNo);
         expenseDetail.setReimburserName(reimbursementDTO.getHandler().getName());
         expenseDetail.setReimburserLoginName(reimbursementDTO.getHandler().getLoginName());
         expenseDetail.setCreateBy(reimbursementDTO.getHandler().getLoginName());
         expenseDetail.setCreateTime(DateUtils.getNowDate());
 
-        expenseDetailMapper.insertCtgLedgerProjectExpenseDetail(expenseDetail);
+        //新数据插入，否则执行更新
+        if (isNewData) {
+            expenseDetailMapper.insertCtgLedgerProjectExpenseDetail(expenseDetail);
+        } else {
+            expenseDetailMapper.updateCtgLedgerProjectExpenseDetail(expenseDetail);
+        }
+
         return currentSequenceNo;
     }
 
@@ -99,7 +113,7 @@ public class ReimbursementServiceImpl implements IReimbursementService {
             boolean isMember = projectUserService.isProjectUser(ctgLedgerProject.getId(), user.getUserId());
             boolean isProjectManager = claimantDTO.getUser().getLoginName().equals(ctgLedgerProject.getProjectManagerLoginName());
             if (!isMember && !isProjectManager) {
-                return  Pair.of(false, claimantDTO.getUser().getLoginName());
+                return Pair.of(false, claimantDTO.getUser().getLoginName());
             }
         }
         return Pair.of(true, "");
@@ -108,7 +122,7 @@ public class ReimbursementServiceImpl implements IReimbursementService {
     @Override
     public boolean isHandlerProjectMember(ReimbursementDTO reimbursementDTO, CtgLedgerProject ctgLedgerProject) {
 
-       return  isProjectMember(reimbursementDTO.getHandler().getLoginName(),ctgLedgerProject);
+        return isProjectMember(reimbursementDTO.getHandler().getLoginName(), ctgLedgerProject);
     }
 
     @Override
@@ -138,19 +152,19 @@ public class ReimbursementServiceImpl implements IReimbursementService {
 
     @Override
     public void checkPermisson(Long projectId, Long userId) {
-        if(permissionService.hasRole("admin")){
+        if (permissionService.hasRole("admin")) {
             return;
         }
-        if(!hasPermission(projectId,userId)){
-            throw new PermissionDeniedDataAccessException(String.format("您没有项目:%s对应的权限",projectId),null);
+        if (!hasPermission(projectId, userId)) {
+            throw new PermissionDeniedDataAccessException(String.format("您没有项目:%s对应的权限", projectId), null);
         }
     }
 
     private SysUser createSysUserIfAbsent(ClaimantDTO.UserDetail handler) {
-        if(Objects.isNull(handler)){
+        if (Objects.isNull(handler)) {
             return null;
         }
-        SysDept currentUserDept = createSysDeptIfAbsent(handler.getDepartment(),handler.getLoginName());
+        SysDept currentUserDept = createSysDeptIfAbsent(handler.getDepartment(), handler.getLoginName());
         SysUser user = buildByUserDetail(handler);
         SysUser dbUser = userMapper.checkUserNameUnique(user.getUserName());
         if (Objects.isNull(dbUser)) {
@@ -164,7 +178,7 @@ public class ReimbursementServiceImpl implements IReimbursementService {
     }
 
     private void createClaimantUsersIfAbsent(List<ClaimantDTO> claimantList) {
-        if(CollectionUtils.isEmpty(claimantList)){
+        if (CollectionUtils.isEmpty(claimantList)) {
             return;
         }
         for (ClaimantDTO claimantDTO : claimantList) {
@@ -172,8 +186,8 @@ public class ReimbursementServiceImpl implements IReimbursementService {
         }
     }
 
-    private SysDept createSysDeptIfAbsent(ClaimantDTO.Department department,String userName) {
-        SysDept sysDept = buildByDepartment(department,userName);
+    private SysDept createSysDeptIfAbsent(ClaimantDTO.Department department, String userName) {
+        SysDept sysDept = buildByDepartment(department, userName);
         if (sysDeptService.checkDeptNameUnique(sysDept)) {
             SysDept parentDept = sysDeptService.selectDeptById(sysDept.getParentId());
             //将祖先信息关联
@@ -187,7 +201,7 @@ public class ReimbursementServiceImpl implements IReimbursementService {
         }
     }
 
-    private SysDept buildByDepartment(ClaimantDTO.Department department,String userName) {
+    private SysDept buildByDepartment(ClaimantDTO.Department department, String userName) {
         SysDept sysDept = new SysDept();
         sysDept.setDeptName(department.getName());
         sysDept.setCreateBy(userName);
