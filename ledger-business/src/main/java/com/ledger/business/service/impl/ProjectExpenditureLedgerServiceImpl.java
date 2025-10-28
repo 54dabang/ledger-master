@@ -265,13 +265,15 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
      * @return
      */
     private BigDecimal buildOthersFee(ProjectExpenditureLedgerColumnVo col) {
-        BigDecimal othersFee = Stream.of(col.getMaterialCost(),
+        BigDecimal othersFee = Stream.of(
+                col.getMaterialCost(),
                 col.getTestProcFee(),
                 col.getFuelPowerCost(),
                 col.getPubDocIpFee(),
                 col.getTravelConfCoopFee(),
                 col.getLaborCost(),
-                col.getServiceCost()
+                col.getServiceCost(),
+                col.getExpertConsultFee()
         ).reduce(BigDecimal.ZERO, BigDecimal::add);
 
 
