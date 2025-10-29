@@ -43,6 +43,7 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
         }
         List<CtgLedgerProjectExpenseDetail> detailList = ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
         detailList = detailList.stream().filter(d -> d.getReimbursementSequenceNo() <= reimbursementSequenceNo).collect(Collectors.toList());
+
         //项目经费执行情况
         ProjectExpenditureLedgerColumnVo totalBudgetCol = convertToLedgerColumnVo(ctgLedgerProject);
         ProjectExpenditureLedgerColumnVo executedAmountCol = convertToExecutedAmountLedgerColumnVo(ctgLedgerProject);
@@ -52,17 +53,19 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
         ProjectExpenditureLedgerColumnVo annualBudgetCol = buildAnnualBudget(annualBudget);
 
         //历史所有支出
-        //将detailList转为按照expenseReportNumber 排序后的有序map
+        //将detailList转为按照reimbursementSequenceNo 排序后的有序map（按照值正排），key为reimbursementSequenceNo，value为为reimbursementSequenceNo相等的CtgLedgerProjectExpenseDetail列表，该列表按照CtgLedgerProjectExpenseDetail.createTime倒排
         LinkedHashMap<Long, List<CtgLedgerProjectExpenseDetail>> sortedCtgLedgerProjectExpenseDetailMap = detailList.stream()
                 .collect(Collectors.groupingBy(
-                        CtgLedgerProjectExpenseDetail::getExpenseReportNumber,
+                        CtgLedgerProjectExpenseDetail::getReimbursementSequenceNo,
                         LinkedHashMap::new,
                         Collectors.toList()))
                 .entrySet().stream()
                 .sorted(Map.Entry.comparingByKey())
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        Map.Entry::getValue,
+                        entry -> entry.getValue().stream()
+                                .sorted((d1, d2) -> d2.getCreateTime().compareTo(d1.getCreateTime()))
+                                .collect(Collectors.toList()),
                         (oldValue, newValue) -> oldValue,
                         LinkedHashMap::new));
         //累计支出经费
