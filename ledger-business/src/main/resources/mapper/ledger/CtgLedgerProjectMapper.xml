@@ -57,6 +57,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <where>  
             <if test="projectName != null  and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
             <if test="projectCode != null  and projectCode != ''"> and project_code like concat('%', #{projectCode}, '%')</if>
+            <!-- 添加keyword查询条件 -->
+            <if test="params.keyword != null and params.keyword != ''">
+                and (project_name like concat('%', #{params.keyword}, '%') OR project_code like concat('%', #{params.keyword}, '%'))
+            </if>
             <if test="extendProjectId != null "> and extend_project_id = #{extendProjectId}</if>
             <if test="equipPurchaseFee != null "> and equip_purchase_fee = #{equipPurchaseFee}</if>
             <if test="protoEquipFee != null "> and proto_equip_fee = #{protoEquipFee}</if>

@@ -56,7 +56,12 @@ public class CtgLedgerProjectController extends BaseController {
     @PreAuthorize("@ss.hasPermi('business:project:list')")
     @GetMapping("/list")
     @ApiOperation(value = "项目基本信息列表", notes = "根据条件查询项目基本信息列表，支持分页和条件查询")
-    public TableDataInfo list(CtgLedgerProject ctgLedgerProject, @ApiParam(value = "查询类型: manage-我管理的项目, participate-我参与的项目") @RequestParam(value = "type", required = false) String type) {
+    public TableDataInfo list(CtgLedgerProject ctgLedgerProject, @ApiParam(value = "查询类型: manage-我管理的项目, participate-我参与的项目") @RequestParam(value = "type", required = false) String type,
+                              @ApiParam("关键词搜索") @RequestParam(value = "keyword", required = false) String keyword) {
+        // 如果提供了keyword参数，则设置到params中
+        if (StringUtils.isNotEmpty(keyword)) {
+            ctgLedgerProject.getParams().put("keyword", keyword);
+        }
         if (InitConstant.PROJECT_QUERY_TYPE_MANAGE.equals(type)) {
             ctgLedgerProject.setProjectManagerLoginName(SecurityUtils.getUsername());
             startPage();
@@ -85,7 +90,12 @@ public class CtgLedgerProjectController extends BaseController {
     @GetMapping("/listAll")
     @ApiOperation(value = "项目的所有列表信息", notes = "根据条件查询项目基本信息列表，支持分页和条件查询（只有管理员有权限）")
     @PreAuthorize("@ss.hasRole('admin')")
-    public TableDataInfo listAll(CtgLedgerProject ctgLedgerProject) {
+    public TableDataInfo listAll(CtgLedgerProject ctgLedgerProject, 
+                                 @ApiParam("关键词搜索") @RequestParam(value = "keyword", required = false) String keyword) {
+        // 如果提供了keyword参数，则设置到params中
+        if (StringUtils.isNotEmpty(keyword)) {
+            ctgLedgerProject.getParams().put("keyword", keyword);
+        }
         startPage();
         List<CtgLedgerProject> list = ctgLedgerProjectService.selectCtgLedgerProjectList(ctgLedgerProject);
         List<CtgLedgerProjectVo> projectVoList = list.stream().map(p -> projectUserService.toCtgLedgerProjectVo(p)).collect(Collectors.toList());
