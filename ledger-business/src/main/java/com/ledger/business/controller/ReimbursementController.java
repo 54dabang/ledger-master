@@ -112,6 +112,9 @@ public class ReimbursementController extends BaseController {
             log.error("加密信息无效！body:{}", encryptDTO, e);
             return AjaxResult.error(HttpStatus.BAD_REQUEST, "加密信息无效！");
         }
+        if(!reimbursementDTO.checkDataValid()){
+            return AjaxResult.error(HttpStatus.BAD_REQUEST, String.format("同步数据信息不完整，请检查更新插件！"));
+        }
 
 
         String reimbursementProjectName = reimbursementDTO.getRsiContractData().getProjectName();
@@ -150,10 +153,10 @@ public class ReimbursementController extends BaseController {
                     .currentSequenceNo(currentSequenceNo)
                     .projectId(ctgLedgerProject.getId())
                     .build();
-            log.info("reimbursementDTO:{} sync success! syncbackVo：{}", reimbursementDTO, syncbackVo);
+            log.info("reimbursementDTO:{} sync success! syncbackVo：{}", JSON.toJSON(reimbursementDTO), syncbackVo);
             return AjaxResult.success(syncbackVo);
         } catch (Exception e) {
-            log.error("reimbursementDTO:{} sync failed!", reimbursementDTO, e);
+            log.error("reimbursementDTO:{} sync failed!",JSON.toJSON(reimbursementDTO), e);
             return AjaxResult.error(e.getMessage());
         } finally {
             if (locked) {

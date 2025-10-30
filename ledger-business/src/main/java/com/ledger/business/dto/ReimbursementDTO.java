@@ -64,5 +64,41 @@ public class ReimbursementDTO {
 
     }
 
-
+    /**
+     * 检查数据有效性
+     * @return 如果数据有效返回true，否则返回false
+     */
+    public boolean checkDataValid() {
+        // 检查billCode不能为空
+        if (billCode == null) {
+            return false;
+        }
+        
+        // 检查title不能为空且不能为null或空字符串
+        if (title == null || title.trim().isEmpty()) {
+            return false;
+        }
+        
+        // 检查totalAmount不能为空
+        if (totalAmount == null) {
+            return false;
+        }
+        
+        // 检查subjectName不能为空且不能为null或空字符串
+        if (subjectName == null || subjectName.trim().isEmpty()) {
+            return false;
+        }
+        
+        // 检查feeType不能为空且不能为null或空字符串
+        if (feeType == null || feeType.trim().isEmpty()) {
+            return false;
+        }
+        
+        // 检查handler不能为空
+        if (handler == null) {
+            return false;
+        }
+        
+        return true;
+    }
 }
