@@ -2,6 +2,7 @@ package com.ledger.business.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
@@ -135,6 +136,10 @@ public class CtgLedgerProjectController extends BaseController {
     @PostMapping
     @ApiOperation("新增项目")
     public AjaxResult add(@RequestBody CtgLedgerProject ctgLedgerProject) {
+        CtgLedgerProject project = ctgLedgerProjectService.selectCtgLedgerProjectByProjectName(ctgLedgerProject.getProjectName());
+        if(Objects.nonNull(project)){
+            return error(String.format("《%s》项目已经存在，不允许重复！",project.getProjectName()));
+        }
         return success(ctgLedgerProjectService.insertCtgLedgerProject(ctgLedgerProject));
     }
 

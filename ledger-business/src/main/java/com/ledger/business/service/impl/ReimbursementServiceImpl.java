@@ -10,6 +10,7 @@ import com.ledger.business.mapper.CtgLedgerProjectUserMapper;
 import com.ledger.business.service.ICtgLedgerProjectUserService;
 import com.ledger.business.service.IReimbursementService;
 import com.ledger.business.util.InitConstant;
+import com.ledger.business.util.StrUtil;
 import com.ledger.common.core.domain.entity.SysDept;
 import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.common.utils.DateUtils;
@@ -80,7 +81,7 @@ public class ReimbursementServiceImpl implements IReimbursementService {
         expenseDetail.setExpenseReportNumber(reimbursementDTO.getBillCode());
         expenseDetail.setFeeType(reimbursementDTO.getFeeType());
         expenseDetail.setSubjectName(reimbursementDTO.getSubjectName());
-        expenseDetail.setRemark(reimbursementDTO.getTitle() + InitConstant.DATA_RESOURCE);
+        expenseDetail.setRemark(StrUtil.buildRemark(expenseDetail));
         expenseDetail.setAmount(reimbursementDTO.getTotalAmount());
         expenseDetail.setLedgerProjectId(ctgLedgerProject.getId());
         expenseDetail.setReimburserName(reimbursementDTO.getHandler().getName());

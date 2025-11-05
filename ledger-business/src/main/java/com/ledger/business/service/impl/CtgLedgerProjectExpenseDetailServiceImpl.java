@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import com.ledger.business.domain.CtgLedgerAnnualBudget;
+import com.ledger.business.util.StrUtil;
 import com.ledger.common.utils.DateUtils;
 import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.StringUtils;
@@ -132,19 +133,21 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
         if (CollectionUtils.isEmpty(projectExpenseDetails)) {
             throw new RuntimeException("导入数据为空");
         }
+        List<CtgLedgerProjectExpenseDetail> dbDetailList = ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year.intValue());
         List<CtgLedgerProjectExpenseDetail> detailList = Lists.newArrayList();
         for (CtgLedgerProjectExpenseDetail detail : projectExpenseDetails) {
             if (StringUtils.isEmpty(detail.getSubjectName())) {
                 break;
             }
-            detail.setRemark(detail.getRemarkTemp());
+            detail.setRemark(StringUtils.isEmpty(detail.getRemarkTemp()) ? StrUtil.buildRemark(detail) : detail.getRemarkTemp());
             detail.setLedgerProjectId(projectId);
             detail.setYear(year.intValue());
-            if (Objects.nonNull(detail.getId())) {
+            if (isExistInDb(detail, dbDetailList)) {
                 detail.setUpdateBy(SecurityUtils.getUsername());
                 detail.setUpdateTime(DateUtils.getNowDate());
                 updateCtgLedgerProjectExpenseDetail(detail);
             } else {
+                detail.setId(null);
                 detail.setCreateBy(SecurityUtils.getUsername());
                 detail.setCreateTime(DateUtils.getNowDate());
                 detail.setReimburserLoginName(SecurityUtils.getUsername());
@@ -154,6 +157,21 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
         }
 
         return detailList;
+    }
+
+    private boolean isExistInDb(CtgLedgerProjectExpenseDetail detail,List<CtgLedgerProjectExpenseDetail> dbDetailList){
+        if(Objects.isNull(detail)){
+            return false;
+        }
+        if(Objects.isNull(detail.getId())){
+            return false;
+        }
+        for(CtgLedgerProjectExpenseDetail dbDetail:dbDetailList){
+            if(detail.getId().equals(dbDetail.getId())){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

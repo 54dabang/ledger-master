@@ -1,6 +1,5 @@
 package com.ledger.business.controller;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,12 +9,12 @@ import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import com.ledger.business.service.*;
 import com.ledger.business.util.LedgerExcelUtil;
+import com.ledger.business.util.StrUtil;
 import com.ledger.business.vo.CtgLedgerProjectVo;
 import com.ledger.common.constant.Constants;
 import com.ledger.common.constant.HttpStatus;
 import com.ledger.common.core.domain.model.LoginUser;
 import com.ledger.common.utils.SecurityUtils;
-import com.ledger.common.utils.StringUtils;
 import com.ledger.framework.web.service.PermissionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -26,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -169,7 +169,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     @Log(title = "项目总预算台账", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
-        for(Long id : ids){
+        for (Long id : ids) {
             CtgLedgerAnnualBudget ctgLedgerAnnualBudget = ctgLedgerAnnualBudgetService.selectCtgLedgerAnnualBudgetById(id);
             reimbursementService.checkPermisson(ctgLedgerAnnualBudget.getProjectId(), SecurityUtils.getUserId());
         }
@@ -182,7 +182,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     @PreAuthorize("@ss.hasPermi('business:budget:import')")
     @Log(title = "导入年度预算台账excel", businessType = BusinessType.DELETE)
     @PostMapping("/importExcelData")
-    public AjaxResult importExcelData(MultipartFile file, Long projectId,Long year) throws Exception {
+    public AjaxResult importExcelData(MultipartFile file, Long projectId, Long year) throws Exception {
         reimbursementService.checkPermisson(projectId, SecurityUtils.getUserId());
         ExcelUtil<CtgLedgerProjectExpenseDetail> util = new ExcelUtil<>(CtgLedgerProjectExpenseDetail.class);
         Workbook workbook = WorkbookFactory.create(file.getInputStream());
@@ -191,11 +191,26 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
             return AjaxResult.error("没有找到sheet");
         }
 
-        List<CtgLedgerProjectExpenseDetail> list = util.importExcel(sheet.getSheetName(),file.getInputStream(),0);
-        projectExpenseDetailService.batchSave(list,projectId,year);
-        log.info("成功导入projectId:{},年度：{},{}条数据",projectId,year,list.size());
+        List<CtgLedgerProjectExpenseDetail> list = util.importExcel(sheet.getSheetName(), file.getInputStream(), 0);
+        try {
+            projectExpenseDetailService.batchSave(list, projectId, year);
+        } catch (Exception ex) {
+            for (Throwable cur = ex; cur != null; cur = cur.getCause()) {
+                if (cur instanceof org.springframework.dao.DuplicateKeyException) {
+                    DuplicateKeyException e= (DuplicateKeyException)cur;
+                    log.error("导入数据异常",e);
+                    String errorMessage = e.getMessage();
+                    errorMessage = StrUtil.extractCoreMessage(errorMessage);
+                    return error("报销单号有重复，请检查！" + errorMessage);
+                }
+                throw ex;
+            }
+        }
+
+        log.info("成功导入projectId:{},年度：{},{}条数据", projectId, year, list.size());
         return success(list);
     }
+
     /**
      * 导出项目支出明细台账列表
      */
@@ -211,10 +226,10 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
                                             @ApiParam("项目ID") @RequestParam(required = false) Long projectId,
                                             @ApiParam("年份") @RequestParam(required = false) Integer year) {
         try {
-            reimbursementService.checkPermisson(projectId,SecurityUtils.getUserId());
+            reimbursementService.checkPermisson(projectId, SecurityUtils.getUserId());
             // 查询符合条件的项目支出明细数据
             List<CtgLedgerProjectExpenseDetail> list = projectExpenseDetailService.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
-            list.stream().forEach(e->e.setRemarkTemp(e.getRemark()));
+            list.stream().forEach(e -> e.setRemarkTemp(e.getRemark()));
             // 使用 ExcelUtil 导出数据
             ExcelUtil<CtgLedgerProjectExpenseDetail> util = new ExcelUtil<>(CtgLedgerProjectExpenseDetail.class);
             util.exportExcel(response, list, "项目支出明细台账数据");
@@ -223,6 +238,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
             throw new RuntimeException("导出项目支出明细台账失败，请稍后重试！");
         }
     }
+
     /**
      * 根据项目ID查询项目支出明细列表
      */
@@ -230,7 +246,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
     @ApiImplicitParam(name = "projectId", value = "项目ID", required = true, dataType = "Long", paramType = "query")
     @PreAuthorize("@ss.hasPermi('business:expense:list')")
     @GetMapping("/selectProjectExpenseDetail")
-    public AjaxResult selectCtgLedgerProjectExpenseDetail(@RequestParam(required = true) Long projectId){
+    public AjaxResult selectCtgLedgerProjectExpenseDetail(@RequestParam(required = true) Long projectId) {
         // 获取当前年份
         Integer year = java.time.LocalDate.now().getYear();
         CtgLedgerProject ctgLedgerProject = ctgLedgerProjectService.selectCtgLedgerProjectById(projectId);
@@ -243,11 +259,11 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
         CtgLedgerProjectVo ctgLedgerProjectVo = projectUserService.toCtgLedgerProjectVo(ctgLedgerProject);
         // 根据项目ID和年份查询支出明细列表
         List<CtgLedgerProjectExpenseDetail> list = projectExpenseDetailService.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
-        Map<String,Object> dataDetail = new HashMap<String,Object>();
-        LoginUser user =  SecurityUtils.getLoginUserWithoutEpx();
-        dataDetail.put("当前登录用户的基本信息",user);
-        dataDetail.put("当前项目的报销数据",list);
-        dataDetail.put("当前项目信息",ctgLedgerProjectVo);
+        Map<String, Object> dataDetail = new HashMap<String, Object>();
+        LoginUser user = SecurityUtils.getLoginUserWithoutEpx();
+        dataDetail.put("当前登录用户的基本信息", user);
+        dataDetail.put("当前项目的报销数据", list);
+        dataDetail.put("当前项目信息", ctgLedgerProjectVo);
 
         return success(dataDetail);
     }

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ledger.business.util.StrUtil;
+import com.ledger.common.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -94,6 +96,7 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController {
     public AjaxResult add(@RequestBody CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail) {
         int count = 0;
         try {
+            ctgLedgerProjectExpenseDetail.setRemark(StringUtils.isEmpty(ctgLedgerProjectExpenseDetail.getRemarkTemp()) ? StrUtil.buildRemark(ctgLedgerProjectExpenseDetail) : ctgLedgerProjectExpenseDetail.getRemarkTemp());
             count = ctgLedgerProjectExpenseDetailService.insertCtgLedgerProjectExpenseDetail(ctgLedgerProjectExpenseDetail);
         } catch (Exception ex) {
             for (Throwable cur = ex; cur != null; cur = cur.getCause()) {
