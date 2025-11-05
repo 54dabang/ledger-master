@@ -28,4 +28,6 @@ public class InitConstant {
 
     public static final String VALID_FLAG = "0";
     public static final String IN_VALID_FLAG = "1";
+
+    public static final String SYS_CONFIG_CHROME_PLUGIN = "sys_config_chrome_plugin";
 }

@@ -26,6 +26,14 @@ chatbot:
       useCase: legerRationalityAnalysis
       url: http://${ledger.host}:3020/chat/share?shareId=lwfjchp53hqdbjtoombb0hlw
 
+plugin:
+  config:
+    - env: leixingbang
+      path: /Users/leixingbang/Downloads
+    - env: qinwei
+      path: /Users/leixingbang/Downloads
+    - env: prod
+      path: /home/ledger/html/download
 
 # 开发环境配置
 server:
@@ -66,7 +74,7 @@ spring:
     # 国际化资源文件路径
     basename: i18n/messages
   profiles:
-    active: prod
+   # active: prod
   # 文件上传
   servlet:
     multipart:

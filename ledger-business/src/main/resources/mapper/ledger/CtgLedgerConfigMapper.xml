@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ledger.business.mapper.CtgLedgerConfigMapper">
+    
+    <resultMap type="CtgLedgerConfig" id="CtgLedgerConfigResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="configObjStr"    column="config_obj_str"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectCtgLedgerConfigVo">
+        select id, name, config_obj_str, create_by, create_time, update_by, update_time from ctg_ledger_config
+    </sql>
+
+    <select id="selectCtgLedgerConfigList" parameterType="CtgLedgerConfig" resultMap="CtgLedgerConfigResult">
+        <include refid="selectCtgLedgerConfigVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="configObjStr != null  and configObjStr != ''"> and config_obj_str = #{configObjStr}</if>
+        </where>
+    </select>
+    
+    <select id="selectCtgLedgerConfigById" parameterType="Long" resultMap="CtgLedgerConfigResult">
+        <include refid="selectCtgLedgerConfigVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertCtgLedgerConfig" parameterType="CtgLedgerConfig" useGeneratedKeys="true" keyProperty="id">
+        insert into ctg_ledger_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="configObjStr != null">config_obj_str,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="configObjStr != null">#{configObjStr},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateCtgLedgerConfig" parameterType="CtgLedgerConfig">
+        update ctg_ledger_config
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="configObjStr != null">config_obj_str = #{configObjStr},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteCtgLedgerConfigById" parameterType="Long">
+        delete from ctg_ledger_config where id = #{id}
+    </delete>
+
+    <delete id="deleteCtgLedgerConfigByIds" parameterType="String">
+        delete from ctg_ledger_config where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

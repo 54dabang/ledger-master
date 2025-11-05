@@ -133,7 +133,14 @@ public class FileUploadUtils
 
         String fileName = useCustomNaming ? uuidFilename(file) : extractFilename(file);
 
-        String absPath = getAbsoluteFile(baseDir, fileName).getAbsolutePath();
+        File absoluteFile = getAbsoluteFile(baseDir, fileName);
+        // 确保文件的父目录存在
+        File parentDir = absoluteFile.getParentFile();
+        if (!parentDir.exists() && !parentDir.mkdirs()) {
+            throw new IOException("无法创建目录: " + parentDir.getAbsolutePath());
+        }
+        
+        String absPath = absoluteFile.getAbsolutePath();
         file.transferTo(Paths.get(absPath));
         return getPathFileName(baseDir, fileName);
     }
@@ -162,7 +169,16 @@ public class FileUploadUtils
         {
             if (!desc.getParentFile().exists())
             {
-                desc.getParentFile().mkdirs();
+                // 确保创建所有必要的父目录
+                if (!desc.getParentFile().mkdirs()) {
+                    // 如果创建失败，抛出异常
+                    throw new IOException("无法创建目录: " + desc.getParentFile().getAbsolutePath());
+                }
+            }
+        } else {
+            // 如果文件已存在，检查它是否确实是一个文件而不是目录
+            if (!desc.isFile()) {
+                throw new IOException("路径已存在但不是一个文件: " + desc.getAbsolutePath());
             }
         }
         return desc;
@@ -170,9 +186,8 @@ public class FileUploadUtils
 
     public static final String getPathFileName(String uploadDir, String fileName) throws IOException
     {
-        int dirLastIndex = RuoYiConfig.getProfile().length() + 1;
-        String currentDir = StringUtils.substring(uploadDir, dirLastIndex);
-        return Constants.RESOURCE_PREFIX + "/" + currentDir + "/" + fileName;
+        // 返回实际路径，而不是资源映射路径
+        return uploadDir + "/" + fileName;
     }
 
     /**
@@ -256,5 +271,54 @@ public class FileUploadUtils
             extension = MimeTypeUtils.getExtension(Objects.requireNonNull(file.getContentType()));
         }
         return extension;
+    }
+
+    /**
+     * 文件上传（直接上传至指定路径，不创建子目录，不改名，同名文件直接覆盖）
+     *
+     * @param baseDir 相对应用的基目录
+     * @param file 上传的文件
+     * @param allowedExtension 上传文件类型
+     * @return 返回上传成功的文件名
+     * @throws FileSizeLimitExceededException 如果超出最大大小
+     * @throws FileNameLengthLimitExceededException 文件名太长
+     * @throws IOException 比如读写文件出错时
+     * @throws InvalidExtensionException 文件校验异常
+     */
+    public static final String uploadDirect(String baseDir, MultipartFile file, String[] allowedExtension)
+            throws FileSizeLimitExceededException, IOException, FileNameLengthLimitExceededException,
+            InvalidExtensionException {
+        int fileNameLength = Objects.requireNonNull(file.getOriginalFilename()).length();
+        if (fileNameLength > FileUploadUtils.DEFAULT_FILE_NAME_LENGTH) {
+            throw new FileNameLengthLimitExceededException(FileUploadUtils.DEFAULT_FILE_NAME_LENGTH);
+        }
+
+        assertAllowed(file, allowedExtension);
+
+        // 使用原始文件名
+        String fileName = file.getOriginalFilename();
+        
+        // 获取目标文件的绝对路径
+        File absoluteFile = getAbsoluteFile(baseDir, fileName);
+        
+        // 如果文件已存在，先删除
+        if (absoluteFile.exists()) {
+            if (!absoluteFile.delete()) {
+                throw new IOException("无法删除已存在的同名文件: " + absoluteFile.getAbsolutePath());
+            }
+        }
+        
+        // 确保父目录存在
+        File parentDir = absoluteFile.getParentFile();
+        if (!parentDir.exists() && !parentDir.mkdirs()) {
+            throw new IOException("无法创建目录: " + parentDir.getAbsolutePath());
+        }
+        
+        // 保存文件
+        String absPath = absoluteFile.getAbsolutePath();
+        file.transferTo(Paths.get(absPath));
+        
+        // 返回文件路径
+        return getPathFileName(baseDir, fileName);
     }
 }

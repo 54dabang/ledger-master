@@ -12,7 +12,7 @@ ledger:
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
-  env: leixingbang
+  env: prod
   #host: 192.168.0.100
   host: localhost
   sign:
@@ -25,6 +25,17 @@ chatbot:
     - env: qinwei
       useCase: legerRationalityAnalysis
       url: http://${ledger.host}:3020/chat/share?shareId=lwfjchp53hqdbjtoombb0hlw
+    - env: prod
+      useCase: legerRationalityAnalysis
+      url: http://${ledger.host}:3020/chat/share?shareId=lwfjchp53hqdbjtoombb0hlw
+plugin:
+  config:
+    - env: leixingbang
+      path: /Users/leixingbang/Downloads
+    - env: qinwei
+      path: /Users/qinwei/Downloads
+    - env: prod
+      path: /home/ledger/html/download
 
 
 # 开发环境配置
