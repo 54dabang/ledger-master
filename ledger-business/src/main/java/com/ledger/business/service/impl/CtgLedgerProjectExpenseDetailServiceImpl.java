@@ -150,7 +150,8 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
                 detail.setId(null);
                 detail.setCreateBy(SecurityUtils.getUsername());
                 detail.setCreateTime(DateUtils.getNowDate());
-                detail.setReimburserLoginName(SecurityUtils.getUsername());
+                //todo 通过项目成员的姓名获取对应的用户，导入数据时需要添加限制
+                //detail.setReimburserLoginName(SecurityUtils.getUsername());
                 ctgLedgerProjectExpenseDetailMapper.insertCtgLedgerProjectExpenseDetail(detail);
             }
             detailList.add(detail);

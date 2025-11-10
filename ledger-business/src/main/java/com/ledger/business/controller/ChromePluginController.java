@@ -99,7 +99,7 @@ public class ChromePluginController extends BaseController {
 
 
     @Log(title = "查看插件配置", businessType = BusinessType.EXPORT)
-    @GetMapping("/white/plugin/upload")
+    @GetMapping("/api/white/plugin/query")
     @ApiOperation("查看插件配置")
     public AjaxResult query() {
         CtgLedgerConfig queryParam = new CtgLedgerConfig();

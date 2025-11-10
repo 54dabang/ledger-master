@@ -5,9 +5,8 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class CtgLedgerConfig extends BaseEntity {
 
-    @ApiModelProperty(name = "业务系统生成的id")
-    private String id;
-
+    /** 项目id,自增字段 */
+    private Long id;
 
     @ApiModelProperty(value = "系统配置名称")
     private String name;
@@ -31,11 +30,11 @@ public class CtgLedgerConfig extends BaseEntity {
         this.configObjStr = configObjStr;
     }
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 }
