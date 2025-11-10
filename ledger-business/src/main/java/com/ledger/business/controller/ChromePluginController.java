@@ -28,9 +28,8 @@ import java.util.Objects;
  *
  * @author ledger
  */
-@Api(tags = "浏览器插件上传接口")
+@Api(tags = "浏览器插件相关接口")
 @RestController
-@RequestMapping("/api/plugin")
 public class ChromePluginController extends BaseController {
 
 
@@ -51,7 +50,7 @@ public class ChromePluginController extends BaseController {
      */
     @ApiOperation("上传浏览器插件")
     @PreAuthorize("@ss.hasPermi('business:plugin:upload')")
-    @PostMapping("/upload")
+    @PostMapping("/api/plugin/upload")
     public AjaxResult uploadPlugin(@RequestParam("file") MultipartFile file) {
         String uploadPath = pluginConfig.getConfig().stream().filter(c -> c.getEnv().equals(legerConfig.getEnv())).map(c -> c.getPath()).findFirst()
                 .orElse(null);
@@ -72,7 +71,7 @@ public class ChromePluginController extends BaseController {
 
     @PreAuthorize("@ss.hasPermi('business:plugin:edit')")
     @Log(title = "更改插件配置", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping("/api/plugin/edit")
     @ApiOperation("更改插件配置")
     public AjaxResult edit(@RequestBody PluginDTO pluginDTO) {
         CtgLedgerConfig queryParam = new CtgLedgerConfig();
@@ -98,9 +97,9 @@ public class ChromePluginController extends BaseController {
         return success(pluginDTO);
     }
 
-    @PreAuthorize("@ss.hasPermi('business:plugin:query')")
+
     @Log(title = "查看插件配置", businessType = BusinessType.EXPORT)
-    @GetMapping
+    @GetMapping("/white/plugin/upload")
     @ApiOperation("查看插件配置")
     public AjaxResult query() {
         CtgLedgerConfig queryParam = new CtgLedgerConfig();
