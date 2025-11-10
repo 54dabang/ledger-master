@@ -12,6 +12,7 @@ import com.ledger.common.annotation.Log;
 import com.ledger.common.core.controller.BaseController;
 import com.ledger.common.core.domain.AjaxResult;
 import com.ledger.common.enums.BusinessType;
+import com.ledger.common.utils.StringUtils;
 import com.ledger.common.utils.file.FileUploadUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,6 +51,7 @@ public class ChromePluginController extends BaseController {
      */
     @ApiOperation("上传浏览器插件")
     @PreAuthorize("@ss.hasPermi('business:plugin:upload')")
+    @Log(title = "上传插件", businessType = BusinessType.INSERT)
     @PostMapping("/api/plugin/upload")
     public AjaxResult uploadPlugin(@RequestParam("file") MultipartFile file) {
         String uploadPath = pluginConfig.getConfig().stream().filter(c -> c.getEnv().equals(legerConfig.getEnv())).map(c -> c.getPath()).findFirst()
@@ -57,7 +59,10 @@ public class ChromePluginController extends BaseController {
         try {
             // 检查文件是否为空
             if (file.isEmpty()) {
-                return error("上传文件不能为空");
+                return error("上传文件不能为空！");
+            }
+            if(StringUtils.isEmpty(uploadPath)){
+                return error("默认上传路径配置错误，请联系管理员！");
             }
 
             // 上传文件，只允许zip格式
@@ -98,7 +103,7 @@ public class ChromePluginController extends BaseController {
     }
 
 
-    @Log(title = "查看插件配置", businessType = BusinessType.EXPORT)
+
     @GetMapping("/api/white/plugin/query")
     @ApiOperation("查看插件配置")
     public AjaxResult query() {
