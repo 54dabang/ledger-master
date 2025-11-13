@@ -17,6 +17,6 @@ public class StrUtil {
     }
 
     public static String buildRemark(CtgLedgerProjectExpenseDetail expenseDetail){
-        return String.format("单号%s，发生%s金额%s元",expenseDetail.getExpenseReportNumber(),expenseDetail.getFeeType(),expenseDetail.getAmount());
+        return String.format("单号%s，发生%s金额%s万元",expenseDetail.getExpenseReportNumber(),expenseDetail.getFeeType(),expenseDetail.getAmount());
     }
 }
