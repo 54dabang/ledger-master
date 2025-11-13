@@ -94,8 +94,22 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
     @Override
     public int insertCtgLedgerProjectExpenseDetail(CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail) {
         ctgLedgerProjectExpenseDetail.setCreateTime(DateUtils.getNowDate());
+        CtgLedgerProject ctgLedgerProject = projectService.selectCtgLedgerProjectById(ctgLedgerProjectExpenseDetail.getLedgerProjectId());
+        CtgLedgerProjectVo ctgLedgerProjectVo = this.projectUserService.toCtgLedgerProjectVo(ctgLedgerProject);
+        List<SysUserVo> allMembers = Stream.concat(
+                ctgLedgerProjectVo.getMembers().stream(),
+                Stream.of(ctgLedgerProjectVo.getManager())
+        ).collect(Collectors.toList());
+        allMembers.stream()
+                .filter(m -> m.getUserName().equals(ctgLedgerProjectExpenseDetail.getReimburserLoginName()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException(
+                        String.format("用户：%s 不是项目成员，请联系管理员添加", ctgLedgerProjectExpenseDetail.getReimburserName())
+                ));
+
         return ctgLedgerProjectExpenseDetailMapper.insertCtgLedgerProjectExpenseDetail(ctgLedgerProjectExpenseDetail);
     }
+
 
     /**
      * 修改项目支出明细
