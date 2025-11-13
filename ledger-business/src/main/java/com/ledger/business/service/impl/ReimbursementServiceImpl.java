@@ -81,13 +81,14 @@ public class ReimbursementServiceImpl implements IReimbursementService {
         expenseDetail.setExpenseReportNumber(reimbursementDTO.getBillCode());
         expenseDetail.setFeeType(reimbursementDTO.getFeeType());
         expenseDetail.setSubjectName(reimbursementDTO.getSubjectName());
-        expenseDetail.setRemark(StrUtil.buildRemark(expenseDetail));
+
         expenseDetail.setAmount(reimbursementDTO.getTotalAmount());
         expenseDetail.setLedgerProjectId(ctgLedgerProject.getId());
         expenseDetail.setReimburserName(reimbursementDTO.getHandler().getName());
         expenseDetail.setReimburserLoginName(reimbursementDTO.getHandler().getLoginName());
         expenseDetail.setCreateBy(reimbursementDTO.getHandler().getLoginName());
         expenseDetail.setCreateTime(DateUtils.getNowDate());
+        expenseDetail.setRemark(StrUtil.buildRemark(expenseDetail));
 
         //新数据插入，否则执行更新
         if (isNewData) {
