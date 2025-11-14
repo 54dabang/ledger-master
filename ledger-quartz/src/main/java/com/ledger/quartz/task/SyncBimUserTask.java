@@ -13,4 +13,8 @@ public class SyncBimUserTask {
         syncBimUserService.syncUsersAndDepts();
     }
 
+    public void updateDeptFullPath(){
+        syncBimUserService.updateDeptFullPath();
+    }
+
 }

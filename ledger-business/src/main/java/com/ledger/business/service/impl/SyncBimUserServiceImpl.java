@@ -74,6 +74,12 @@ public class SyncBimUserServiceImpl implements SyncBimUserService {
             log.info("同步组织机构数据耗时: {}毫秒", stepEndTime - stepStartTime);
 
             stepStartTime = System.currentTimeMillis();
+            updateDeptFullPath();
+            stepEndTime = System.currentTimeMillis();
+            log.info("同步部门全路径耗时: {}毫秒", stepEndTime - stepStartTime);
+
+
+            stepStartTime = System.currentTimeMillis();
             List<BimUser> bimUserList = iBimUserService.selectBimUserList(new BimUser());
             stepEndTime = System.currentTimeMillis();
             log.info("查询BIM用户数据耗时: {}毫秒", stepEndTime - stepStartTime);
@@ -97,6 +103,84 @@ public class SyncBimUserServiceImpl implements SyncBimUserService {
         }
     }
 
+    /**
+     * 批量更新所有部门的 fullPath
+     */
+    public void updateDeptFullPath() {
+        log.info("开始更新部门完整路径信息");
+        SysOperLog operLog = new SysOperLog();
+        operLog.setStatus(BusinessStatus.SUCCESS.ordinal());
+        operLog.setOperatorType(OperatorType.OTHER.ordinal());
+        operLog.setTitle("更新部门完整路径信息");
+        operLog.setBusinessType(BusinessType.OTHER.ordinal());
+        operLog.setOperName("系统定时任务");
+        long start = System.currentTimeMillis();
+        
+        try {
+            // 1. 一次性查出全部部门
+            List<SysDept> deptList = sysDeptMapper.selectDeptList(new SysDept());
+            if (CollectionUtils.isEmpty(deptList)) {
+                log.info("没有需要更新的部门数据");
+                operLog.setErrorMsg("没有需要更新的部门数据");
+                AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
+                return;
+            }
+
+            // 2. 建立 id -> dept 映射
+            Map<Long, SysDept> deptMap = deptList.stream()
+                    .collect(Collectors.toMap(SysDept::getDeptId, d -> d, (existing, replacement) -> existing));
+
+            // 3. 计算 fullPath（内存里完成，无递归）
+            deptList.forEach(dept -> dept.setDepFullPath(buildFullPath(dept, deptMap)));
+            int totalUpdated = deptList.size();
+            for(SysDept dept: deptList){
+                sysDeptMapper.updateDept(dept);
+            }
+            
+            log.info("部门完整路径信息更新成功，总计更新{}个部门", totalUpdated);
+            operLog.setCostTime(System.currentTimeMillis() - start);
+            operLog.setJsonResult("部门完整路径信息更新成功，总计更新" + totalUpdated + "个部门");
+            AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
+        } catch (Exception e) {
+            operLog.setStatus(BusinessStatus.FAIL.ordinal());
+            operLog.setErrorMsg(StringUtils.substring(Convert.toStr(e.getMessage(),
+                    ExceptionUtil.getExceptionMessage(e)), 0, 2000));
+            AsyncManager.me().execute(AsyncFactory.recordOper(operLog));
+            log.error("部门完整路径信息更新失败", e);
+            throw new RuntimeException("部门完整路径信息更新失败", e);
+        }
+    }
+
+    /**
+     * 构造以“-”分隔的完整路径，首尾无多余连接符
+     * 若上级不存在则中断，防止 NPE
+     */
+    private String buildFullPath(SysDept dept, Map<Long, SysDept> deptMap) {
+        List<String> names = new ArrayList<>();
+        SysDept curr = dept;
+        // 防止循环引用导致的无限循环
+        Set<Long> visited = new HashSet<>();
+        while (curr != null && curr.getDeptId() != null && curr.getDeptId() != 0L) {
+            // 检查是否已经访问过该节点，防止循环引用
+            if (visited.contains(curr.getDeptId())) {
+                log.warn("检测到部门层级结构中的循环引用，部门ID: {}", curr.getDeptId());
+                break;
+            }
+            visited.add(curr.getDeptId());
+            
+            names.add(curr.getDeptName());
+            if (curr.getParentId() == null || curr.getParentId() == 0L) {
+                break;          // 已到根
+            }
+            curr = deptMap.get(curr.getParentId());
+            // 防止坏数据（parentId 指向不存在的节点）
+            if (curr == null) {
+                break;
+            }
+        }
+        Collections.reverse(names);
+        return String.join("-", names);   // 高效且无需再处理尾部符号
+    }
 
 
 

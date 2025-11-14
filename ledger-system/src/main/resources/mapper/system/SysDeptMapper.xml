@@ -197,5 +197,27 @@
 	<delete id="deleteDeptById" parameterType="Long">
 		update sys_dept set del_flag = '2' where dept_id = #{deptId}
 	</delete>
+	
+	<update id="updateBatchById" parameterType="SysDept">
+        UPDATE sys_dept
+        <set>
+            <if test="parentId != null and parentId != 0">parent_id = #{parentId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="deptName != null and deptName != ''">dept_name = #{deptName},</if>
+            <if test="orderNum != null">order_num = #{orderNum},</if>
+            <if test="leader != null">leader = #{leader},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="depFullName != null">dep_full_name = #{depFullName},</if>
+            <if test="depFullPath != null">dep_full_path = #{depFullPath},</if>
+            <if test="bimDeptId != null">bim_dept_id = #{bimDeptId},</if>
+            <if test="bimImmutableDeptId != null">bim_immutable_dept_id = #{bimImmutableDeptId},</if>
+            <if test="updateBy != null and updateBy != ''">update_by = #{updateBy},</if>
+            update_time = sysdate()
+        </set>
+        WHERE dept_id = #{deptId}
+    </update>
 
 </mapper>

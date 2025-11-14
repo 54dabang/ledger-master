@@ -123,4 +123,11 @@ public interface SysDeptMapper
      * @return 结果
      */
     public int deleteDeptById(Long deptId);
+
+    /**
+     * 批量更新部门信息
+     *
+     * @param depts 部门信息列表
+     */
+    int updateBatchById(@Param("depts") List<SysDept> depts);
 }
