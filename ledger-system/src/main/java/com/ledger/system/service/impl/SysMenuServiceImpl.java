@@ -46,6 +46,8 @@ public class SysMenuServiceImpl implements ISysMenuService
     @Autowired
     private SysRoleMenuMapper roleMenuMapper;
 
+
+
     /**
      * 根据用户查询系统菜单列表
      * 
@@ -130,10 +132,10 @@ public class SysMenuServiceImpl implements ISysMenuService
      * @return 菜单列表
      */
     @Override
-    public List<SysMenu> selectMenuTreeByUserId(Long userId)
+    public List<SysMenu> selectMenuTreeByUserId(Long userId,Boolean isAdmin)
     {
         List<SysMenu> menus = null;
-        if (SecurityUtils.isAdmin(userId))
+        if (isAdmin)
         {
             menus = menuMapper.selectMenuTreeAll();
         }

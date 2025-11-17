@@ -124,16 +124,6 @@ public class SecurityUtils
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
-    /**
-     * 是否为管理员
-     * 
-     * @param userId 用户ID
-     * @return 结果
-     */
-    public static boolean isAdmin(Long userId)
-    {
-        return userId != null && 1L == userId;
-    }
 
     /**
      * 验证用户是否具备某权限

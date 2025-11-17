@@ -92,19 +92,7 @@ public class SysLoginController
         return ajax;
     }
 
-    /**
-     * 获取路由信息
-     * 
-     * @return 路由信息
-     */
-    @GetMapping("getRouters")
-    public AjaxResult getRouters()
-    {
-        Long userId = SecurityUtils.getUserId();
-        List<SysMenu> menus = menuService.selectMenuTreeByUserId(userId);
-        return AjaxResult.success(menuService.buildMenus(menus));
-    }
-    
+
     // 检查初始密码是否提醒修改
     public boolean initPasswordIsModify(Date pwdUpdateDate)
     {
