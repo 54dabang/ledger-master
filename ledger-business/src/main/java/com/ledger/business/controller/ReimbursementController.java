@@ -230,7 +230,22 @@ public class ReimbursementController extends BaseController {
             maxReimbursementSequenceNo = projectExpenditureLedgerService.selectMaxReimbursementSequenceNo(projectId, year);
         }
         maxReimbursementSequenceNo = Optional.ofNullable(maxReimbursementSequenceNo).orElse(0L);
+        CtgLedgerProject ctgLedgerProject = projectService.selectCtgLedgerProjectById(projectId);
+        String projectManagerSignaturePic = Optional.ofNullable(ctgLedgerProject).map(p->p.getProjectManagerLoginName())
+                .map(uname->userService.selectUserByUserName(uname))
+                .map(u->u.getSignaturePic())
+                .orElseThrow(()->new IllegalStateException("项目管理员尚未上传自己的电子签!"));
+
+        String  currentUserSignaturePic = Optional.ofNullable(SecurityUtils.getUsername())
+                .map(uname->userService.selectUserByUserName(uname))
+                .map(u->u.getSignaturePic())
+                .orElseThrow(()->new IllegalStateException("您尚未上传自己的电子签名，请维护!"));
+
         ProjectExpenditureLedgerVo projectExpenditureLedgerVo = projectExpenditureLedgerService.getProjectExpenditureLedgerVo(projectId, year, maxReimbursementSequenceNo);
+
+        projectExpenditureLedgerVo.setProjectManagerSignaturePic(projectManagerSignaturePic);
+        projectExpenditureLedgerVo.setCurrentUserSignaturePic(currentUserSignaturePic);
+
         return AjaxResult.success(projectExpenditureLedgerVo);
     }
 

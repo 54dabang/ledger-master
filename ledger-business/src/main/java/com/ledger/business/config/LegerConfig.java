@@ -12,4 +12,7 @@ public class LegerConfig {
 
     @Value("${ledger.sign.password}")
     private String signPassword;
+
+    @Value("${ledger.profile}")
+    private String uploadPicPath;
 }

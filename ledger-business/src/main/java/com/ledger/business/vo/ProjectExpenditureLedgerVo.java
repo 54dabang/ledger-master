@@ -43,4 +43,10 @@ public class ProjectExpenditureLedgerVo {
     @ApiModelProperty(name = "剩余总经费")
     private BigDecimal remainingTotalFunds;
 
+    @ApiModelProperty(name = "项目管理员电子签")
+    private String projectManagerSignaturePic;
+
+    @ApiModelProperty(name = "当前登录用户电子签")
+    private String currentUserSignaturePic;
+
 }

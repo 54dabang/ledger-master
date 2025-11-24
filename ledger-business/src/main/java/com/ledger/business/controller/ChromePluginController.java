@@ -74,6 +74,9 @@ public class ChromePluginController extends BaseController {
         }
     }
 
+
+
+
     @PreAuthorize("@ss.hasPermi('business:plugin:edit')")
     @Log(title = "更改插件配置", businessType = BusinessType.INSERT)
     @PostMapping("/api/plugin/edit")
@@ -120,6 +123,8 @@ public class ChromePluginController extends BaseController {
 
         return success(pluginDTO);
     }
+
+
 
 
 }

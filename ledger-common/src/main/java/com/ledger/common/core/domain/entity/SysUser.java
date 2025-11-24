@@ -52,6 +52,9 @@ public class SysUser extends BaseEntity
     @Excel(name = "用户性别", readConverterExp = "0=男,1=女,2=未知")
     private String sex;
 
+    /** 用户电子签名 */
+    private String signaturePic;
+
     /** 用户头像 */
     private String avatar;
 
@@ -311,6 +314,14 @@ public class SysUser extends BaseEntity
     public void setRoleId(Long roleId)
     {
         this.roleId = roleId;
+    }
+
+    public String getSignaturePic() {
+        return signaturePic;
+    }
+
+    public void setSignaturePic(String signaturePic) {
+        this.signaturePic = signaturePic;
     }
 
     @Override
