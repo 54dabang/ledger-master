@@ -128,6 +128,9 @@ public interface ISysUserService
      */
     public int updateUser(SysUser user);
 
+
+    void updateUserInfo(SysUser user);
+
     /**
      * 用户授权角色
      * 

@@ -321,4 +321,22 @@ public class FileUploadUtils
         // 返回文件路径
         return getPathFileName(baseDir, fileName);
     }
+
+    /**
+     * 删除文件
+     *
+     * @param filePath 文件路径
+     */
+    public static void deleteFile(String filePath) {
+        if (StringUtils.isEmpty(filePath)) {
+            return;
+        }
+        
+        File file = new File(filePath);
+        if (file.exists()) {
+            if (!file.delete()) {
+                throw new IllegalStateException(String.format("无法删除文件:%s",filePath));
+            }
+        }
+    }
 }

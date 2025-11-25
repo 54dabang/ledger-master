@@ -64,7 +64,7 @@ public class SysController extends BaseController {
     @Log(title = "上传个人电子签", businessType = BusinessType.INSERT)
     @PostMapping("/api/user/uploadSignaturePic")
     public AjaxResult uploadSignaturePic(@RequestParam("file") MultipartFile file) {
-        String uploadPath = legerConfig.getUploadPicPath()+"/pic/";
+        String uploadPath = legerConfig.getUploadPicPath()+"/pic";
         try {
             // 检查文件是否为空
             if (file.isEmpty()) {
@@ -72,6 +72,10 @@ public class SysController extends BaseController {
             }
             if(StringUtils.isEmpty(uploadPath)){
                 return error("默认上传路径配置错误，请联系管理员！");
+            }
+            SysUser loginUser = userService.selectUserByUserName(SecurityUtils.getUsername());
+            if(StringUtils.isNotEmpty(loginUser.getSignaturePic())){
+                FileUploadUtils.deleteFile(loginUser.getSignaturePic());
             }
 
             // 使用UUID重命名文件
@@ -86,7 +90,7 @@ public class SysController extends BaseController {
             MultipartFile uuidNamedFile = FileUtils.wrap(newFileName,file);
 
             String path = FileUploadUtils.uploadDirect(uploadPath, uuidNamedFile, ALLOWED_EXTENSION);
-            SysUser loginUser = userService.selectUserByUserName(SecurityUtils.getUsername());
+
             loginUser.setSignaturePic(path);
             userService.updateUser(loginUser);
             return success(UploadFileVO.builder().path(path).build());
