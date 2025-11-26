@@ -24,7 +24,7 @@ public class StrUtil {
         String feeType = expenseDetail.getFeeType();
         java.math.BigDecimal amount = expenseDetail.getAmount();
         
-        return String.format("单号%s，发生%s金额%s元",
+        return String.format("单号%s，发生%s金额%s万元",
                 expenseReportNumber != null ? expenseReportNumber : "",
                 feeType != null ? feeType : "",
                 amount != null ? amount.multiply(new java.math.BigDecimal("10000")) : "");
