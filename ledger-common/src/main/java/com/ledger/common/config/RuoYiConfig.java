@@ -126,9 +126,10 @@ public class RuoYiConfig
     }
 
 
-    public static String getRelativePath(String path){
-        if(StringUtils.isNotEmpty(path) && path.startsWith(getProfile())){
-           return path.replaceFirst(getProfile(), "/profile");
+    public static String getRelativePath(String path) {
+        if (StringUtils.isNotEmpty(path) && path.startsWith(getProfile())) {
+            // 直接使用字符串替换，避免正则表达式
+            return "/profile" + path.substring(getProfile().length());
         }
         return path;
     }
