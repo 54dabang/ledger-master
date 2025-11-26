@@ -21,6 +21,9 @@ public class CtgLedgerProjectVo extends CtgLedgerProject {
     @ApiModelProperty(value = "项目管理员")
     private SysUserVo manager;
 
+    @ApiModelProperty(value = "项目联系人")
+    private SysUserVo contact;
+
     @ApiModelProperty(value = "年度预算")
     private BigDecimal annualBudgetFee;
 

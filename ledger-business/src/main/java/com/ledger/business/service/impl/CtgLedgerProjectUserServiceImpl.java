@@ -196,6 +196,18 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
                     .nickName(user.getNickName())
                     .build();
         }
+
+        SysUser contact = userService.selectUserByUserName(project.getProjectContactLoginName());
+
+        SysUserVo contactVO = null;
+        if (Objects.nonNull(contact)) {
+            contactVO = SysUserVo.builder().userId(contact.getUserId())
+                    .userName(contact.getUserName())
+                    .nickName(contact.getNickName())
+                    .build();
+        }
+
+
         int currentYear = Year.now().getValue();
         CtgLedgerAnnualBudget ctgLedgerAnnualBudget = annualBudgetService.selectByProjectIdAndYear(project.getId(), currentYear);
         BigDecimal annualBudgetFee = Optional.ofNullable(ctgLedgerAnnualBudget)
@@ -205,6 +217,7 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
         //设置其他关联信息
         projectVo.setMembers(sysUserVoList);
         projectVo.setManager(manager);
+        projectVo.setContact(contactVO);
         projectVo.setYear(currentYear);
         projectVo.setAnnualBudgetFee(annualBudgetFee);
         Long  budgetFeeId = Optional.ofNullable(ctgLedgerAnnualBudget).map(CtgLedgerAnnualBudget::getId).orElse(null);
