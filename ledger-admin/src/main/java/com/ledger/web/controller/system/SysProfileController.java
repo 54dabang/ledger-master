@@ -146,11 +146,13 @@ public class SysProfileController extends BaseController
                 {
                     FileUtils.deleteFile(RuoYiConfig.getProfile() + FileUtils.stripPrefix(oldAvatar));
                 }
-                AjaxResult ajax = AjaxResult.success();
-                ajax.put("imgUrl", avatar);
+
                 // 更新缓存用户头像
+                avatar = RuoYiConfig.getRelativePath(avatar);
                 loginUser.getUser().setAvatar(avatar);
                 tokenService.setLoginUser(loginUser);
+                AjaxResult ajax = AjaxResult.success();
+                ajax.put("imgUrl", avatar);
                 return ajax;
             }
         }

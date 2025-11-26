@@ -1,5 +1,6 @@
 package com.ledger.common.config;
 
+import com.ledger.common.utils.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
@@ -104,6 +105,10 @@ public class RuoYiConfig
         return getProfile() + "/avatar";
     }
 
+    public static String getSignaturePath(){
+        return getProfile() + "/pic";
+    }
+
     /**
      * 获取下载路径
      */
@@ -119,4 +124,13 @@ public class RuoYiConfig
     {
         return getProfile() + "/upload";
     }
+
+
+    public static String getRelativePath(String path){
+        if(StringUtils.isNotEmpty(path) && path.startsWith(getProfile())){
+           return path.replaceFirst(getProfile(), "/profile");
+        }
+        return path;
+    }
+
 }

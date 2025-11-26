@@ -3,6 +3,7 @@ package com.ledger.business.controller;
 import com.ledger.business.config.LegerConfig;
 import com.ledger.business.vo.UploadFileVO;
 import com.ledger.common.annotation.Log;
+import com.ledger.common.config.RuoYiConfig;
 import com.ledger.common.constant.Constants;
 import com.ledger.common.core.controller.BaseController;
 import com.ledger.common.core.domain.AjaxResult;
@@ -43,7 +44,7 @@ public class SysController extends BaseController {
     @Autowired
     private ISysMenuService menuService;
     @Autowired
-    private LegerConfig legerConfig;
+    private RuoYiConfig yiConfig;
     @Autowired
     private ISysUserService userService;
 
@@ -70,7 +71,7 @@ public class SysController extends BaseController {
     @Log(title = "上传个人电子签", businessType = BusinessType.INSERT)
     @PostMapping("/api/user/uploadSignaturePic")
     public AjaxResult uploadSignaturePic(@RequestParam("file") MultipartFile file) {
-        String uploadPath = legerConfig.getUploadPicPath()+"/pic";
+        String uploadPath = RuoYiConfig.getSignaturePath();
         try {
             // 检查文件是否为空
             if (file.isEmpty()) {
@@ -96,6 +97,7 @@ public class SysController extends BaseController {
             MultipartFile uuidNamedFile = FileUtils.wrap(newFileName,file);
 
             String path = FileUploadUtils.uploadDirect(uploadPath, uuidNamedFile, ALLOWED_EXTENSION);
+            path = RuoYiConfig.getRelativePath(path);
 
             loginUser.setSignaturePic(path);
             userService.updateUserInfo(loginUser);

@@ -142,7 +142,9 @@ public class FileUploadUtils
         
         String absPath = absoluteFile.getAbsolutePath();
         file.transferTo(Paths.get(absPath));
-        return getPathFileName(baseDir, fileName);
+        String filePath = getPathFileName(baseDir, fileName);
+
+        return RuoYiConfig.getRelativePath(filePath);
     }
 
     /**
