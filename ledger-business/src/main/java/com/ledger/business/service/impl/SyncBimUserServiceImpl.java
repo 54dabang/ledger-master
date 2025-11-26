@@ -179,7 +179,7 @@ public class SyncBimUserServiceImpl implements SyncBimUserService {
             }
         }
         Collections.reverse(names);
-        return String.join("-", names);   // 高效且无需再处理尾部符号
+        return String.join("/", names);   // 高效且无需再处理尾部符号
     }
 
 

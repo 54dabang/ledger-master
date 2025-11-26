@@ -3,6 +3,7 @@ package com.ledger.web.controller.system;
 import java.util.Map;
 import java.util.Optional;
 
+import com.ledger.common.core.domain.entity.SysDept;
 import com.ledger.system.service.ISysDeptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,9 +54,11 @@ public class SysProfileController extends BaseController
     public AjaxResult profile() {
         LoginUser loginUser = getLoginUser();
         SysUser user = loginUser.getUser();
-        String deptFullPath = Optional.ofNullable(sysDeptService.selectDeptById(user.getDeptId()))
+        SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
+        user.setDept(dept);
+        /*String deptFullPath = Optional.ofNullable(dept)
                 .map(d -> d.getDepFullPath()).orElse(null);
-        user.setDeptFullPath(deptFullPath);
+        user.setDeptFullPath(deptFullPath);*/
         AjaxResult ajax = AjaxResult.success(user);
         ajax.put("roleGroup", userService.selectUserRoleGroup(loginUser.getUsername()));
         ajax.put("postGroup", userService.selectUserPostGroup(loginUser.getUsername()));
