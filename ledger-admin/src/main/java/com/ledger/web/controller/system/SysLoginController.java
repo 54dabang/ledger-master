@@ -3,6 +3,8 @@ package com.ledger.web.controller.system;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+
+import com.ledger.system.service.ISysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -47,6 +49,9 @@ public class SysLoginController
     @Autowired
     private ISysConfigService configService;
 
+    @Autowired
+    private ISysUserService sysUserService;
+
     /**
      * 登录方法
      * 
@@ -73,7 +78,8 @@ public class SysLoginController
     public AjaxResult getInfo()
     {
         LoginUser loginUser = SecurityUtils.getLoginUser();
-        SysUser user = loginUser.getUser();
+        SysUser user =  sysUserService.selectUserById(loginUser.getUser().getUserId()) ;
+        user.setPassword(null);
         // 角色集合
         Set<String> roles = permissionService.getRolePermission(user);
         // 权限集合
