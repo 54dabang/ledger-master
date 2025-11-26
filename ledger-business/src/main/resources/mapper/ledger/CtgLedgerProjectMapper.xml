@@ -43,13 +43,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="executedMgmtFee" column="executed_mgmt_fee" />
         <result property="executedTaxFee" column="executed_tax_fee" />
         <result property="projectManagerLoginName" column="project_manager_login_name" />
+        <result property="projectContactLoginName" column="project_contact_login_name" />
         <!-- 新增的合同金额字段 -->
         <result property="contractAmount" column="contract_amount" />
         <result property="executedContractAmount" column="executed_contract_amount" />
     </resultMap>
 
     <sql id="selectCtgLedgerProjectVo">
-        select id, project_name, project_code, extend_project_id, equip_purchase_fee, proto_equip_fee, equip_renov_fee, equip_rent_fee, material_cost, test_proc_fee, fuel_power_cost, pub_doc_ip_fee, travel_conf_coop_fee, labor_cost, service_cost, expert_consult_fee, mgmt_fee, tax_fee, create_by, create_time, update_by, update_time, executed_equip_purchase_fee, executed_proto_equip_fee, executed_equip_renov_fee, executed_equip_rent_fee, executed_material_cost, executed_test_proc_fee, executed_fuel_power_cost, executed_pub_doc_ip_fee, executed_travel_conf_coop_fee, executed_labor_cost, executed_service_cost, executed_expert_consult_fee, executed_mgmt_fee, executed_tax_fee, project_manager_login_name, contract_amount, executed_contract_amount from ctg_ledger_project
+        select id, project_name, project_code, extend_project_id, equip_purchase_fee, proto_equip_fee, equip_renov_fee, equip_rent_fee, material_cost, test_proc_fee, fuel_power_cost, pub_doc_ip_fee, travel_conf_coop_fee, labor_cost, service_cost, expert_consult_fee, mgmt_fee, tax_fee, create_by, create_time, update_by, update_time, executed_equip_purchase_fee, executed_proto_equip_fee, executed_equip_renov_fee, executed_equip_rent_fee, executed_material_cost, executed_test_proc_fee, executed_fuel_power_cost, executed_pub_doc_ip_fee, executed_travel_conf_coop_fee, executed_labor_cost, executed_service_cost, executed_expert_consult_fee, executed_mgmt_fee, executed_tax_fee, project_manager_login_name, project_contact_login_name, contract_amount, executed_contract_amount from ctg_ledger_project
     </sql>
 
         <select id="selectCtgLedgerProjectList" parameterType="CtgLedgerProject" resultMap="CtgLedgerProjectResult">
@@ -60,6 +61,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <!-- 添加keyword查询条件 -->
             <if test="params.keyword != null and params.keyword != ''">
                 and (project_name like concat('%', #{params.keyword}, '%') OR project_code like concat('%', #{params.keyword}, '%'))
+            </if>
+            <if test="params.managerName != null and params.managerName != ''">
+                and (project_manager_login_name = #{params.managerName} OR project_contact_login_name =  #{params.managerName})
             </if>
             <if test="extendProjectId != null "> and extend_project_id = #{extendProjectId}</if>
             <if test="equipPurchaseFee != null "> and equip_purchase_fee = #{equipPurchaseFee}</if>
@@ -92,6 +96,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="executedMgmtFee != null "> and executed_mgmt_fee = #{executedMgmtFee}</if>
             <if test="executedTaxFee != null "> and executed_tax_fee = #{executedTaxFee}</if>
             <if test="projectManagerLoginName != null "> and project_manager_login_name = #{projectManagerLoginName}</if>
+            <if test="projectContactLoginName != null "> and project_contact_login_name = #{projectContactLoginName}</if>
             <if test="params.ids != null and params.ids.size() > 0">
                 and id in
                 <foreach item="id" collection="params.ids" open="(" separator="," close=")">
@@ -147,6 +152,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="executedTaxFee != null">executed_tax_fee,</if>
             <!-- 新增的项目负责人和合同金额字段 -->
             <if test="projectManagerLoginName != null">project_manager_login_name,</if>
+            <if test="projectContactLoginName != null">project_contact_login_name,</if>
             <if test="contractAmount != null">contract_amount,</if>
             <if test="executedContractAmount != null">executed_contract_amount,</if>
          </trim>
@@ -189,6 +195,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="executedTaxFee != null">#{executedTaxFee},</if>
             <!-- 新增的项目负责人和合同金额字段 -->
             <if test="projectManagerLoginName != null">#{projectManagerLoginName},</if>
+            <if test="projectContactLoginName != null">#{projectContactLoginName},</if>
             <if test="contractAmount != null">#{contractAmount},</if>
             <if test="executedContractAmount != null">#{executedContractAmount},</if>
          </trim>
@@ -235,6 +242,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="executedTaxFee != null">executed_tax_fee = #{executedTaxFee},</if>
             <!-- 新增的项目负责人和合同金额字段 -->
             <if test="projectManagerLoginName != null">project_manager_login_name = #{projectManagerLoginName},</if>
+            <if test="projectContactLoginName != null">project_contact_login_name = #{projectContactLoginName},</if>
             <if test="contractAmount != null">contract_amount = #{contractAmount},</if>
             <if test="executedContractAmount != null">executed_contract_amount = #{executedContractAmount},</if>
         </trim>

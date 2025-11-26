@@ -86,6 +86,9 @@ public class SysUser extends BaseEntity
     })
     private SysDept dept;
 
+
+    private String deptFullPath;
+
     /** 角色对象 */
     private List<SysRole> roles;
 
@@ -322,6 +325,14 @@ public class SysUser extends BaseEntity
 
     public void setSignaturePic(String signaturePic) {
         this.signaturePic = signaturePic;
+    }
+
+    public String getDeptFullPath() {
+        return deptFullPath;
+    }
+
+    public void setDeptFullPath(String deptFullPath) {
+        this.deptFullPath = deptFullPath;
     }
 
     @Override

@@ -64,7 +64,8 @@ public class CtgLedgerProjectController extends BaseController {
             ctgLedgerProject.getParams().put("keyword", keyword);
         }
         if (InitConstant.PROJECT_QUERY_TYPE_MANAGE.equals(type)) {
-            ctgLedgerProject.setProjectManagerLoginName(SecurityUtils.getUsername());
+            //ctgLedgerProject.setProjectManagerLoginName(SecurityUtils.getUsername());
+            ctgLedgerProject.getParams().put("managerName", SecurityUtils.getUsername());
             startPage();
             List<CtgLedgerProject> list = ctgLedgerProjectService.selectCtgLedgerProjectList(ctgLedgerProject);
             List<CtgLedgerProjectVo> projectVoList = list.stream().map(p->projectUserService.toCtgLedgerProjectVo(p)).collect(Collectors.toList());

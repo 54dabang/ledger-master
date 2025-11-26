@@ -40,6 +40,11 @@ public class CtgLedgerProject extends BaseEntity
     @ApiModelProperty(value = "项目负责人登录用户名")
     private String projectManagerLoginName;
 
+    @Excel(name = "项目联系人登录用户名")
+    @ApiModelProperty(value = "项目联系人登录用户名")
+    private String projectContactLoginName;
+
+
     /** 购置设备费 */
     @Excel(name = "购置设备费")
     @ApiModelProperty(value = "购置设备费")
@@ -504,6 +509,14 @@ public class CtgLedgerProject extends BaseEntity
 
     public void setExecutedContractAmount(BigDecimal executedContractAmount) {
         this.executedContractAmount = executedContractAmount;
+    }
+
+    public String getProjectContactLoginName() {
+        return projectContactLoginName;
+    }
+
+    public void setProjectContactLoginName(String projectContactLoginName) {
+        this.projectContactLoginName = projectContactLoginName;
     }
 
     @Override

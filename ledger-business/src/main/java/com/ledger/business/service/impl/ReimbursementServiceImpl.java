@@ -136,6 +136,7 @@ public class ReimbursementServiceImpl implements IReimbursementService {
         }
         boolean isMember = projectUserService.isProjectUser(ctgLedgerProject.getId(), user.getUserId());
         boolean isProjectManager = loginName.trim().equals(ctgLedgerProject.getProjectManagerLoginName().trim());
+        boolean isProjectContact = loginName.trim().equals(ctgLedgerProject.getProjectManagerLoginName().trim());
         return isMember || isProjectManager;
     }
 

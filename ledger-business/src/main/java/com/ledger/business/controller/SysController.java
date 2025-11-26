@@ -15,7 +15,9 @@ import com.ledger.common.utils.file.FileUploadUtils;
 import com.ledger.framework.web.service.PermissionService;
 import com.ledger.system.service.ISysMenuService;
 import com.ledger.system.service.ISysUserService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,6 +35,8 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
+@Api(value = "用户电子签", tags = {"用户电子签"})
+@Slf4j
 public class SysController extends BaseController {
     @Autowired
     private PermissionService permissionService;
@@ -58,6 +62,8 @@ public class SysController extends BaseController {
         List<SysMenu> menus = menuService.selectMenuTreeByUserId(userId,isAdmin);
         return AjaxResult.success(menuService.buildMenus(menus));
     }
+
+
 
     @ApiOperation("上传个人电子签")
     @PreAuthorize("@ss.hasPermi('business:user:upload:signature')")
