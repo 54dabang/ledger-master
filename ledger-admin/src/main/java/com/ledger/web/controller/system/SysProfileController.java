@@ -53,7 +53,8 @@ public class SysProfileController extends BaseController
     @GetMapping
     public AjaxResult profile() {
         LoginUser loginUser = getLoginUser();
-        SysUser user = loginUser.getUser();
+        SysUser user = userService.selectUserById(loginUser.getUserId());
+        user.setPassword(null);
         SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
         user.setDept(dept);
         /*String deptFullPath = Optional.ofNullable(dept)
