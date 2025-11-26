@@ -98,7 +98,7 @@ public class SysController extends BaseController {
             String path = FileUploadUtils.uploadDirect(uploadPath, uuidNamedFile, ALLOWED_EXTENSION);
 
             loginUser.setSignaturePic(path);
-            userService.updateUser(loginUser);
+            userService.updateUserInfo(loginUser);
             return success(UploadFileVO.builder().path(path).build());
         } catch (Exception e) {
             logger.error("上传文件报错", e);
