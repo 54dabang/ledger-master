@@ -234,7 +234,7 @@ public class ReimbursementController extends BaseController {
         String projectManagerSignaturePic = Optional.ofNullable(ctgLedgerProject).map(p->p.getProjectManagerLoginName())
                 .map(uname->userService.selectUserByUserName(uname))
                 .map(u->u.getSignaturePic())
-                .orElseThrow(()->new IllegalStateException("项目管理员尚未上传自己的电子签!"));
+                .orElseThrow(()->new IllegalStateException("项目管理员尚未上传自己的电子签，请维护"));
 
         String  currentUserSignaturePic = Optional.ofNullable(SecurityUtils.getUsername())
                 .map(uname->userService.selectUserByUserName(uname))
