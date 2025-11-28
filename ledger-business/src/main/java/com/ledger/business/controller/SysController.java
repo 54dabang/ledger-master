@@ -82,7 +82,7 @@ public class SysController extends BaseController {
             }
             SysUser loginUser = userService.selectUserByUserName(SecurityUtils.getUsername());
             if(StringUtils.isNotEmpty(loginUser.getSignaturePic())){
-                FileUploadUtils.deleteFile(loginUser.getSignaturePic());
+                FileUploadUtils.deleteFile(RuoYiConfig.getAbsolutePath(loginUser.getSignaturePic()));
             }
 
             // 使用UUID重命名文件

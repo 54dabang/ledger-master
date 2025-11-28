@@ -147,6 +147,11 @@ public class FileUploadUtils
         return RuoYiConfig.getRelativePath(filePath);
     }
 
+    public static void delete(String nativePath){
+        String absolutePath = RuoYiConfig.getAbsolutePath(nativePath);
+
+    }
+
     /**
      * 编码文件名(日期格式目录 + 原文件名 + 序列值 + 后缀)
      */
