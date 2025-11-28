@@ -74,6 +74,8 @@ public class ReimbursementController extends BaseController {
 
     @Autowired
     private IProjectExpenditureLedgerService projectExpenditureLedgerService;
+    @Autowired
+    private ICtgLedgerProjectExpenseDetailService ctgLedgerProjectExpenseDetailService;
 
     @Autowired
     private ISysUserService userService;
@@ -230,21 +232,32 @@ public class ReimbursementController extends BaseController {
             maxReimbursementSequenceNo = projectExpenditureLedgerService.selectMaxReimbursementSequenceNo(projectId, year);
         }
         maxReimbursementSequenceNo = Optional.ofNullable(maxReimbursementSequenceNo).orElse(0L);
+
+        CtgLedgerProjectExpenseDetail queryParam = new CtgLedgerProjectExpenseDetail();
+        queryParam.setLedgerProjectId(projectId);
+        queryParam.setYear(year);
+        queryParam.setReimbursementSequenceNo(maxReimbursementSequenceNo);
+        List<CtgLedgerProjectExpenseDetail> projectExpenseDetailList = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(queryParam);
+
+        String reimburserLoginName = Optional.ofNullable(projectExpenseDetailList.get(0)).map(e->e.getReimburserLoginName()).orElse(null);
+
         CtgLedgerProject ctgLedgerProject = projectService.selectCtgLedgerProjectById(projectId);
         String projectManagerSignaturePic = Optional.ofNullable(ctgLedgerProject).map(p->p.getProjectManagerLoginName())
                 .map(uname->userService.selectUserByUserName(uname))
                 .map(u->u.getSignaturePic())
                 .orElseThrow(()->new IllegalStateException("项目管理员尚未上传自己的电子签，请维护"));
 
-        String  currentUserSignaturePic = Optional.ofNullable(SecurityUtils.getUsername())
+        String  reimbuserSignaturePic = Optional.ofNullable(reimburserLoginName)
                 .map(uname->userService.selectUserByUserName(uname))
                 .map(u->u.getSignaturePic())
                 .orElseThrow(()->new IllegalStateException("您尚未上传自己的电子签名，请维护!"));
 
+
+
         ProjectExpenditureLedgerVo projectExpenditureLedgerVo = projectExpenditureLedgerService.getProjectExpenditureLedgerVo(projectId, year, maxReimbursementSequenceNo);
 
         projectExpenditureLedgerVo.setProjectManagerSignaturePic(projectManagerSignaturePic);
-        projectExpenditureLedgerVo.setCurrentUserSignaturePic(currentUserSignaturePic);
+        projectExpenditureLedgerVo.setCurrentUserSignaturePic(reimbuserSignaturePic);
 
         return AjaxResult.success(projectExpenditureLedgerVo);
     }

@@ -44,6 +44,7 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
         List<CtgLedgerProjectExpenseDetail> detailList = ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
         detailList = detailList.stream().filter(d -> d.getReimbursementSequenceNo() <= reimbursementSequenceNo).collect(Collectors.toList());
 
+
         //项目经费执行情况
         ProjectExpenditureLedgerColumnVo totalBudgetCol = convertToLedgerColumnVo(ctgLedgerProject);
         ProjectExpenditureLedgerColumnVo executedAmountCol = convertToExecutedAmountLedgerColumnVo(ctgLedgerProject);
@@ -103,7 +104,6 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
 
 
         projectExpenditureLedgerVo.setRemainingTotalFunds(remainingTotalFunds);
-
         projectExpenditureLedgerVo.setProjectName(ctgLedgerProject.getProjectName());
         projectExpenditureLedgerVo.setYear(year);
         projectExpenditureLedgerVo.setSequenceNo(reimbursementSequenceNo);
