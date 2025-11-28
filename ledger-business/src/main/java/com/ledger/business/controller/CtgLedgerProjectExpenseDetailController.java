@@ -96,7 +96,7 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController {
     public AjaxResult add(@RequestBody CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail) {
         int count = 0;
         try {
-            ctgLedgerProjectExpenseDetail.setRemark(StringUtils.isEmpty(ctgLedgerProjectExpenseDetail.getRemarkTemp()) ? StrUtil.buildRemark(ctgLedgerProjectExpenseDetail) : ctgLedgerProjectExpenseDetail.getRemarkTemp());
+            //ctgLedgerProjectExpenseDetail.setRemark(StringUtils.isEmpty(ctgLedgerProjectExpenseDetail.getRemarkTemp()) ? StrUtil.buildRemark(ctgLedgerProjectExpenseDetail) : ctgLedgerProjectExpenseDetail.getRemarkTemp());
             count = ctgLedgerProjectExpenseDetailService.insertCtgLedgerProjectExpenseDetail(ctgLedgerProjectExpenseDetail);
         } catch (Exception ex) {
             for (Throwable cur = ex; cur != null; cur = cur.getCause()) {

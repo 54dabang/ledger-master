@@ -11,16 +11,15 @@ import com.ledger.business.vo.CategoryEnum;
 import com.ledger.business.vo.ProjectExpenditureColumnEnum;
 import com.ledger.business.vo.ProjectExpenditureLedgerColumnVo;
 import com.ledger.business.vo.ProjectExpenditureLedgerVo;
+import com.ledger.common.core.domain.entity.SysUser;
+import com.ledger.system.service.ISysUserService;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,6 +32,9 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
     private CtgLedgerAnnualBudgetMapper CtgLedgerAnnualBudgetMapper;
     @Autowired
     private CtgLedgerProjectExpenseDetailMapper ctgLedgerProjectExpenseDetailMapper;
+    @Autowired
+    private ISysUserService sysUserService;
+
 
     @Override
     public ProjectExpenditureLedgerVo getProjectExpenditureLedgerVo(Long projectId, Integer year, Long reimbursementSequenceNo) {
@@ -400,5 +402,43 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
     @Override
     public Long selectMaxReimbursementSequenceNo(Long projectId, Integer year) {
         return ctgLedgerProjectExpenseDetailMapper.selectMaxReimbursementSequenceNoByProjectIdAndYear(projectId, year);
+    }
+
+    @Override
+    public boolean projectExpenditureLedgerValid(Long projectId, Integer year, Long reimbursementSequenceNo) {
+        CtgLedgerProject ctgLedgerProject = ctgLedgerProjectMapper.selectCtgLedgerProjectById(projectId);
+        CtgLedgerAnnualBudget annualBudget = CtgLedgerAnnualBudgetMapper.selectByProjectIdAndYear(projectId, year);
+        if(Objects.isNull(annualBudget)){
+            throw new IllegalStateException("年度预算不存在，请联系管理员新增！");
+        }
+        // 项目管理员
+        SysUser projectManager = Optional.ofNullable(ctgLedgerProject)
+                .map(p -> p.getProjectManagerLoginName())
+                .map(sysUserService::selectUserByUserName)
+                .orElseThrow(() -> new IllegalStateException("项目管理员信息不存在"));
+
+        CtgLedgerProjectExpenseDetail queryParam = new CtgLedgerProjectExpenseDetail();
+        queryParam.setLedgerProjectId(projectId);
+        queryParam.setYear(year);
+        queryParam.setReimbursementSequenceNo(reimbursementSequenceNo);
+        List<CtgLedgerProjectExpenseDetail> projectExpenseDetailList = ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailList(queryParam);
+
+        String reimburserLoginName = Optional.ofNullable(projectExpenseDetailList.get(0)).map(e->e.getReimburserLoginName()).orElse(null);
+        String projectManagerNickName = projectManager.getNickName();
+        String projectManagerSignaturePic = Optional.ofNullable(projectManager.getSignaturePic())
+                .orElseThrow(() -> new IllegalStateException(
+                        String.format("项目管理员:%s,尚未上传自己的电子签，请维护", projectManagerNickName)));
+
+
+        // 报销人电子签维护
+        SysUser reimburser = Optional.ofNullable(reimburserLoginName)
+                .map(sysUserService::selectUserByUserName)
+                .orElseThrow(() -> new IllegalStateException("报销人信息不存在"));
+
+        String reimburserNickName = reimburser.getNickName();
+        String reimburserSignaturePic = Optional.ofNullable(reimburser.getSignaturePic())
+                .orElseThrow(() -> new IllegalStateException(
+                        String.format("报销人:%s尚未上传自己的电子签名，请维护!", reimburserNickName)));
+        return false;
     }
 }

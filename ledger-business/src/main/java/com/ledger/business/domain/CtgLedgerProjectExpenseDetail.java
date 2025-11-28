@@ -1,5 +1,7 @@
 package com.ledger.business.domain;
 
+import com.ledger.business.util.StrUtil;
+import com.ledger.common.utils.StringUtil;
 import io.swagger.annotations.ApiModelProperty;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -166,6 +168,11 @@ public class CtgLedgerProjectExpenseDetail extends BaseEntity {
 
     public void setRemarkTemp(String remarkTemp) {
         this.remarkTemp = remarkTemp;
+    }
+
+    @Override
+    public String getRemark() {
+        return StrUtil.buildRemark(this);
     }
 
     @Override

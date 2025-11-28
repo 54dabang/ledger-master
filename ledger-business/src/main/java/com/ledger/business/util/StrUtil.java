@@ -16,17 +16,23 @@ public class StrUtil {
         return m.find() ? m.group() : "";
     }
 
-    public static String buildRemark(CtgLedgerProjectExpenseDetail expenseDetail){
+    public static String buildRemark(CtgLedgerProjectExpenseDetail expenseDetail) {
         if (expenseDetail == null) {
             return "";
         }
+
         Long expenseReportNumber = expenseDetail.getExpenseReportNumber();
         String feeType = expenseDetail.getFeeType();
         java.math.BigDecimal amount = expenseDetail.getAmount();
-        
+
+        String amountStr = "";
+        if (amount != null) {
+            amountStr = amount.stripTrailingZeros().toPlainString();
+        }
+
         return String.format("单号%s，发生%s金额%s万元",
                 expenseReportNumber != null ? expenseReportNumber : "",
                 feeType != null ? feeType : "",
-                amount != null ? amount.multiply(new java.math.BigDecimal("10000")) : "");
+                amountStr);
     }
 }

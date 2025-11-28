@@ -6,4 +6,6 @@ public interface IProjectExpenditureLedgerService {
     ProjectExpenditureLedgerVo getProjectExpenditureLedgerVo(Long projectId,Integer year,Long reimbursementSequenceNo);
 
     Long selectMaxReimbursementSequenceNo(Long projectId,Integer year);
+
+    boolean projectExpenditureLedgerValid(Long projectId,Integer year,Long reimbursementSequenceNo);
 }

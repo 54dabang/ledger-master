@@ -20,6 +20,8 @@ public interface IReimbursementService {
 
     boolean isProjectMember(String loginName, CtgLedgerProject ctgLedgerProject);
 
+    boolean enableManageProject(String loginName, CtgLedgerProject ctgLedgerProject);
+
     boolean hasPermission(Long projectId, Long userId);
 
     void checkPermisson(Long projectId, Long userId);

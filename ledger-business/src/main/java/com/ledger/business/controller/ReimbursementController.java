@@ -91,6 +91,8 @@ public class ReimbursementController extends BaseController {
     @Autowired
     private TokenService tokenService;
 
+
+
     @ApiOperation("同步台账基本数据信息")
     @RequestMapping(value = "/white/syncReimbursementData", method = RequestMethod.POST)
     @Log(
@@ -242,25 +244,48 @@ public class ReimbursementController extends BaseController {
         String reimburserLoginName = Optional.ofNullable(projectExpenseDetailList.get(0)).map(e->e.getReimburserLoginName()).orElse(null);
 
         CtgLedgerProject ctgLedgerProject = projectService.selectCtgLedgerProjectById(projectId);
-        String projectManagerSignaturePic = Optional.ofNullable(ctgLedgerProject).map(p->p.getProjectManagerLoginName())
-                .map(uname->userService.selectUserByUserName(uname))
-                .map(u->u.getSignaturePic())
-                .orElseThrow(()->new IllegalStateException("项目管理员尚未上传自己的电子签，请维护"));
+        // 项目管理员
+        SysUser projectManager = Optional.ofNullable(ctgLedgerProject)
+                .map(p -> p.getProjectManagerLoginName())
+                .map(userService::selectUserByUserName)
+                .orElseThrow(() -> new IllegalStateException("项目管理员信息不存在"));
 
-        String  reimbuserSignaturePic = Optional.ofNullable(reimburserLoginName)
-                .map(uname->userService.selectUserByUserName(uname))
-                .map(u->u.getSignaturePic())
-                .orElseThrow(()->new IllegalStateException("您尚未上传自己的电子签名，请维护!"));
+        String projectManagerNickName = projectManager.getNickName();
+        String projectManagerSignaturePic = Optional.ofNullable(projectManager.getSignaturePic())
+                .orElseThrow(() -> new IllegalStateException(
+                        String.format("项目管理员:%s,尚未上传自己的电子签，请维护", projectManagerNickName)));
+
+
+        // 报销人电子签维护
+        SysUser reimburser = Optional.ofNullable(reimburserLoginName)
+                .map(userService::selectUserByUserName)
+                .orElseThrow(() -> new IllegalStateException("报销人信息不存在"));
+
+        String reimburserNickName = reimburser.getNickName();
+        String reimburserSignaturePic = Optional.ofNullable(reimburser.getSignaturePic())
+                .orElseThrow(() -> new IllegalStateException(
+                        String.format("报销人:%s尚未上传自己的电子签名，请维护!", reimburserNickName)));
 
 
 
         ProjectExpenditureLedgerVo projectExpenditureLedgerVo = projectExpenditureLedgerService.getProjectExpenditureLedgerVo(projectId, year, maxReimbursementSequenceNo);
 
         projectExpenditureLedgerVo.setProjectManagerSignaturePic(projectManagerSignaturePic);
-        projectExpenditureLedgerVo.setCurrentUserSignaturePic(reimbuserSignaturePic);
+        projectExpenditureLedgerVo.setCurrentUserSignaturePic(reimburserSignaturePic);
 
         return AjaxResult.success(projectExpenditureLedgerVo);
     }
+
+    @ApiOperation("checkExpenditureLedgerDataValid")
+    @RequestMapping(value = "/checkExpenditureLedgerDataValid", method = RequestMethod.GET)
+    @PreAuthorize("@ss.hasPermi('business:expenditure:exportledger')")
+    @Log(title = "检查台账数据完整性", businessType = BusinessType.EXPORT)
+    public AjaxResult checkExpenditureLedgerDataValid(@RequestParam("projectId") Long projectId, @RequestParam("year") Integer year, @RequestParam("maxReimbursementSequenceNo") Long maxReimbursementSequenceNo) {
+        projectExpenditureLedgerService.projectExpenditureLedgerValid(projectId,year,maxReimbursementSequenceNo);
+        return AjaxResult.success("成功！");
+    }
+
+
 
     @ApiOperation("获取所有有效用户")
     @RequestMapping(value = "/loadValidUsers", method = RequestMethod.GET)

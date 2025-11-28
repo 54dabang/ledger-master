@@ -60,7 +60,13 @@ public interface ICtgLedgerProjectExpenseDetailService
      * @param ctgLedgerProjectExpenseDetail 项目支出明细
      * @return 结果
      */
-    public int updateCtgLedgerProjectExpenseDetail(CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail);
+    public int updateCtgLedgerProjectExpenseDetail(CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail) ;
+
+    /**
+     * 检查权限
+     * @param expenseDetailId
+     */
+    void checkPermission(Long expenseDetailId);
 
     /**
      * 批量删除项目支出明细
@@ -68,7 +74,7 @@ public interface ICtgLedgerProjectExpenseDetailService
      * @param ids 需要删除的项目支出明细主键集合
      * @return 结果
      */
-    public int deleteCtgLedgerProjectExpenseDetailByIds(Long[] ids);
+    public int deleteCtgLedgerProjectExpenseDetailByIds(Long[] ids) ;
 
     /**
      * 删除项目支出明细信息
@@ -76,7 +82,7 @@ public interface ICtgLedgerProjectExpenseDetailService
      * @param id 项目支出明细主键
      * @return 结果
      */
-    public int deleteCtgLedgerProjectExpenseDetailById(Long id);
+    public int deleteCtgLedgerProjectExpenseDetailById(Long id) throws IllegalAccessException;
 
     List<CtgLedgerProjectExpenseDetail> batchSave(List<CtgLedgerProjectExpenseDetail> projectExpenseDetails, Long projectId, Long year);
 

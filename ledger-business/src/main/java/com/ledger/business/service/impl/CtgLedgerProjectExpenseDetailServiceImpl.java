@@ -10,6 +10,7 @@ import com.ledger.business.domain.CtgLedgerAnnualBudget;
 import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.service.ICtgLedgerProjectService;
 import com.ledger.business.service.ICtgLedgerProjectUserService;
+import com.ledger.business.service.IReimbursementService;
 import com.ledger.business.util.StrUtil;
 import com.ledger.business.vo.CtgLedgerProjectVo;
 import com.ledger.business.vo.SysUserVo;
@@ -40,6 +41,8 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
     private ICtgLedgerProjectUserService projectUserService;
     @Autowired
     private ICtgLedgerProjectService projectService;
+    @Autowired
+    private IReimbursementService reimbursementService;
 
     /**
      * 查询项目支出明细
@@ -118,9 +121,22 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
      * @return 结果
      */
     @Override
-    public int updateCtgLedgerProjectExpenseDetail(CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail) {
+    public int updateCtgLedgerProjectExpenseDetail(CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail)  {
+        checkPermission(ctgLedgerProjectExpenseDetail.getId());
         ctgLedgerProjectExpenseDetail.setUpdateTime(DateUtils.getNowDate());
         return ctgLedgerProjectExpenseDetailMapper.updateCtgLedgerProjectExpenseDetail(ctgLedgerProjectExpenseDetail);
+    }
+
+    public void checkPermission(Long expenseDetailId)  {
+        if(Objects.isNull(expenseDetailId)){
+            return;
+        }
+        CtgLedgerProjectExpenseDetail expenseDetail = this.ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailById(expenseDetailId);
+        CtgLedgerProject project =  projectService.selectCtgLedgerProjectById(expenseDetail.getLedgerProjectId());
+        String loginUser = SecurityUtils.getUsername();
+        if(!loginUser.equals(expenseDetail.getReimburserLoginName()) && !reimbursementService.enableManageProject(loginUser,project)){
+            throw new IllegalStateException(String.format("%s 没有该报销记录 %s 的操作权限！",SecurityUtils.getLoginUser().getUser().getNickName(),expenseDetail.getExpenseReportNumber()));
+        }
     }
 
     /**
@@ -130,7 +146,10 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
      * @return 结果
      */
     @Override
-    public int deleteCtgLedgerProjectExpenseDetailByIds(Long[] ids) {
+    public int deleteCtgLedgerProjectExpenseDetailByIds(Long[] ids){
+        for (Long id : ids) {
+            checkPermission(id);
+        }
         return ctgLedgerProjectExpenseDetailMapper.deleteCtgLedgerProjectExpenseDetailByIds(ids);
     }
 
@@ -141,7 +160,8 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
      * @return 结果
      */
     @Override
-    public int deleteCtgLedgerProjectExpenseDetailById(Long id) {
+    public int deleteCtgLedgerProjectExpenseDetailById(Long id) throws IllegalAccessException {
+        checkPermission(id);
         return ctgLedgerProjectExpenseDetailMapper.deleteCtgLedgerProjectExpenseDetailById(id);
     }
 

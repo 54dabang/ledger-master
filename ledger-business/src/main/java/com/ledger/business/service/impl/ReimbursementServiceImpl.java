@@ -58,6 +58,8 @@ public class ReimbursementServiceImpl implements IReimbursementService {
     private PermissionService permissionService;
 
 
+
+
     @Override
     public Long syncReimbursementData(ReimbursementDTO reimbursementDTO, CtgLedgerProject ctgLedgerProject) {
 
@@ -137,9 +139,17 @@ public class ReimbursementServiceImpl implements IReimbursementService {
         boolean isMember = projectUserService.isProjectUser(ctgLedgerProject.getId(), user.getUserId());
         boolean isProjectManager = loginName.trim().equals(ctgLedgerProject.getProjectManagerLoginName().trim());
         boolean isProjectContact = loginName.trim().equals(ctgLedgerProject.getProjectManagerLoginName().trim());
-        return isMember || isProjectManager;
+        return isMember || isProjectManager || isProjectContact;
     }
 
+    @Override
+    public boolean enableManageProject(String loginName, CtgLedgerProject ctgLedgerProject) {
+        boolean isProjectManager = loginName.trim().equals(ctgLedgerProject.getProjectManagerLoginName().trim());
+        boolean isProjectContact = loginName.trim().equals(ctgLedgerProject.getProjectManagerLoginName().trim());
+        boolean isAdmin = permissionService.hasRole("admin");
+
+        return  isProjectManager || isProjectContact || isAdmin;
+    }
 
     @Override
     public boolean hasPermission(Long projectId, Long userId) {
