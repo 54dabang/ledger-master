@@ -254,7 +254,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
         boolean isMember = reimbursementService.isProjectMember(SecurityUtils.getUsername(), ctgLedgerProject);
         boolean isAdmin = permissionService.hasRole(Constants.SUPER_ADMIN);
         if (!isMember && !isAdmin) {
-            return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("用户:%s，不是项目：《%s》 成员或者管理员角色，请联系项目管理员添加！", SecurityUtils.getUsername(), ctgLedgerProject.getProjectName()));
+            return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("用户:%s，不是项目：《%s》 成员或者管理员角色，请联系项目负责人（联系人）添加！", SecurityUtils.getUsername(), ctgLedgerProject.getProjectName()));
         }
         CtgLedgerProjectVo ctgLedgerProjectVo = projectUserService.toCtgLedgerProjectVo(ctgLedgerProject);
         // 根据项目ID和年份查询支出明细列表

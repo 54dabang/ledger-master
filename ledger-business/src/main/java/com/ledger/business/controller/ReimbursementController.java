@@ -138,7 +138,7 @@ public class ReimbursementController extends BaseController {
         //检测用户是否是项目成员
         boolean isMember = reimbursementService.isHandlerProjectMember(reimbursementDTO, ctgLedgerProject);
         if (!isMember) {
-            return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("用户:%s，不是项目：《%s》 成员，请联系项目管理员添加！", reimbursementDTO.getHandler().getLoginName(), ctgLedgerProject.getProjectName()));
+            return AjaxResult.error(HttpStatus.DATA_DUPLICATE, String.format("用户:%s，不是项目：《%s》 成员，请联系项目负责人（联系人）添加！", reimbursementDTO.getHandler().getLoginName(), ctgLedgerProject.getProjectName()));
         }
 
         //资源加锁，防止并发冲突

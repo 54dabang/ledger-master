@@ -107,7 +107,7 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
                 .filter(m -> m.getUserName().equals(ctgLedgerProjectExpenseDetail.getReimburserLoginName()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException(
-                        String.format("用户：%s 不是项目成员，请联系管理员添加", ctgLedgerProjectExpenseDetail.getReimburserName())
+                        String.format("用户：%s 不是项目成员，请联系项目负责人（联系人）添加", ctgLedgerProjectExpenseDetail.getReimburserName())
                 ));
 
         return ctgLedgerProjectExpenseDetailMapper.insertCtgLedgerProjectExpenseDetail(ctgLedgerProjectExpenseDetail);
@@ -207,7 +207,7 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
     private  SysUserVo findByReimburserName(List<SysUserVo> allMembers,String name){
         SysUserVo sysUserVo = allMembers.stream().filter(m->m.getNickName().equals(name.trim())).findFirst().orElse(null);
         if(Objects.isNull(sysUserVo)){
-            throw new IllegalStateException(String.format("用户：%s 不是项目成员，请联系管理员添加",name));
+            throw new IllegalStateException(String.format("用户：%s 不是项目成员，请联系项目负责人（联系人）添加",name));
         }
         return sysUserVo;
     }
