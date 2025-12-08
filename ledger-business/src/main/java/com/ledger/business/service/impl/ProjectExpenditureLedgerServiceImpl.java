@@ -7,6 +7,7 @@ import com.ledger.business.mapper.CtgLedgerAnnualBudgetMapper;
 import com.ledger.business.mapper.CtgLedgerProjectExpenseDetailMapper;
 import com.ledger.business.mapper.CtgLedgerProjectMapper;
 import com.ledger.business.service.IProjectExpenditureLedgerService;
+import com.ledger.business.util.StrUtil;
 import com.ledger.business.vo.CategoryEnum;
 import com.ledger.business.vo.ProjectExpenditureColumnEnum;
 import com.ledger.business.vo.ProjectExpenditureLedgerColumnVo;
@@ -17,6 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -109,8 +111,16 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
         projectExpenditureLedgerVo.setProjectName(ctgLedgerProject.getProjectName());
         projectExpenditureLedgerVo.setYear(year);
         projectExpenditureLedgerVo.setSequenceNo(reimbursementSequenceNo);
+        projectExpenditureLedgerVo.setRemark(buildRemark(currentExpenditureColVo,lastEntry.getValue()));
 
         return projectExpenditureLedgerVo;
+    }
+
+    public static String buildRemark(ProjectExpenditureLedgerColumnVo currentExpenditureColVo,List<CtgLedgerProjectExpenseDetail> expenseDetails){
+        if(!CollectionUtils.isEmpty(expenseDetails) && expenseDetails.size() ==1 ){
+            return StrUtil.buildRemarkInYuan(expenseDetails.get(0),true);
+        }
+        return null;
     }
 
 

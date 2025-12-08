@@ -49,4 +49,7 @@ public class ProjectExpenditureLedgerVo {
     @ApiModelProperty(name = "当前登录用户电子签")
     private String currentUserSignaturePic;
 
+    @ApiModelProperty(name = "备注")
+    private String remark;
+
 }
