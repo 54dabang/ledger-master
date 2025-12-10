@@ -5,12 +5,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
+import com.ledger.business.domain.CtgLedgerProject;
+import com.ledger.business.service.ICtgLedgerProjectService;
+import com.ledger.business.service.ICtgLedgerProjectUserService;
 import com.ledger.business.util.StrUtil;
+import com.ledger.business.vo.CtgLedgerProjectExpenseDetailVo;
+import com.ledger.business.vo.CtgLedgerProjectVo;
 import com.ledger.common.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.models.auth.In;
+import org.springframework.beans.BeanUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +41,10 @@ import com.ledger.common.core.page.TableDataInfo;
 public class CtgLedgerProjectExpenseDetailController extends BaseController {
     @Autowired
     private ICtgLedgerProjectExpenseDetailService ctgLedgerProjectExpenseDetailService;
+    @Autowired
+    private ICtgLedgerProjectUserService projectUserService;
+    @Autowired
+    private ICtgLedgerProjectService projectService;
 
     /**
      * 查询项目支出明细列表
@@ -48,9 +58,23 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController {
         CtgLedgerProjectExpenseDetail detailParam = new CtgLedgerProjectExpenseDetail();
         detailParam.setLedgerProjectId(projectId);
         detailParam.setYear(year);
+        CtgLedgerProject project = projectService.selectCtgLedgerProjectById(projectId);
+        CtgLedgerProjectVo ctgLedgerProjectVo =  projectUserService.toCtgLedgerProjectVo(project);
         List<CtgLedgerProjectExpenseDetail> list = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(detailParam);
-        return getDataTable(list);
+        List<CtgLedgerProjectExpenseDetailVo> lst = list.stream().map(e->toExpenseDetailVo(e,ctgLedgerProjectVo)).collect(Collectors.toList());
+        return getDataTable(lst);
     }
+
+    private CtgLedgerProjectExpenseDetailVo toExpenseDetailVo(CtgLedgerProjectExpenseDetail expenseDetail, CtgLedgerProjectVo ctgLedgerProjectVo) {
+        CtgLedgerProjectExpenseDetailVo detailVo = new CtgLedgerProjectExpenseDetailVo();
+        BeanUtils.copyProperties(expenseDetail, detailVo);
+        detailVo.setContact(ctgLedgerProjectVo.getContact());
+        detailVo.setManager(ctgLedgerProjectVo.getManager());
+        return detailVo;
+
+    }
+
+
 
     @PreAuthorize("@ss.hasPermi('business:detail:list')")
     @GetMapping("/getAllDbYears")
