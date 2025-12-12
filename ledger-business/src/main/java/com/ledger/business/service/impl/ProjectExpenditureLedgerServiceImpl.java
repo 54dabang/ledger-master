@@ -111,16 +111,13 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
         projectExpenditureLedgerVo.setProjectName(ctgLedgerProject.getProjectName());
         projectExpenditureLedgerVo.setYear(year);
         projectExpenditureLedgerVo.setSequenceNo(reimbursementSequenceNo);
-        projectExpenditureLedgerVo.setRemark(buildRemark(currentExpenditureColVo,lastEntry.getValue()));
+        projectExpenditureLedgerVo.setRemarkList(buildRemark(lastEntry.getValue()));
 
         return projectExpenditureLedgerVo;
     }
 
-    public static String buildRemark(ProjectExpenditureLedgerColumnVo currentExpenditureColVo,List<CtgLedgerProjectExpenseDetail> expenseDetails){
-        if(!CollectionUtils.isEmpty(expenseDetails) && expenseDetails.size() ==1 ){
-            return StrUtil.buildRemarkInYuan(expenseDetails.get(0),true);
-        }
-        return null;
+    public static List<String> buildRemark(List<CtgLedgerProjectExpenseDetail> expenseDetails){
+       return expenseDetails.stream().map(e->StrUtil.buildRemarkInYuan(e,true)).collect(Collectors.toList());
     }
 
 
