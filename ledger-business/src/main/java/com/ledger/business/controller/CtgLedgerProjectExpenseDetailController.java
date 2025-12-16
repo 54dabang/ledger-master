@@ -1,7 +1,9 @@
 package com.ledger.business.controller;
 
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
@@ -11,6 +13,7 @@ import com.ledger.business.service.ICtgLedgerProjectUserService;
 import com.ledger.business.util.StrUtil;
 import com.ledger.business.vo.CtgLedgerProjectExpenseDetailVo;
 import com.ledger.business.vo.CtgLedgerProjectVo;
+import com.ledger.business.vo.SysUserVo;
 import com.ledger.common.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -62,7 +65,20 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController {
         CtgLedgerProjectVo ctgLedgerProjectVo =  projectUserService.toCtgLedgerProjectVo(project);
         List<CtgLedgerProjectExpenseDetail> list = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(detailParam);
         List<CtgLedgerProjectExpenseDetailVo> lst = list.stream().map(e->toExpenseDetailVo(e,ctgLedgerProjectVo)).collect(Collectors.toList());
-        return getDataTable(lst);
+        List<SysUserVo> members = new ArrayList<>();
+        members.addAll(ctgLedgerProjectVo.getMembers());
+        members.add(ctgLedgerProjectVo.getManager());
+        members.add(ctgLedgerProjectVo.getContact());
+        List<SysUserVo> distinctMembers = members.stream()
+                .filter(Objects::nonNull)          // 如果集合里可能有 null，先过滤
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(
+                                SysUserVo::getUserId,   // key
+                                v -> v,                 // value
+                                (v1, v2) -> v1),        // 重复 key 时保留第一个
+                        map -> new ArrayList<>(map.values())));
+
+        return getDataTable(lst,distinctMembers);
     }
 
     private CtgLedgerProjectExpenseDetailVo toExpenseDetailVo(CtgLedgerProjectExpenseDetail expenseDetail, CtgLedgerProjectVo ctgLedgerProjectVo) {
