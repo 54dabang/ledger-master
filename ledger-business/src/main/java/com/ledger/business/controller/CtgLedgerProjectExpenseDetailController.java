@@ -78,7 +78,7 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController {
                                 (v1, v2) -> v1),        // 重复 key 时保留第一个
                         map -> new ArrayList<>(map.values())));
 
-        return getDataTable(lst,distinctMembers);
+        return getDataTable(lst,"members",distinctMembers);
     }
 
     private CtgLedgerProjectExpenseDetailVo toExpenseDetailVo(CtgLedgerProjectExpenseDetail expenseDetail, CtgLedgerProjectVo ctgLedgerProjectVo) {

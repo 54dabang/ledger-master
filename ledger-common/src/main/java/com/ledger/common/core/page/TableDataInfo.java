@@ -1,7 +1,9 @@
 package com.ledger.common.core.page;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 表格分页数据对象
@@ -24,7 +26,7 @@ public class TableDataInfo implements Serializable
     /** 消息内容 */
     private String msg;
 
-    private Object metaInfo;
+    private Map<String,Object> metaInfo = new HashMap<>();
 
     /**
      * 表格数据对象
@@ -85,11 +87,11 @@ public class TableDataInfo implements Serializable
         this.msg = msg;
     }
 
-    public Object getMetaInfo() {
+    public Map<String, Object> getMetaInfo() {
         return metaInfo;
     }
 
-    public void setMetaInfo(Object metaInfo) {
+    public void setMetaInfo(Map<String, Object> metaInfo) {
         this.metaInfo = metaInfo;
     }
 }
