@@ -11,6 +11,7 @@ import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import com.ledger.business.domain.CtgLedgerProjectUser;
 import com.ledger.business.service.ICtgLedgerProjectExpenseDetailService;
 import com.ledger.business.service.ICtgLedgerProjectUserService;
+import com.ledger.business.service.IReimbursementService;
 import com.ledger.business.util.InitConstant;
 import com.ledger.business.vo.CtgLedgerProjectVo;
 import com.ledger.common.utils.SecurityUtils;
@@ -50,7 +51,8 @@ public class CtgLedgerProjectController extends BaseController {
     private ICtgLedgerProjectUserService projectUserService;
     @Autowired
     private ICtgLedgerProjectExpenseDetailService iCtgLedgerProjectExpenseDetailService;
-
+   @Autowired
+    private IReimbursementService reimbursementService;
     /**
      * 查询项目管理列表
      */
@@ -126,6 +128,7 @@ public class CtgLedgerProjectController extends BaseController {
     @GetMapping(value = "/{id}")
     @ApiOperation("获取项目基本信息")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
+        reimbursementService.checkPermisson(id, SecurityUtils.getUserId());
         return success(ctgLedgerProjectService.selectCtgLedgerProjectById(id));
     }
 
@@ -152,6 +155,7 @@ public class CtgLedgerProjectController extends BaseController {
     @PutMapping
     @ApiOperation("编辑项目")
     public AjaxResult edit(@RequestBody CtgLedgerProject ctgLedgerProject) {
+        reimbursementService.checkPermisson(ctgLedgerProject.getId(), SecurityUtils.getUserId());
         return toAjax(ctgLedgerProjectService.updateCtgLedgerProject(ctgLedgerProject));
     }
 
@@ -164,6 +168,7 @@ public class CtgLedgerProjectController extends BaseController {
     @ApiOperation("删除项目")
     public AjaxResult remove(@PathVariable Long[] ids) {
         for(Long id : ids){
+            reimbursementService.checkPermisson(id, SecurityUtils.getUserId());
             CtgLedgerProjectExpenseDetail queryParam = new CtgLedgerProjectExpenseDetail();
             queryParam.setLedgerProjectId(id);
             List<CtgLedgerProjectExpenseDetail> selectCtgLedgerProjectExpenseDetailList = iCtgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(queryParam);

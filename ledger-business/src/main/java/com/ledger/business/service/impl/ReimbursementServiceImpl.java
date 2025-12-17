@@ -157,7 +157,8 @@ public class ReimbursementServiceImpl implements IReimbursementService {
         CtgLedgerProject project = projectMapper.selectCtgLedgerProjectById(projectId);
         boolean isMember = projectUserService.isProjectUser(projectId, userId);
         boolean isProjectManager = user.getUserName().equals(project.getProjectManagerLoginName());
-        if (!isMember && !isProjectManager) {
+        boolean isContact = user.getUserName().equals(project.getProjectContactLoginName());
+        if (!isMember && !isProjectManager && !isContact) {
             return false;
         }
         return true;
@@ -169,7 +170,8 @@ public class ReimbursementServiceImpl implements IReimbursementService {
             return;
         }
         if (!hasPermission(projectId, userId)) {
-            throw new PermissionDeniedDataAccessException(String.format("您没有项目:%s对应的权限", projectId), null);
+            CtgLedgerProject project = projectMapper.selectCtgLedgerProjectById(projectId);
+            throw new PermissionDeniedDataAccessException(String.format("您没有项目:%s对应的权限", project.getProjectName()), null);
         }
     }
 
