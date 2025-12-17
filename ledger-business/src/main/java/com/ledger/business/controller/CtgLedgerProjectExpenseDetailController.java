@@ -65,20 +65,9 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController {
         CtgLedgerProjectVo ctgLedgerProjectVo =  projectUserService.toCtgLedgerProjectVo(project);
         List<CtgLedgerProjectExpenseDetail> list = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(detailParam);
         List<CtgLedgerProjectExpenseDetailVo> lst = list.stream().map(e->toExpenseDetailVo(e,ctgLedgerProjectVo)).collect(Collectors.toList());
-        List<SysUserVo> members = new ArrayList<>();
-        members.addAll(ctgLedgerProjectVo.getMembers());
-        members.add(ctgLedgerProjectVo.getManager());
-        members.add(ctgLedgerProjectVo.getContact());
-        List<SysUserVo> distinctMembers = members.stream()
-                .filter(Objects::nonNull)          // 如果集合里可能有 null，先过滤
-                .collect(Collectors.collectingAndThen(
-                        Collectors.toMap(
-                                SysUserVo::getUserId,   // key
-                                v -> v,                 // value
-                                (v1, v2) -> v1),        // 重复 key 时保留第一个
-                        map -> new ArrayList<>(map.values())));
+        List<SysUserVo> members =  projectUserService.getAllMembers(project);
 
-        return getDataTable(lst,"members",distinctMembers);
+        return getDataTable(lst,"members",members);
     }
 
     private CtgLedgerProjectExpenseDetailVo toExpenseDetailVo(CtgLedgerProjectExpenseDetail expenseDetail, CtgLedgerProjectVo ctgLedgerProjectVo) {

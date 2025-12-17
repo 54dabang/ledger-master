@@ -180,7 +180,7 @@ public class CtgLedgerAnnualBudgetController extends BaseController {
 
     @ApiOperation("导入excel项目台账支出明细Excel")
     @PreAuthorize("@ss.hasPermi('business:budget:import')")
-    @Log(title = "导入年度预算台账excel", businessType = BusinessType.DELETE)
+    @Log(title = "导入年度预算台账excel", businessType = BusinessType.IMPORT)
     @PostMapping("/importExcelData")
     public AjaxResult importExcelData(MultipartFile file, Long projectId, Long year) throws Exception {
         reimbursementService.checkPermisson(projectId, SecurityUtils.getUserId());

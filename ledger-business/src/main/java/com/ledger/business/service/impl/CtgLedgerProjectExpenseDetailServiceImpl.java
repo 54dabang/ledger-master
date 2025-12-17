@@ -3,6 +3,7 @@ package com.ledger.business.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -121,21 +122,21 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
      * @return 结果
      */
     @Override
-    public int updateCtgLedgerProjectExpenseDetail(CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail)  {
+    public int updateCtgLedgerProjectExpenseDetail(CtgLedgerProjectExpenseDetail ctgLedgerProjectExpenseDetail) {
         checkPermission(ctgLedgerProjectExpenseDetail.getId());
         ctgLedgerProjectExpenseDetail.setUpdateTime(DateUtils.getNowDate());
         return ctgLedgerProjectExpenseDetailMapper.updateCtgLedgerProjectExpenseDetail(ctgLedgerProjectExpenseDetail);
     }
 
-    public void checkPermission(Long expenseDetailId)  {
-        if(Objects.isNull(expenseDetailId)){
+    public void checkPermission(Long expenseDetailId) {
+        if (Objects.isNull(expenseDetailId)) {
             return;
         }
         CtgLedgerProjectExpenseDetail expenseDetail = this.ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailById(expenseDetailId);
-        CtgLedgerProject project =  projectService.selectCtgLedgerProjectById(expenseDetail.getLedgerProjectId());
+        CtgLedgerProject project = projectService.selectCtgLedgerProjectById(expenseDetail.getLedgerProjectId());
         String loginUser = SecurityUtils.getUsername();
-        if(!loginUser.equals(expenseDetail.getReimburserLoginName()) && !reimbursementService.enableManageProject(loginUser,project)){
-            throw new IllegalStateException(String.format("%s 没有该报销记录 %s 的操作权限！",SecurityUtils.getLoginUser().getUser().getNickName(),expenseDetail.getExpenseReportNumber()));
+        if (!loginUser.equals(expenseDetail.getReimburserLoginName()) && !reimbursementService.enableManageProject(loginUser, project)) {
+            throw new IllegalStateException(String.format("%s 没有该报销记录 %s 的操作权限！", SecurityUtils.getLoginUser().getUser().getNickName(), expenseDetail.getExpenseReportNumber()));
         }
     }
 
@@ -146,7 +147,7 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
      * @return 结果
      */
     @Override
-    public int deleteCtgLedgerProjectExpenseDetailByIds(Long[] ids){
+    public int deleteCtgLedgerProjectExpenseDetailByIds(Long[] ids) {
         for (Long id : ids) {
             checkPermission(id);
         }
@@ -170,21 +171,19 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
         if (CollectionUtils.isEmpty(projectExpenseDetails)) {
             throw new RuntimeException("导入数据为空");
         }
-        CtgLedgerProject ctgLedgerProject =   projectService.selectCtgLedgerProjectById(projectId);
-        CtgLedgerProjectVo ctgLedgerProjectVo = this.projectUserService.toCtgLedgerProjectVo(ctgLedgerProject);
-        List<SysUserVo> allMembers = Stream.concat(
-                ctgLedgerProjectVo.getMembers().stream(),
-                Stream.of(ctgLedgerProjectVo.getManager())
-        ).collect(Collectors.toList());
+        CtgLedgerProject ctgLedgerProject = projectService.selectCtgLedgerProjectById(projectId);
+        List<SysUserVo> allMembers = projectUserService.getAllMembers(ctgLedgerProject);
 
         List<CtgLedgerProjectExpenseDetail> dbDetailList = ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year.intValue());
         List<CtgLedgerProjectExpenseDetail> detailList = Lists.newArrayList();
+        checkProjectExpenseDetailsReimburserNameInMebmbers(projectExpenseDetails,allMembers);
+
         for (CtgLedgerProjectExpenseDetail detail : projectExpenseDetails) {
             if (StringUtils.isEmpty(detail.getSubjectName())) {
                 break;
             }
             //通过用户的名字（中文）找到对应的用户
-            SysUserVo user  = findByReimburserName(allMembers,detail.getReimburserName());
+            SysUserVo user = findByReimburserName(allMembers, detail.getReimburserName());
             detail.setRemark(StringUtils.isEmpty(detail.getRemarkTemp()) ? StrUtil.buildRemark(detail) : detail.getRemarkTemp());
             detail.setLedgerProjectId(projectId);
             detail.setYear(year.intValue());
@@ -204,10 +203,42 @@ public class CtgLedgerProjectExpenseDetailServiceImpl implements ICtgLedgerProje
 
         return detailList;
     }
-    private  SysUserVo findByReimburserName(List<SysUserVo> allMembers,String name){
-        SysUserVo sysUserVo = allMembers.stream().filter(m->m.getNickName().equals(name.trim())).findFirst().orElse(null);
-        if(Objects.isNull(sysUserVo)){
-            throw new IllegalStateException(String.format("用户：%s 不是项目成员，请联系项目负责人（联系人）添加",name));
+
+    public void checkProjectExpenseDetailsReimburserNameInMebmbers(
+            List<CtgLedgerProjectExpenseDetail> detailList,
+            List<SysUserVo> allMembers) {
+
+        // 1. 收集所有明细里的报销人姓名
+        Set<String> reimburserNames = detailList.stream()
+                .map(CtgLedgerProjectExpenseDetail::getReimburserName)
+                .filter(StringUtils::isNotBlank)
+                .map(String::trim)
+                .collect(Collectors.toSet());
+
+        // 2. 收集项目成员的所有昵称
+        Set<String> memberNickNames = allMembers.stream()
+                .map(SysUserVo::getNickName)
+                .filter(StringUtils::isNotBlank)
+                .map(String::trim)
+                .collect(Collectors.toSet());
+
+        // 3. 找出“不在项目成员中”的报销人
+        List<String> notInMembers = reimburserNames.stream()
+                .filter(name -> !memberNickNames.contains(name))
+                .collect(Collectors.toList());
+
+        // 4. 一次性抛出异常
+        if (!notInMembers.isEmpty()) {
+            throw new IllegalStateException(
+                    "以下报销人不是项目成员，请联系项目负责人添加："
+                            + String.join("、", notInMembers));
+        }
+    }
+
+    private SysUserVo findByReimburserName(List<SysUserVo> allMembers, String name) {
+        SysUserVo sysUserVo = allMembers.stream().filter(m -> m.getNickName().equals(name.trim())).findFirst().orElse(null);
+        if (Objects.isNull(sysUserVo)) {
+            throw new IllegalStateException(String.format("用户：%s 不是项目成员，请联系项目负责人（联系人）添加", name));
         }
         return sysUserVo;
     }

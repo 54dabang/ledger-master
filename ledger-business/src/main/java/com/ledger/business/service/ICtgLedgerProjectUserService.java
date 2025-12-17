@@ -6,6 +6,7 @@ import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.domain.CtgLedgerProjectUser;
 import com.ledger.business.dto.ProjectUsersDTO;
 import com.ledger.business.vo.CtgLedgerProjectVo;
+import com.ledger.business.vo.SysUserVo;
 
 /**
  * 项目用户Service接口
@@ -82,4 +83,6 @@ public interface ICtgLedgerProjectUserService
     public List<CtgLedgerProjectUser> batchInsertCtgLedgerProjectUser(ProjectUsersDTO projectUsersDTO);
 
     CtgLedgerProjectVo toCtgLedgerProjectVo(CtgLedgerProject project);
+
+    List<SysUserVo> getAllMembers(CtgLedgerProject project);
 }
