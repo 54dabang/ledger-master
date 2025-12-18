@@ -20,7 +20,7 @@ public class StrUtil {
     }
 
     public static String buildRemark(CtgLedgerProjectExpenseDetail expenseDetail) {
-        return buildRemarkInYuan(expenseDetail, false);
+        return buildRemarkInYuan(expenseDetail, true);
     }
 
     public static String buildRemarkInYuan(CtgLedgerProjectExpenseDetail expenseDetail, boolean inYuan) {
