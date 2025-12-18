@@ -252,8 +252,7 @@ public class ReimbursementController extends BaseController {
 
         String projectManagerNickName = projectManager.getNickName();
         String projectManagerSignaturePic = Optional.ofNullable(projectManager.getSignaturePic())
-                .orElseThrow(() -> new IllegalStateException(
-                        String.format("项目管理员:%s,尚未上传自己的电子签，请维护", projectManagerNickName)));
+                .orElse(null);
 
 
         // 报销人电子签维护
@@ -263,9 +262,7 @@ public class ReimbursementController extends BaseController {
 
         String reimburserNickName = reimburser.getNickName();
         String reimburserSignaturePic = Optional.ofNullable(reimburser.getSignaturePic())
-                .orElseThrow(() -> new IllegalStateException(
-                        String.format("报销人:%s尚未上传自己的电子签名，请维护!", reimburserNickName)));
-
+                .orElse(null);
 
 
         ProjectExpenditureLedgerVo projectExpenditureLedgerVo = projectExpenditureLedgerService.getProjectExpenditureLedgerVo(projectId, year, maxReimbursementSequenceNo);
@@ -276,6 +273,7 @@ public class ReimbursementController extends BaseController {
         return AjaxResult.success(projectExpenditureLedgerVo);
     }
 
+
     @ApiOperation("checkExpenditureLedgerDataValid")
     @RequestMapping(value = "/checkExpenditureLedgerDataValid", method = RequestMethod.GET)
     @PreAuthorize("@ss.hasPermi('business:expenditure:exportledger')")
@@ -284,6 +282,7 @@ public class ReimbursementController extends BaseController {
         projectExpenditureLedgerService.projectExpenditureLedgerValid(projectId,year,maxReimbursementSequenceNo);
         return AjaxResult.success("成功！");
     }
+
 
 
 
