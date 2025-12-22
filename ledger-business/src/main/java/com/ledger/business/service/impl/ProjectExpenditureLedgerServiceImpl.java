@@ -12,6 +12,7 @@ import com.ledger.business.vo.CategoryEnum;
 import com.ledger.business.vo.ProjectExpenditureColumnEnum;
 import com.ledger.business.vo.ProjectExpenditureLedgerColumnVo;
 import com.ledger.business.vo.ProjectExpenditureLedgerVo;
+import com.ledger.common.core.domain.AjaxResult;
 import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.system.service.ISysUserService;
 import io.swagger.annotations.ApiModelProperty;
@@ -413,7 +414,7 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
     }
 
     @Override
-    public boolean projectExpenditureLedgerValid(Long projectId, Integer year, Long reimbursementSequenceNo) {
+    public AjaxResult projectExpenditureLedgerValid(Long projectId, Integer year, Long reimbursementSequenceNo) {
         CtgLedgerProject ctgLedgerProject = ctgLedgerProjectMapper.selectCtgLedgerProjectById(projectId);
         CtgLedgerAnnualBudget annualBudget = CtgLedgerAnnualBudgetMapper.selectByProjectIdAndYear(projectId, year);
         if (Objects.isNull(annualBudget)) {
@@ -453,9 +454,9 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
             String errMsg = pmNoSig && rbNoSig
                     ? String.format("项目管理员:%s和报销人:%s%s", pm, rb, suffix)
                     : String.format("%s:%s%s", pmNoSig ? "项目管理员" : "报销人", pmNoSig ? pm : rb, suffix);
-            throw new IllegalStateException(errMsg);
+           return AjaxResult.error(201,errMsg);
         }
 
-        return false;
+        return AjaxResult.success("成功！");
     }
-}
+    }

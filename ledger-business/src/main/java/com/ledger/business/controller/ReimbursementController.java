@@ -279,8 +279,7 @@ public class ReimbursementController extends BaseController {
     @PreAuthorize("@ss.hasPermi('business:expenditure:exportledger')")
     @Log(title = "检查台账数据完整性", businessType = BusinessType.EXPORT)
     public AjaxResult checkExpenditureLedgerDataValid(@RequestParam("projectId") Long projectId, @RequestParam("year") Integer year, @RequestParam("maxReimbursementSequenceNo") Long maxReimbursementSequenceNo) {
-        projectExpenditureLedgerService.projectExpenditureLedgerValid(projectId,year,maxReimbursementSequenceNo);
-        return AjaxResult.success("成功！");
+        return projectExpenditureLedgerService.projectExpenditureLedgerValid(projectId,year,maxReimbursementSequenceNo);
     }
 
 
