@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -42,7 +43,7 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
     public ProjectExpenditureLedgerVo getProjectExpenditureLedgerVo(Long projectId, Integer year, Long reimbursementSequenceNo) {
         CtgLedgerProject ctgLedgerProject = ctgLedgerProjectMapper.selectCtgLedgerProjectById(projectId);
         CtgLedgerAnnualBudget annualBudget = CtgLedgerAnnualBudgetMapper.selectByProjectIdAndYear(projectId, year);
-        if(Objects.isNull(annualBudget)){
+        if (Objects.isNull(annualBudget)) {
             throw new IllegalStateException("年度预算不存在，请联系管理员新增！");
         }
         List<CtgLedgerProjectExpenseDetail> detailList = ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
@@ -116,8 +117,8 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
         return projectExpenditureLedgerVo;
     }
 
-    public static List<String> buildRemark(List<CtgLedgerProjectExpenseDetail> expenseDetails){
-       return expenseDetails.stream().map(e->StrUtil.buildRemarkInYuan(e,true)).collect(Collectors.toList());
+    public static List<String> buildRemark(List<CtgLedgerProjectExpenseDetail> expenseDetails) {
+        return expenseDetails.stream().map(e -> StrUtil.buildRemarkInYuan(e, true)).collect(Collectors.toList());
     }
 
 
@@ -415,7 +416,7 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
     public boolean projectExpenditureLedgerValid(Long projectId, Integer year, Long reimbursementSequenceNo) {
         CtgLedgerProject ctgLedgerProject = ctgLedgerProjectMapper.selectCtgLedgerProjectById(projectId);
         CtgLedgerAnnualBudget annualBudget = CtgLedgerAnnualBudgetMapper.selectByProjectIdAndYear(projectId, year);
-        if(Objects.isNull(annualBudget)){
+        if (Objects.isNull(annualBudget)) {
             throw new IllegalStateException("年度预算不存在，请联系管理员新增！");
         }
         // 项目管理员
@@ -430,22 +431,31 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
         queryParam.setReimbursementSequenceNo(reimbursementSequenceNo);
         List<CtgLedgerProjectExpenseDetail> projectExpenseDetailList = ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailList(queryParam);
 
-        String reimburserLoginName = Optional.ofNullable(projectExpenseDetailList.get(0)).map(e->e.getReimburserLoginName()).orElse(null);
-        String projectManagerNickName = projectManager.getNickName();
-        String projectManagerSignaturePic = Optional.ofNullable(projectManager.getSignaturePic())
-                .orElseThrow(() -> new IllegalStateException(
-                        String.format("项目管理员:%s,尚未上传自己的电子签，请维护", projectManagerNickName)));
+        String reimburserLoginName = Optional.ofNullable(projectExpenseDetailList.get(0))
+                .map(e -> e.getReimburserLoginName())
+                .orElse(null);
 
 
-        // 报销人电子签维护
+        // 报销人信息校验（前提条件）
         SysUser reimburser = Optional.ofNullable(reimburserLoginName)
                 .map(sysUserService::selectUserByUserName)
                 .orElseThrow(() -> new IllegalStateException("报销人信息不存在"));
 
-        String reimburserNickName = reimburser.getNickName();
-        String reimburserSignaturePic = Optional.ofNullable(reimburser.getSignaturePic())
-                .orElseThrow(() -> new IllegalStateException(
-                        String.format("报销人:%s尚未上传自己的电子签名，请维护!", reimburserNickName)));
+        // 核心信息提取（极简变量名，兼顾简洁与可读性）
+        String pm = projectManager.getNickName();
+        String rb = reimburser.getNickName();
+        boolean pmNoSig = StringUtils.isEmpty(projectManager.getSignaturePic());
+        boolean rbNoSig = StringUtils.isEmpty(reimburser.getSignaturePic());
+        String suffix = "尚未上传自己的电子签名，请维护！";
+
+        // 构建异常信息（无冗余拼接，逻辑直观）
+        if (pmNoSig || rbNoSig) {
+            String errMsg = pmNoSig && rbNoSig
+                    ? String.format("项目管理员:%s和报销人:%s%s", pm, rb, suffix)
+                    : String.format("%s:%s%s", pmNoSig ? "项目管理员" : "报销人", pmNoSig ? pm : rb, suffix);
+            throw new IllegalStateException(errMsg);
+        }
+
         return false;
     }
 }
