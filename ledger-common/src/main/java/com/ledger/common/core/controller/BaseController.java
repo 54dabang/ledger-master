@@ -88,15 +88,15 @@ public class BaseController
     @SuppressWarnings({ "rawtypes", "unchecked" })
     protected TableDataInfo getDataTable(List<?> list)
     {
-        return getDataTable(list,null,null);
+        return getDataTable(list,list.size(),null,null);
     }
-    protected TableDataInfo getDataTable(List<?> list, String key, Object value)
+    protected TableDataInfo getDataTable(List<?> list,long total, String key, Object value)
     {
         TableDataInfo rspData = new TableDataInfo();
         rspData.setCode(HttpStatus.SUCCESS);
         rspData.setMsg("查询成功");
         rspData.setRows(list);
-        rspData.setTotal(new PageInfo(list).getTotal());
+        rspData.setTotal(total);
         if(StringUtils.isNotEmpty(key)){
             rspData.getMetaInfo().put(key,value);
         }

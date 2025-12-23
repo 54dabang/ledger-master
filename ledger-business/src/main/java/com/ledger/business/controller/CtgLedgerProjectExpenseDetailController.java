@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
+import com.github.pagehelper.PageInfo;
 import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.service.ICtgLedgerProjectService;
 import com.ledger.business.service.ICtgLedgerProjectUserService;
@@ -57,17 +58,20 @@ public class CtgLedgerProjectExpenseDetailController extends BaseController {
     @ApiOperation("项目支出明细列表")
     public TableDataInfo list(@ApiParam("项目ID") @RequestParam(required = false) Long projectId,
                               @ApiParam("年份") @RequestParam(required = false) Integer year) {
-        startPage();
+
         CtgLedgerProjectExpenseDetail detailParam = new CtgLedgerProjectExpenseDetail();
         detailParam.setLedgerProjectId(projectId);
         detailParam.setYear(year);
         CtgLedgerProject project = projectService.selectCtgLedgerProjectById(projectId);
         CtgLedgerProjectVo ctgLedgerProjectVo =  projectUserService.toCtgLedgerProjectVo(project);
+        //在正式查询之前，执行了其他查询，会导致threadlocal中拦截器失效，从而导致分页失败，上面的步骤中已经包含了查询操作，所以startPage();必须放在
+        // projectUserService.toCtgLedgerProjectVo(project)之后
+        startPage();
         List<CtgLedgerProjectExpenseDetail> list = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(detailParam);
         List<CtgLedgerProjectExpenseDetailVo> lst = list.stream().map(e->toExpenseDetailVo(e,ctgLedgerProjectVo)).collect(Collectors.toList());
         List<SysUserVo> members =  projectUserService.getAllMembers(project);
 
-        return getDataTable(lst,"members",members);
+        return getDataTable(lst,new PageInfo(list).getTotal(), "members", members);
     }
 
     private CtgLedgerProjectExpenseDetailVo toExpenseDetailVo(CtgLedgerProjectExpenseDetail expenseDetail, CtgLedgerProjectVo ctgLedgerProjectVo) {
