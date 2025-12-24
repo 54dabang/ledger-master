@@ -2,6 +2,7 @@ package com.ledger.business.service.impl;
 
 import java.util.List;
 
+import com.ledger.business.mapper.CtgLedgerProjectUserMapper;
 import com.ledger.common.utils.DateUtils;
 import com.ledger.common.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.ledger.business.mapper.CtgLedgerProjectMapper;
 import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.service.ICtgLedgerProjectService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 项目管理Service业务层处理
@@ -17,9 +19,12 @@ import com.ledger.business.service.ICtgLedgerProjectService;
  * @date 2025-08-21
  */
 @Service
+@Transactional
 public class CtgLedgerProjectServiceImpl implements ICtgLedgerProjectService {
     @Autowired
     private CtgLedgerProjectMapper ctgLedgerProjectMapper;
+    @Autowired
+    private CtgLedgerProjectUserMapper ctgLedgerProjectUserMapper;
 
     /**
      * 查询项目管理
@@ -81,6 +86,9 @@ public class CtgLedgerProjectServiceImpl implements ICtgLedgerProjectService {
      */
     @Override
     public int deleteCtgLedgerProjectByIds(Long[] ids) {
+        for(Long id: ids){
+            ctgLedgerProjectUserMapper.deleteByCtgLedgerProjectIdInt(id);
+        }
         return ctgLedgerProjectMapper.deleteCtgLedgerProjectByIds(ids);
     }
 
