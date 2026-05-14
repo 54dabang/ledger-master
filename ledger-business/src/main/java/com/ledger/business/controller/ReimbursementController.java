@@ -288,23 +288,37 @@ public class ReimbursementController extends BaseController {
     @ApiOperation("获取所有有效用户")
     @RequestMapping(value = "/loadValidUsers", method = RequestMethod.GET)
     @PreAuthorize("@ss.hasPermi('business:expenditure:userlist')")
-    public AjaxResult loadValidUsers(@RequestParam(name = "name", required = false) String name, @RequestParam(name = "pageSize", required = false, defaultValue = "200") Integer pageSize) {
-        PageUtils.startPage(pageSize);
-        SysUser param = new SysUser();
-        param.setDelFlag(InitConstant.USER_EXIST_FLAG);
-        Optional.ofNullable(name)
-                .filter(n -> !n.isEmpty())
-                .ifPresent(n -> {
-                    boolean startEnglish = StringUtil.startWithEnglish(n);
-                    if (startEnglish) {
-                        param.setUserName(n);
-                    } else {
-                        param.setNickName(n);
-                    }
-                });
+    public AjaxResult loadValidUsers(@RequestParam(name = "name", required = false) String name, @RequestParam(name = "pageSize", required = false, defaultValue = "50") Integer pageSize) {
 
-        List<SysUser> userList = userService.selectUserList(param);
-        List<SysUserVo> sysUserVoList = userList.stream().map(u -> SysUserVo.toSysUserVo(u)).collect(Collectors.toList());
+        
+        PageUtils.startPage(pageSize);
+        
+        // 根据名称类型确定查询字段
+        String userName = null;
+        String nickName = null;
+        
+        if (name != null && !name.isEmpty()) {
+            boolean startEnglish = StringUtil.startWithEnglish(name);
+            if (startEnglish) {
+                userName = name;
+            } else {
+                nickName = name;
+            }
+        }
+
+        // 使用高效查询方法，只查询需要的字段，不关联角色表
+        List<SysUser> userList = userService.selectValidUsersBasic(userName, nickName);
+        
+        // 防止空指针异常
+        if (userList == null) {
+            userList = java.util.Collections.emptyList();
+        }
+        
+        // 转换为VO对象
+        List<SysUserVo> sysUserVoList = userList.stream()
+                .map(SysUserVo::toSysUserVo)
+                .collect(Collectors.toList());
+        
         return AjaxResult.success(sysUserVoList);
     }
 

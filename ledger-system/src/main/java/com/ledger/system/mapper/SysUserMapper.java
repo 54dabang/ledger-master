@@ -142,4 +142,13 @@ public interface SysUserMapper
     public SysUser checkEmailUnique(String email);
 
     public List<SysUser> selectByDelFlag(Integer delFlag);
+
+    /**
+     * 高效查询有效用户列表（仅查询基本信息，不关联角色表）
+     * 
+     * @param userName 用户名（模糊查询）
+     * @param nickName 昵称（模糊查询）
+     * @return 用户信息集合
+     */
+    public List<SysUser> selectValidUsersBasic(@Param("userName") String userName, @Param("nickName") String nickName);
 }
