@@ -302,9 +302,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  	</delete>
 	
 	<!-- 高效查询有效用户列表（仅查询基本信息，不关联角色表） -->
-	<select id="selectValidUsersBasic" resultType="SysUser">
+	<select id="selectValidUsersBasic" resultMap="SysUserResult">
 		select u.user_id, u.dept_id, u.user_name, u.nick_name, u.sex,
-		       d.dept_id as "dept.deptId", d.dept_name as "dept.deptName"
+		       d.dept_id, d.dept_name
 		from sys_user u
 		left join sys_dept d on u.dept_id = d.dept_id
 		where u.del_flag = '0'
