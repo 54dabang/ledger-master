@@ -16,7 +16,8 @@ import java.util.Map;
 @Getter
 @ToString
 @EqualsAndHashCode
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@NoArgsConstructor
+@AllArgsConstructor
 @ApiModel(value = "返回响应", description = "返回响应，统一封装实体")
 public class Result<T> {
 

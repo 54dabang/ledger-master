@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn clean *)",
+      "Bash(/usr/libexec/java_home *)",
+      "Bash(mvn dependency:tree -pl ledger-business -Dincludes=org.projectlombok)",
+      "Bash(mvn dependency:resolve -Dartifact=org.projectlombok:lombok:RELEASE)",
+      "WebSearch",
+      "Bash(javap -p /Users/leixingbang/sanxiaProject/ledger-master/ledger-business/target/classes/com/ledger/business/vo/ProjectExpenditureLedgerColumnVo.class)",
+      "Bash(javap -p /Users/leixingbang/sanxiaProject/ledger-master/ledger-business/target/classes/com/ledger/business/vo/CtgLedgerProjectVo.class)",
+      "Bash(brew list *)"
+    ]
+  }
+}

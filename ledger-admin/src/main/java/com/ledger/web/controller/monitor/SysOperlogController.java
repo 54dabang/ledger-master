@@ -2,6 +2,8 @@ package com.ledger.web.controller.monitor;
 
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
+
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,7 +39,7 @@ public class SysOperlogController extends BaseController
     {
         startPage();
         List<SysOperLog> list = operLogService.selectOperLogList(operLog);
-        return getDataTable(list);
+        return getDataTable(list,new PageInfo(list).getTotal());
     }
 
     @Log(title = "操作日志", businessType = BusinessType.EXPORT)

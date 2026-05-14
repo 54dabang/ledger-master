@@ -223,6 +223,10 @@ oauth2:
 url:
   oauth2SsoUrl: http://127.0.0.1:1024/oauth2SsoLogin
   mySystemHomeUrl: http://127.0.0.1:1024/index
+
+# 超时监控配置
+timeout:
+  threshold: 1000  # 超时阈值（毫秒），默认1秒
 # 数据源配置
 #打包部署
 #cd /Users/leixingbang/sanxiaProject/ledger-master && mvn clean install -U
