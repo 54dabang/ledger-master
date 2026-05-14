@@ -11,7 +11,9 @@ import com.ledger.business.dto.ReimbursementDTO;
 import com.ledger.business.dto.TokenValidDTO;
 import com.ledger.business.service.*;
 import com.ledger.business.util.InitConstant;
+import com.ledger.common.constant.Constants;
 import com.ledger.common.core.domain.model.LoginUser;
+import com.ledger.common.utils.MessageUtils;
 import com.ledger.common.utils.StringUtil;
 import com.ledger.business.vo.ProjectExpenditureLedgerVo;
 import com.ledger.business.vo.SyncbackVo;
@@ -26,6 +28,8 @@ import com.ledger.common.enums.OperatorType;
 import com.ledger.common.utils.PageUtils;
 import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.sign.Decryptor;
+import com.ledger.framework.manager.AsyncManager;
+import com.ledger.framework.manager.factory.AsyncFactory;
 import com.ledger.framework.tools.RedisLock;
 import com.ledger.framework.web.service.SysLoginService;
 import com.ledger.framework.web.service.TokenService;
@@ -187,6 +191,8 @@ public class ReimbursementController extends BaseController {
         try {
             String decryptStr = Decryptor.decrypt(encryptDTO.getData(), legerConfig.getSignPassword());
             String token = sysLoginService.getTokenByLoginName(decryptStr);
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(decryptStr,
+                    Constants.LOGIN_SUCCESS, "插件登录: " + MessageUtils.message("user.login.success")));
             return AjaxResult.success(token);
 
         } catch (Exception e) {
