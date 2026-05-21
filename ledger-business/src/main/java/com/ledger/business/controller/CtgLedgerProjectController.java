@@ -144,6 +144,13 @@ public class CtgLedgerProjectController extends BaseController {
         if(Objects.nonNull(project)){
             return error(String.format("《%s》项目已经存在，不允许重复！",project.getProjectName()));
         }
+        CtgLedgerProject param = new CtgLedgerProject();
+        param.setProjectCode(ctgLedgerProject.getProjectCode());
+        List<CtgLedgerProject> projects = ctgLedgerProjectService.selectCtgLedgerProjectList(param);
+        if(!CollectionUtils.isEmpty(projects)){
+            return error(String.format("项目编号:%S 已经存在，不允许重复！",ctgLedgerProject.getProjectCode()));
+        }
+
         return success(ctgLedgerProjectService.insertCtgLedgerProject(ctgLedgerProject));
     }
 
