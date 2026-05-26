@@ -7,12 +7,12 @@ ledger:
   # 版权年份
   copyrightYear: 2025
   # 文件路径 示例（ Windows配置D:/ledger/uploadPath，Linux配置 /home/ledger/uploadPath）
-  profile: /Users/leixingbang
+  profile: /Users/qinwei/Desktop/工作/Project/智能台账/uploadPath
   # 获取ip地址开关
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
   captchaType: math
-  env: leixingbang
+  env: qinwei
   #host: 192.168.0.100
   host: localhost
   sign:
@@ -24,7 +24,7 @@ chatbot:
       url: http://${ledger.host}:3018/chat/share?shareId=nswp13LDKATXrhpCQngXMkQ7
     - env: qinwei
       useCase: legerRationalityAnalysis
-      url: http://${ledger.host}:3020/chat/share?shareId=lwfjchp53hqdbjtoombb0hlw
+      url: https://cloud.fastgpt.cn/chat/share?shareId=tLhWVhI4xispRr9S8dwC1dhp
 
 plugin:
   config:
@@ -38,7 +38,7 @@ plugin:
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080
-  port: 8080
+  port: 7070
   servlet:
     # 应用的访问路径
     context-path: /
@@ -74,7 +74,7 @@ spring:
     # 国际化资源文件路径
     basename: i18n/messages
   profiles:
-   # active: prod
+  # active: prod
   # 文件上传
   servlet:
     multipart:
