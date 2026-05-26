@@ -1,6 +1,7 @@
 package com.ledger.business.service.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.stream.Stream;
 import com.ledger.business.domain.CtgLedgerAnnualBudget;
 import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.dto.ProjectUsersDTO;
+import com.ledger.business.mapper.CtgLedgerProjectExpenseDetailMapper;
 import com.ledger.business.service.ICtgLedgerAnnualBudgetService;
 import com.ledger.business.service.ICtgLedgerProjectService;
 import com.ledger.business.vo.CtgLedgerProjectVo;
@@ -19,9 +21,7 @@ import com.ledger.business.vo.SysUserVo;
 import com.ledger.common.core.domain.entity.SysUser;
 import com.ledger.common.utils.DateUtils;
 import com.ledger.common.utils.SecurityUtils;
-import com.ledger.common.utils.spring.SpringUtils;
 import com.ledger.system.service.ISysUserService;
-import com.sun.jna.platform.win32.COM.IStream;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.ledger.business.mapper.CtgLedgerProjectUserMapper;
@@ -48,6 +48,8 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
     private ICtgLedgerProjectService projectService;
     @Autowired
     private ICtgLedgerAnnualBudgetService annualBudgetService;
+    @Autowired
+    private CtgLedgerProjectExpenseDetailMapper ctgLedgerProjectExpenseDetailMapper;
 
     /**
      * 查询项目用户
@@ -213,6 +215,13 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
         BigDecimal annualBudgetFee = Optional.ofNullable(ctgLedgerAnnualBudget)
                 .map(this::toAnnualBudgetFee)
                 .orElse(null);
+        BigDecimal currentYearExecutedAmount = Optional.ofNullable(
+                        ctgLedgerProjectExpenseDetailMapper.sumAmountByProjectIdAndYear(project.getId(), currentYear))
+                .orElse(BigDecimal.ZERO);
+         BigDecimal totalBudgetFee = toTotalBudgetFee(project);
+        BigDecimal executedBudgetFee = toExecutedBudgetFee(project).add(currentYearExecutedAmount);
+        BigDecimal budgetCompletionRate = calculateCompletionRate(executedBudgetFee, totalBudgetFee);
+        BigDecimal annualBudgetCompletionRate = calculateCompletionRate(currentYearExecutedAmount, annualBudgetFee);
 
         //设置其他关联信息
         projectVo.setMembers(sysUserVoList);
@@ -222,7 +231,68 @@ public class CtgLedgerProjectUserServiceImpl implements ICtgLedgerProjectUserSer
         projectVo.setAnnualBudgetFee(annualBudgetFee);
         Long  budgetFeeId = Optional.ofNullable(ctgLedgerAnnualBudget).map(CtgLedgerAnnualBudget::getId).orElse(null);
         projectVo.setAnnualBudgetFeeId(budgetFeeId);
+        projectVo.setBudgetCompletionRate(budgetCompletionRate);
+        projectVo.setAnnualBudgetCompletionRate(annualBudgetCompletionRate);
         return projectVo;
+    }
+
+    private BigDecimal calculateCompletionRate(BigDecimal executedAmount, BigDecimal budgetAmount) {
+        if (Objects.isNull(budgetAmount) || budgetAmount.compareTo(BigDecimal.ZERO) == 0) {
+            return null;
+        }
+        return Optional.ofNullable(executedAmount)
+                .orElse(BigDecimal.ZERO)
+                .divide(budgetAmount, 4, RoundingMode.HALF_UP);
+    }
+
+    private BigDecimal toTotalBudgetFee(CtgLedgerProject project) {
+        if (Objects.isNull(project)) {
+            return null;
+        }
+        return Stream.of(
+                        project.getEquipPurchaseFee(),
+                        project.getProtoEquipFee(),
+                        project.getEquipRenovFee(),
+                        project.getEquipRentFee(),
+                        project.getMaterialCost(),
+                        project.getTestProcFee(),
+                        project.getFuelPowerCost(),
+                        project.getPubDocIpFee(),
+                        project.getTravelConfCoopFee(),
+                        project.getLaborCost(),
+                        project.getServiceCost(),
+                        project.getExpertConsultFee(),
+                        project.getMgmtFee(),
+                        project.getTaxFee(),
+                        project.getContractAmount()
+                )
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal toExecutedBudgetFee(CtgLedgerProject project) {
+        if (Objects.isNull(project)) {
+            return null;
+        }
+        return Stream.of(
+                        project.getExecutedEquipPurchaseFee(),
+                        project.getExecutedProtoEquipFee(),
+                        project.getExecutedEquipRenovFee(),
+                        project.getExecutedEquipRentFee(),
+                        project.getExecutedMaterialCost(),
+                        project.getExecutedTestProcFee(),
+                        project.getExecutedFuelPowerCost(),
+                        project.getExecutedPubDocIpFee(),
+                        project.getExecutedTravelConfCoopFee(),
+                        project.getExecutedLaborCost(),
+                        project.getExecutedServiceCost(),
+                        project.getExecutedExpertConsultFee(),
+                        project.getExecutedMgmtFee(),
+                        project.getExecutedTaxFee(),
+                        project.getExecutedContractAmount()
+                )
+                .filter(Objects::nonNull)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private BigDecimal toAnnualBudgetFee(CtgLedgerAnnualBudget ctgLedgerAnnualBudget) {

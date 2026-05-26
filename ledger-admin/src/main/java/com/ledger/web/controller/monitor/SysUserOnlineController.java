@@ -1,9 +1,10 @@
 package com.ledger.web.controller.monitor;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,7 +26,7 @@ import com.ledger.system.service.ISysUserOnlineService;
 
 /**
  * 在线用户监控
- * 
+ *
  * @author ledger
  */
 @RestController
@@ -42,31 +43,81 @@ public class SysUserOnlineController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(String ipaddr, String userName)
     {
-        Collection<String> keys = redisCache.keys(CacheConstants.LOGIN_TOKEN_KEY + "*");
-        List<SysUserOnline> userOnlineList = new ArrayList<SysUserOnline>();
-        for (String key : keys)
-        {
+        final Map<String, SysUserOnline> latestOnlineUserMap = new LinkedHashMap<String, SysUserOnline>();
+        redisCache.scan(CacheConstants.LOGIN_TOKEN_KEY + "*", 1000, key -> {
             LoginUser user = redisCache.getCacheObject(key);
+            if (StringUtils.isNull(user))
+            {
+                return;
+            }
+            SysUserOnline userOnline = null;
             if (StringUtils.isNotEmpty(ipaddr) && StringUtils.isNotEmpty(userName))
             {
-                userOnlineList.add(userOnlineService.selectOnlineByInfo(ipaddr, userName, user));
+                userOnline = userOnlineService.selectOnlineByInfo(ipaddr, userName, user);
             }
             else if (StringUtils.isNotEmpty(ipaddr))
             {
-                userOnlineList.add(userOnlineService.selectOnlineByIpaddr(ipaddr, user));
+                userOnline = userOnlineService.selectOnlineByIpaddr(ipaddr, user);
             }
             else if (StringUtils.isNotEmpty(userName) && StringUtils.isNotNull(user.getUser()))
             {
-                userOnlineList.add(userOnlineService.selectOnlineByUserName(userName, user));
+                userOnline = userOnlineService.selectOnlineByUserName(userName, user);
             }
             else
             {
-                userOnlineList.add(userOnlineService.loginUserToUserOnline(user));
+                userOnline = userOnlineService.loginUserToUserOnline(user);
             }
+            retainLatestOnlineUser(latestOnlineUserMap, userOnline);
+        });
+        return getDataTable(sortOnlineUsers(latestOnlineUserMap));
+    }
+
+    private void retainLatestOnlineUser(Map<String, SysUserOnline> latestOnlineUserMap, SysUserOnline userOnline)
+    {
+        if (StringUtils.isNull(userOnline))
+        {
+            return;
         }
-        Collections.reverse(userOnlineList);
-        userOnlineList.removeAll(Collections.singleton(null));
-        return getDataTable(userOnlineList);
+        String userName = userOnline.getUserName();
+        String uniqueKey = StringUtils.isNotEmpty(userName) ? userName : userOnline.getTokenId();
+        SysUserOnline latestOnlineUser = latestOnlineUserMap.get(uniqueKey);
+        if (StringUtils.isNull(latestOnlineUser) || compareLoginTime(userOnline, latestOnlineUser) > 0)
+        {
+            latestOnlineUserMap.put(uniqueKey, userOnline);
+        }
+    }
+
+    private List<SysUserOnline> sortOnlineUsers(Map<String, SysUserOnline> latestOnlineUserMap)
+    {
+        List<SysUserOnline> latestOnlineUserList = new ArrayList<SysUserOnline>(latestOnlineUserMap.values());
+        latestOnlineUserList.sort(new Comparator<SysUserOnline>()
+        {
+            @Override
+            public int compare(SysUserOnline firstUser, SysUserOnline secondUser)
+            {
+                return compareLoginTime(secondUser, firstUser);
+            }
+        });
+        return latestOnlineUserList;
+    }
+
+    private int compareLoginTime(SysUserOnline firstUser, SysUserOnline secondUser)
+    {
+        Long firstLoginTime = firstUser.getLoginTime();
+        Long secondLoginTime = secondUser.getLoginTime();
+        if (StringUtils.isNull(firstLoginTime) && StringUtils.isNull(secondLoginTime))
+        {
+            return 0;
+        }
+        if (StringUtils.isNull(firstLoginTime))
+        {
+            return -1;
+        }
+        if (StringUtils.isNull(secondLoginTime))
+        {
+            return 1;
+        }
+        return firstLoginTime.compareTo(secondLoginTime);
     }
 
     /**

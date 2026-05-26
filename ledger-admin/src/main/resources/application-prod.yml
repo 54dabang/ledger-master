@@ -7,7 +7,7 @@ ledger:
   # 版权年份
   copyrightYear: 2025
   # 文件路径 示例（ Windows配置D:/ledger/uploadPath，Linux配置 /home/ledger/uploadPath）
-  profile: /Users/leixingbang
+  profile: /home/ledger/uploadPath
   # 获取ip地址开关
   addressEnabled: false
   # 验证码类型 math 数字计算 char 字符验证
@@ -41,7 +41,7 @@ plugin:
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080
-  port: 8080
+  port: 7070
   servlet:
     # 应用的访问路径
     context-path: /
@@ -91,7 +91,7 @@ spring:
       master:
         url: jdbc:mysql://${ledger.host}:3306/ledger?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
         username: root
-        password: oneapimmysql
+        password: rootroot
         driverClassName: com.mysql.cj.jdbc.Driver
       # 从库数据源
       slave:
@@ -99,7 +99,7 @@ spring:
         enabled: true
         url: jdbc:mysql://${ledger.host}:3306/manager?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
         username: root
-        password: oneapimmysql
+        password: rootroot
         driverClassName: com.mysql.cj.jdbc.Driver
       # 初始连接数
       initialSize: 5
@@ -179,7 +179,7 @@ token:
   # 令牌密钥
   secret: abcdefghijklmnopqrstuvwxyz
   # 令牌有效期（默认30分钟）
-  expireTime: 2400
+  expireTime: 1200
 
 # MyBatis配置
 mybatis:
