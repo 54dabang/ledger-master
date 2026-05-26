@@ -1,6 +1,7 @@
 package com.ledger.business.mapper;
 
 import java.util.List;
+import java.math.BigDecimal;
 
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import org.apache.ibatis.annotations.Param;
@@ -82,4 +83,7 @@ public interface CtgLedgerProjectExpenseDetailMapper {
 
     Long selectMaxReimbursementSequenceNoByProjectIdAndYear(@Param("projectId") Long projectId,
                                          @Param("year") Integer year);
+
+    BigDecimal sumAmountByProjectIdAndYear(@Param("projectId") Long projectId,
+                                           @Param("year") Integer year);
 }

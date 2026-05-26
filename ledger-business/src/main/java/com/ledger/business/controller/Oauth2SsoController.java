@@ -165,7 +165,7 @@ public class Oauth2SsoController extends BaseController {
             sysLoginService.recordLoginInfo(loginUser.getUserId());
 
             // fourth: 然后将生成jwt并将用户信息放到redis中
-            String jwtToken = tokenService.createToken(loginUser);
+            String jwtToken = tokenService.createLoginToken(loginUser);
             
             // 记录下本次登录uuid,删除所有之前登录生成的uuid
             tokenService.saveLatestUuidAndDeleteOldUuid(loginUser.getToken(), loginUser.getUsername());

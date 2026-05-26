@@ -3,6 +3,7 @@ package com.ledger.common.core.redis;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import com.ledger.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -261,6 +262,29 @@ public class RedisCache
     public Collection<String> keys(final String pattern)
     {
         return redisTemplate.keys(pattern);
+    }
+
+    /**
+     * 使用SCAN遍历匹配的Redis键，避免KEYS一次性拉取大量数据。
+     *
+     * @param pattern 匹配模式
+     * @param count 每批扫描数量
+     * @param keyConsumer 键处理器
+     */
+    public void scan(final String pattern, final int count, final Consumer<String> keyConsumer)
+    {
+        final int batchSize = count > 0 ? count : 1000;
+        redisTemplate.execute((RedisCallback<Void>) connection -> {
+            try (Cursor<byte[]> cursor = connection.scan(ScanOptions.scanOptions()
+                    .match(pattern)
+                    .count(batchSize)
+                    .build())) {
+                while (cursor.hasNext()) {
+                    keyConsumer.accept(new String(cursor.next(), StandardCharsets.UTF_8));
+                }
+                return null;
+            }
+        });
     }
 
 

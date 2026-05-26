@@ -11,7 +11,9 @@ import com.ledger.business.dto.ReimbursementDTO;
 import com.ledger.business.dto.TokenValidDTO;
 import com.ledger.business.service.*;
 import com.ledger.business.util.InitConstant;
+import com.ledger.common.constant.Constants;
 import com.ledger.common.core.domain.model.LoginUser;
+import com.ledger.common.utils.MessageUtils;
 import com.ledger.common.utils.StringUtil;
 import com.ledger.business.vo.ProjectExpenditureLedgerVo;
 import com.ledger.business.vo.SyncbackVo;
@@ -26,6 +28,8 @@ import com.ledger.common.enums.OperatorType;
 import com.ledger.common.utils.PageUtils;
 import com.ledger.common.utils.SecurityUtils;
 import com.ledger.common.utils.sign.Decryptor;
+import com.ledger.framework.manager.AsyncManager;
+import com.ledger.framework.manager.factory.AsyncFactory;
 import com.ledger.framework.tools.RedisLock;
 import com.ledger.framework.web.service.SysLoginService;
 import com.ledger.framework.web.service.TokenService;
@@ -187,6 +191,8 @@ public class ReimbursementController extends BaseController {
         try {
             String decryptStr = Decryptor.decrypt(encryptDTO.getData(), legerConfig.getSignPassword());
             String token = sysLoginService.getTokenByLoginName(decryptStr);
+            AsyncManager.me().execute(AsyncFactory.recordLogininfor(decryptStr,
+                    Constants.LOGIN_SUCCESS, "插件登录: " + MessageUtils.message("user.login.success")));
             return AjaxResult.success(token);
 
         } catch (Exception e) {
@@ -288,23 +294,37 @@ public class ReimbursementController extends BaseController {
     @ApiOperation("获取所有有效用户")
     @RequestMapping(value = "/loadValidUsers", method = RequestMethod.GET)
     @PreAuthorize("@ss.hasPermi('business:expenditure:userlist')")
-    public AjaxResult loadValidUsers(@RequestParam(name = "name", required = false) String name, @RequestParam(name = "pageSize", required = false, defaultValue = "200") Integer pageSize) {
-        PageUtils.startPage(pageSize);
-        SysUser param = new SysUser();
-        param.setDelFlag(InitConstant.USER_EXIST_FLAG);
-        Optional.ofNullable(name)
-                .filter(n -> !n.isEmpty())
-                .ifPresent(n -> {
-                    boolean startEnglish = StringUtil.startWithEnglish(n);
-                    if (startEnglish) {
-                        param.setUserName(n);
-                    } else {
-                        param.setNickName(n);
-                    }
-                });
+    public AjaxResult loadValidUsers(@RequestParam(name = "name", required = false) String name, @RequestParam(name = "pageSize", required = false, defaultValue = "50") Integer pageSize) {
 
-        List<SysUser> userList = userService.selectUserList(param);
-        List<SysUserVo> sysUserVoList = userList.stream().map(u -> SysUserVo.toSysUserVo(u)).collect(Collectors.toList());
+        
+        PageUtils.startPage(pageSize);
+        
+        // 根据名称类型确定查询字段
+        String userName = null;
+        String nickName = null;
+        
+        if (name != null && !name.isEmpty()) {
+            boolean startEnglish = StringUtil.startWithEnglish(name);
+            if (startEnglish) {
+                userName = name;
+            } else {
+                nickName = name;
+            }
+        }
+
+        // 使用高效查询方法，只查询需要的字段，不关联角色表
+        List<SysUser> userList = userService.selectValidUsersBasic(userName, nickName);
+        
+        // 防止空指针异常
+        if (userList == null) {
+            userList = java.util.Collections.emptyList();
+        }
+        
+        // 转换为VO对象
+        List<SysUserVo> sysUserVoList = userList.stream()
+                .map(SysUserVo::toSysUserVo)
+                .collect(Collectors.toList());
+        
         return AjaxResult.success(sysUserVoList);
     }
 

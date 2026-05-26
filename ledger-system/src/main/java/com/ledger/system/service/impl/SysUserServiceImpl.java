@@ -554,4 +554,17 @@ public class SysUserServiceImpl implements ISysUserService
         }
         return successMsg.toString();
     }
+
+    /**
+     * 高效查询有效用户列表（仅查询基本信息，不关联角色表）
+     * 
+     * @param userName 用户名（模糊查询）
+     * @param nickName 昵称（模糊查询）
+     * @return 用户信息集合
+     */
+    @Override
+    public List<SysUser> selectValidUsersBasic(String userName, String nickName)
+    {
+        return userMapper.selectValidUsersBasic(userName, nickName);
+    }
 }

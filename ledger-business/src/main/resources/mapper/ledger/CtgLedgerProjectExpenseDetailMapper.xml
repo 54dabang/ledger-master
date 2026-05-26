@@ -70,6 +70,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where ledger_project_id = #{projectId} and year = #{year}
     </select>
 
+    <select id="sumAmountByProjectIdAndYear" resultType="java.math.BigDecimal">
+        select coalesce(sum(amount), 0) from ctg_ledger_project_expense_detail
+        where ledger_project_id = #{projectId} and year = #{year}
+    </select>
+
     <insert id="insertCtgLedgerProjectExpenseDetail" parameterType="CtgLedgerProjectExpenseDetail" useGeneratedKeys="true" keyProperty="id">
         insert into ctg_ledger_project_expense_detail
         <trim prefix="(" suffix=")" suffixOverrides=",">

@@ -2,13 +2,17 @@ package com.ledger.business.vo;
 
 import com.ledger.common.core.domain.entity.SysUser;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Optional;
 
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class SysUserVo {
     @ApiModelProperty(value = "用户id")
     private Long userId;

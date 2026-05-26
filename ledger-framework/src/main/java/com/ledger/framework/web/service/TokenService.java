@@ -1,5 +1,6 @@
 package com.ledger.framework.web.service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -105,26 +106,184 @@ public class TokenService {
     /**
      * 创建令牌
      *
+     * 这里会创建新的登录态uuid，并写入Redis登录缓存。
+     * 如果只是给已有token续期，不应该调用该方法，而应该调用refreshToken。
+     *
      * @param loginUser 用户信息
      * @return 令牌
      */
-    public String createToken(LoginUser loginUser) {
-        String token = IdUtils.fastUUID();
-        return createToken(loginUser,token);
+    public String createLoginToken(LoginUser loginUser) {
+        String uuid = IdUtils.fastUUID();
+        return createLoginToken(loginUser, uuid);
     }
-    public String createToken(LoginUser loginUser,String token) {
-        if(StringUtils.isEmpty(token)){
-            token = IdUtils.fastUUID();
+    public String createLoginToken(LoginUser loginUser,String uuid) {
+        if(StringUtils.isEmpty(uuid)){
+            uuid = IdUtils.fastUUID();
         }
 
-        loginUser.setToken(token);
+        loginUser.setToken(uuid);
         setUserAgent(loginUser);
         refreshToken(loginUser);
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put(Constants.LOGIN_USER_KEY, token);
+        claims.put(Constants.LOGIN_USER_KEY, uuid);
         claims.put(Constants.JWT_USERNAME, loginUser.getUsername());
-        return createToken(claims);
+        return createJwtToken(claims);
+    }
+
+    /**
+     * 根据用户名获取仍有效的令牌，并刷新令牌有效期。
+     *
+     * 先通过 username -> uuid 的索引查找；如果索引中出现多个uuid，说明登录态不唯一，
+     * 会先清理历史登录缓存并返回null。只有索引唯一或索引缺失时，才继续尝试复用有效缓存。
+     * 找到有效登录态后只刷新Redis有效期，不创建新uuid。
+     *
+     * @param username 用户名
+     * @return 有效令牌，不存在时返回null
+     */
+    public String getValidTokenByUsername(String username) {
+        if (StringUtils.isEmpty(username)) {
+            return null;
+        }
+
+        List<Object> usernameUuids = redisCache.getCacheList(getTokenKey(username));
+        if (hasMultipleUsernameUuids(usernameUuids)) {
+            invalidateHistoricalLoginTokens(username, usernameUuids);
+            return null;
+        }
+
+        String token = getValidTokenByUsernameUuids(username, usernameUuids);
+        if (StringUtils.isNotEmpty(token)) {
+            return token;
+        }
+
+        return getValidTokenByUsernameScan(username);
+    }
+
+    private boolean hasMultipleUsernameUuids(List<?> usernameUuids) {
+        if (usernameUuids == null || usernameUuids.isEmpty()) {
+            return false;
+        }
+
+        int uuidCount = 0;
+        for (Object usernameUuid : usernameUuids) {
+            if (usernameUuid instanceof String && StringUtils.isNotEmpty((String) usernameUuid)) {
+                uuidCount++;
+                if (uuidCount > 1) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private void invalidateHistoricalLoginTokens(String username, List<?> usernameUuids) {
+        if (usernameUuids != null) {
+            for (Object usernameUuid : usernameUuids) {
+                if (usernameUuid instanceof String && StringUtils.isNotEmpty((String) usernameUuid)) {
+                    redisCache.deleteObject(getTokenKey((String) usernameUuid));
+                }
+            }
+        }
+
+        /*
+         * 多个uuid说明该用户登录态已不唯一，这时不再挑选其中一个复用。
+         * 同时扫描并清理该用户名残留的LoginUser缓存，确保上层重新创建干净的唯一登录态。
+         */
+        redisCache.scan(CacheConstants.LOGIN_TOKEN_KEY + "*", 1000, key -> {
+            if (StringUtils.equals(key, getTokenKey(username))) {
+                return;
+            }
+
+            Object cacheObject = redisCache.getCacheObject(key);
+            if (cacheObject instanceof LoginUser
+                    && StringUtils.equals(username, ((LoginUser) cacheObject).getUsername())) {
+                redisCache.deleteObject(key);
+            }
+        });
+        redisCache.deleteObject(getTokenKey(username));
+    }
+
+    private String getValidTokenByUsernameUuids(String username, List<?> usernameUuids) {
+        if (usernameUuids == null || usernameUuids.isEmpty()) {
+            return null;
+        }
+
+        // 优先按用户名索引里记录的uuid查找，这是正常情况下最快的路径。
+        for (Object usernameUuid : usernameUuids) {
+            if (!(usernameUuid instanceof String)) {
+                continue;
+            }
+
+            String token = refreshAndCreateTokenIfValid(username, (String) usernameUuid);
+            if (StringUtils.isNotEmpty(token)) {
+                return token;
+            }
+        }
+
+        return null;
+    }
+
+    private String getValidTokenByUsernameScan(String username) {
+        final List<String> matchedUuids = new ArrayList<>();
+        /*
+         * 兼容历史数据：如果旧登录缓存存在，但当时没有写入 username -> uuid 索引，
+         * 仅靠索引会误判为没有有效token。这里用SCAN兜底查找该用户名的LoginUser。
+         */
+        redisCache.scan(CacheConstants.LOGIN_TOKEN_KEY + "*", 1000, key -> {
+            if (StringUtils.equals(key, getTokenKey(username))) {
+                return;
+            }
+
+            Object cacheObject = redisCache.getCacheObject(key);
+            if (!(cacheObject instanceof LoginUser)) {
+                return;
+            }
+
+            LoginUser loginUser = (LoginUser) cacheObject;
+            if (!StringUtils.equals(username, loginUser.getUsername())) {
+                return;
+            }
+
+            matchedUuids.add(loginUser.getToken());
+        });
+
+        if (matchedUuids.size() > 1) {
+            invalidateHistoricalLoginTokens(username, matchedUuids);
+            return null;
+        }
+
+        if (matchedUuids.size() == 1) {
+            return refreshAndCreateTokenIfValid(username, matchedUuids.get(0));
+        }
+
+        return null;
+    }
+
+    private String refreshAndCreateTokenIfValid(String username, String uuid) {
+        // uuid对应的LoginUser还存在，才说明Redis登录缓存仍在有效期内。
+        LoginUser loginUser = redisCache.getCacheObject(getTokenKey(uuid));
+        if (loginUser == null || !StringUtils.equals(username, loginUser.getUsername())) {
+            return null;
+        }
+
+        // 再校验LoginUser里记录的业务过期时间，避免只看Redis key存在导致误判。
+        Long loginUserExpireTime = loginUser.getExpireTime();
+        if (loginUserExpireTime == null || loginUserExpireTime <= System.currentTimeMillis()) {
+            redisCache.deleteObject(getTokenKey(uuid));
+            return null;
+        }
+
+        // 复用原uuid刷新Redis有效期，并补齐/更新 username -> uuid 索引。
+        refreshToken(loginUser);
+        saveLatestUuidAndDeleteOldUuid(uuid, username);
+
+        // 这里只是基于原uuid重新签发JWT字符串，不会创建新的Redis登录缓存。
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(Constants.LOGIN_USER_KEY, uuid);
+        claims.put(Constants.JWT_USERNAME, username);
+        return createJwtToken(claims);
     }
 
 
@@ -175,7 +334,7 @@ public class TokenService {
      * @param claims 数据声明
      * @return 令牌
      */
-    private String createToken(Map<String, Object> claims) {
+    private String createJwtToken(Map<String, Object> claims) {
         String token = Jwts.builder()
                 .setClaims(claims)
                 .signWith(SignatureAlgorithm.HS512, secret).compact();
@@ -227,9 +386,9 @@ public class TokenService {
     public void saveLatestUuidAndDeleteOldUuid(String uuid, String username) {
         List<Object> usernameUuids = redisCache.getCacheList(getTokenKey(username));
         for (Object usernameUuid : usernameUuids) {
-            //if (!StringUtils.equals(uuid, (String)usernameUuid)) {
-            redisCache.deleteObject(getTokenKey((String) usernameUuid));
-            //}
+            if (!StringUtils.equals(uuid, (String)usernameUuid)) {
+                redisCache.deleteObject(getTokenKey((String) usernameUuid));
+            }
         }
 
         redisCache.deleteObject(getTokenKey(username));

@@ -33,5 +33,10 @@ public class CtgLedgerProjectVo extends CtgLedgerProject {
     @ApiModelProperty(value = "年度预算id")
     private Long annualBudgetFeeId;
 
+    @ApiModelProperty(value = "预算完成率")
+    private BigDecimal budgetCompletionRate;
+
+    @ApiModelProperty(value = "年度预算完成率")
+    private BigDecimal annualBudgetCompletionRate;
 
 }

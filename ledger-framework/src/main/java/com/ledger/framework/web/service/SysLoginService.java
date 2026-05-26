@@ -102,11 +102,15 @@ public class SysLoginService
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         recordLoginInfo(loginUser.getUserId());
         // 生成token
-        return tokenService.createToken(loginUser);
+        return tokenService.createLoginToken(loginUser);
     }
 
     /**
      * 通过用户名获取token
+     *
+     * 这个方法主要给插件/白名单接口按用户名换取系统访问token使用。
+     * 整体原则是：优先复用Redis中已有且仍有效的登录态，只刷新有效期；
+     * 只有确认没有可复用登录态时，才重新构造LoginUser并创建新的登录态。
      *
      * @param loginName 用户名
      * @return token字符串
@@ -118,13 +122,55 @@ public class SysLoginService
             throw new UserNotExistsException();
         }
 
-        // 2. 根据用户名获取用户信息
+        /*
+         * 2. 先尝试复用Redis里已经存在的有效token。
+         *
+         * tokenService.getValidTokenByUsername(loginName) 内部会：
+         * 1) 通过 username -> uuid 的Redis索引查找登录态；
+         * 2) 如果索引中出现多个uuid，说明登录态不唯一，会清理历史登录缓存并返回null；
+         * 3) 如果索引缺失，再扫描历史登录缓存，避免旧缓存有效但索引不存在时误创建新token；
+         * 4) 如果找到唯一有效LoginUser，只调用 refreshToken(loginUser) 重置Redis有效期；
+         * 5) 使用原来的uuid重新签出JWT字符串返回。
+         *
+         * 注意：这里返回时不会生成新的uuid，也不会新增登录缓存。
+         */
+        String validToken = tokenService.getValidTokenByUsername(loginName);
+        if (StringUtils.isNotEmpty(validToken)) {
+            return validToken;
+        }
+
+        /*
+         * 3. 走到这里表示Redis中没有找到可复用的有效登录态。
+         * 此时才从数据库查询用户，并基于当前用户信息、权限信息创建新的LoginUser。
+         */
         SysUser sysUser = userService.selectUserByUserName(loginName);
         UserDetails userDetails  = userDetailsService.createLoginUser(sysUser);
-        //更新用户登录时间，避免token过期失效
+
+        /*
+         * 4. 更新数据库中的最近登录信息，比如登录IP、登录时间。
+         * 这一步不负责刷新Redis token有效期；Redis有效期由TokenService.refreshToken处理。
+         */
         recordLoginInfo(sysUser.getUserId());
-        // 生成token
-        return tokenService.createToken((LoginUser) userDetails);
+
+        /*
+         * 5. 创建新的登录态。
+         *
+         * createLoginToken(loginUser) 会生成新的uuid，写入 loginUser.token，
+         * 再把LoginUser缓存到 Redis key: legder:login_tokens:{uuid}，
+         * 最后基于该uuid签发JWT字符串。
+         *
+         * 只有在前面确认没有有效旧token时，才会执行到这里。
+         */
+        LoginUser loginUser = (LoginUser) userDetails;
+        String token = tokenService.createLoginToken(loginUser);
+
+        /*
+         * 6. 维护 username -> uuid 的索引。
+         * 下次按用户名获取token时，可以先通过这个索引快速找到登录态并续期。
+         * 同时清理该用户名下旧uuid对应的缓存，避免同一用户保留多份旧登录态。
+         */
+        tokenService.saveLatestUuidAndDeleteOldUuid(loginUser.getToken(), loginUser.getUsername());
+        return token;
     }
 
 
