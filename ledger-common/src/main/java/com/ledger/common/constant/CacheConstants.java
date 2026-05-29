@@ -13,6 +13,11 @@ public class CacheConstants
     public static final String LOGIN_TOKEN_KEY = "legder:login_tokens:";
 
     /**
+     * 登录用户名称索引 redis key
+     */
+    public static final String LOGIN_TOKEN_USERNAME_KEY = "legder:login_token_usernames:";
+
+    /**
      * 验证码 redis key
      */
     public static final String CAPTCHA_CODE_KEY = "legder:captcha_codes:";

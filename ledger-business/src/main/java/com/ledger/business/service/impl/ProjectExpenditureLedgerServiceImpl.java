@@ -45,7 +45,7 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
         CtgLedgerProject ctgLedgerProject = ctgLedgerProjectMapper.selectCtgLedgerProjectById(projectId);
         CtgLedgerAnnualBudget annualBudget = CtgLedgerAnnualBudgetMapper.selectByProjectIdAndYear(projectId, year);
         if (Objects.isNull(annualBudget)) {
-            throw new IllegalStateException("年度预算不存在，请联系管理员新增！");
+            throw new IllegalStateException("年度预算不存在，请联系负责人新增！");
         }
         List<CtgLedgerProjectExpenseDetail> detailList = ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
         detailList = detailList.stream().filter(d -> d.getReimbursementSequenceNo() <= reimbursementSequenceNo).collect(Collectors.toList());
@@ -418,7 +418,7 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
         CtgLedgerProject ctgLedgerProject = ctgLedgerProjectMapper.selectCtgLedgerProjectById(projectId);
         CtgLedgerAnnualBudget annualBudget = CtgLedgerAnnualBudgetMapper.selectByProjectIdAndYear(projectId, year);
         if (Objects.isNull(annualBudget)) {
-            throw new IllegalStateException("年度预算不存在，请联系管理员新增！");
+            throw new IllegalStateException("年度预算不存在，请联系负责人新增！");
         }
         // 项目管理员
         SysUser projectManager = Optional.ofNullable(ctgLedgerProject)

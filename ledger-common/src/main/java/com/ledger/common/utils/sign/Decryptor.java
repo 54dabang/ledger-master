@@ -89,7 +89,7 @@ public class Decryptor {
         String ct = encrypt(json, pwd);
         System.out.println("Java 加密结果（直接复制给前端可解密）:");
         System.out.println(ct);
-
+        ct ="U2FsdGVkX19WgrHxjHCtSfoqhMbC0buRHBBUss6yCrM";
         // 用已有的 Decryptor 解密验证
         String pt = Decryptor.decrypt(ct, pwd);
         System.out.println("Java 解密结果:");

@@ -74,8 +74,8 @@ public class TokenService {
                 Claims claims = parseToken(token);
                 // 解析对应的权限以及用户信息
                 String uuid = (String) claims.get(Constants.LOGIN_USER_KEY);
-                String userKey = getTokenKey(uuid);
-                LoginUser user = redisCache.getCacheObject(userKey);
+                String userKey = getLoginTokenKey(uuid);
+                LoginUser user = redisCache.getCacheObjectIfValue(userKey);
                 return user;
             } catch (Exception e) {
                 log.error("获取用户信息异常，token:{}",token, e);
@@ -98,7 +98,7 @@ public class TokenService {
      */
     public void delLoginUser(String token) {
         if (StringUtils.isNotEmpty(token)) {
-            String userKey = getTokenKey(token);
+            String userKey = getLoginTokenKey(token);
             redisCache.deleteObject(userKey);
         }
     }
@@ -146,7 +146,7 @@ public class TokenService {
             return null;
         }
 
-        List<Object> usernameUuids = redisCache.getCacheList(getTokenKey(username));
+        List<Object> usernameUuids = getUsernameUuids(username);
         if (hasMultipleUsernameUuids(usernameUuids)) {
             invalidateHistoricalLoginTokens(username, usernameUuids);
             return null;
@@ -182,7 +182,7 @@ public class TokenService {
         if (usernameUuids != null) {
             for (Object usernameUuid : usernameUuids) {
                 if (usernameUuid instanceof String && StringUtils.isNotEmpty((String) usernameUuid)) {
-                    redisCache.deleteObject(getTokenKey((String) usernameUuid));
+                    redisCache.deleteObject(getLoginTokenKey((String) usernameUuid));
                 }
             }
         }
@@ -192,17 +192,17 @@ public class TokenService {
          * 同时扫描并清理该用户名残留的LoginUser缓存，确保上层重新创建干净的唯一登录态。
          */
         redisCache.scan(CacheConstants.LOGIN_TOKEN_KEY + "*", 1000, key -> {
-            if (StringUtils.equals(key, getTokenKey(username))) {
+            if (isUsernameUuidIndexKey(key, username)) {
                 return;
             }
 
-            Object cacheObject = redisCache.getCacheObject(key);
+            Object cacheObject = redisCache.getCacheObjectIfValue(key);
             if (cacheObject instanceof LoginUser
                     && StringUtils.equals(username, ((LoginUser) cacheObject).getUsername())) {
                 redisCache.deleteObject(key);
             }
         });
-        redisCache.deleteObject(getTokenKey(username));
+        deleteUsernameUuidIndex(username);
     }
 
     private String getValidTokenByUsernameUuids(String username, List<?> usernameUuids) {
@@ -232,11 +232,11 @@ public class TokenService {
          * 仅靠索引会误判为没有有效token。这里用SCAN兜底查找该用户名的LoginUser。
          */
         redisCache.scan(CacheConstants.LOGIN_TOKEN_KEY + "*", 1000, key -> {
-            if (StringUtils.equals(key, getTokenKey(username))) {
+            if (isUsernameUuidIndexKey(key, username)) {
                 return;
             }
 
-            Object cacheObject = redisCache.getCacheObject(key);
+            Object cacheObject = redisCache.getCacheObjectIfValue(key);
             if (!(cacheObject instanceof LoginUser)) {
                 return;
             }
@@ -263,7 +263,7 @@ public class TokenService {
 
     private String refreshAndCreateTokenIfValid(String username, String uuid) {
         // uuid对应的LoginUser还存在，才说明Redis登录缓存仍在有效期内。
-        LoginUser loginUser = redisCache.getCacheObject(getTokenKey(uuid));
+        LoginUser loginUser = redisCache.getCacheObjectIfValue(getLoginTokenKey(uuid));
         if (loginUser == null || !StringUtils.equals(username, loginUser.getUsername())) {
             return null;
         }
@@ -271,7 +271,7 @@ public class TokenService {
         // 再校验LoginUser里记录的业务过期时间，避免只看Redis key存在导致误判。
         Long loginUserExpireTime = loginUser.getExpireTime();
         if (loginUserExpireTime == null || loginUserExpireTime <= System.currentTimeMillis()) {
-            redisCache.deleteObject(getTokenKey(uuid));
+            redisCache.deleteObject(getLoginTokenKey(uuid));
             return null;
         }
 
@@ -310,7 +310,7 @@ public class TokenService {
         loginUser.setLoginTime(System.currentTimeMillis());
         loginUser.setExpireTime(loginUser.getLoginTime() + expireTime * MILLIS_MINUTE);
         // 根据uuid将loginUser缓存
-        String userKey = getTokenKey(loginUser.getToken());
+        String userKey = getLoginTokenKey(loginUser.getToken());
         redisCache.setCacheObject(userKey, loginUser, expireTime, TimeUnit.MINUTES);
     }
 
@@ -379,21 +379,62 @@ public class TokenService {
         return token;
     }
 
-    private String getTokenKey(String uuid) {
+    private String getLoginTokenKey(String uuid) {
         return CacheConstants.LOGIN_TOKEN_KEY + uuid;
     }
 
+    private String getUsernameTokenKey(String username) {
+        return CacheConstants.LOGIN_TOKEN_USERNAME_KEY + username;
+    }
+
+    private String getLegacyUsernameTokenKey(String username) {
+        return CacheConstants.LOGIN_TOKEN_KEY + username;
+    }
+
+    private List<Object> getUsernameUuids(String username) {
+        List<Object> usernameUuids = new ArrayList<>();
+        addUsernameUuids(usernameUuids, redisCache.getCacheListIfList(getUsernameTokenKey(username)));
+        addUsernameUuids(usernameUuids, redisCache.getCacheListIfList(getLegacyUsernameTokenKey(username)));
+        return usernameUuids;
+    }
+
+    private void addUsernameUuids(List<Object> usernameUuids, List<?> cachedUuids) {
+        if (cachedUuids == null || cachedUuids.isEmpty()) {
+            return;
+        }
+        for (Object cachedUuid : cachedUuids) {
+            if (!usernameUuids.contains(cachedUuid)) {
+                usernameUuids.add(cachedUuid);
+            }
+        }
+    }
+
+    private boolean isUsernameUuidIndexKey(String key, String username) {
+        return StringUtils.equals(key, getUsernameTokenKey(username))
+                || StringUtils.equals(key, getLegacyUsernameTokenKey(username));
+    }
+
+    private void deleteUsernameUuidIndex(String username) {
+        redisCache.deleteObject(getUsernameTokenKey(username));
+        String legacyUsernameTokenKey = getLegacyUsernameTokenKey(username);
+        if (redisCache.isCacheList(legacyUsernameTokenKey)) {
+            redisCache.deleteObject(legacyUsernameTokenKey);
+        }
+    }
+
     public void saveLatestUuidAndDeleteOldUuid(String uuid, String username) {
-        List<Object> usernameUuids = redisCache.getCacheList(getTokenKey(username));
+        List<Object> usernameUuids = getUsernameUuids(username);
         for (Object usernameUuid : usernameUuids) {
-            if (!StringUtils.equals(uuid, (String)usernameUuid)) {
-                redisCache.deleteObject(getTokenKey((String) usernameUuid));
+            if (usernameUuid instanceof String && !StringUtils.equals(uuid, (String)usernameUuid)) {
+                redisCache.deleteObject(getLoginTokenKey((String) usernameUuid));
             }
         }
 
-        redisCache.deleteObject(getTokenKey(username));
+        deleteUsernameUuidIndex(username);
 
-        redisCache.setCacheList(getTokenKey(username), Arrays.asList(uuid));
+        String usernameTokenKey = getUsernameTokenKey(username);
+        redisCache.setCacheList(usernameTokenKey, Arrays.asList(uuid));
+        redisCache.expire(usernameTokenKey, expireTime, TimeUnit.MINUTES);
     }
 
 }
