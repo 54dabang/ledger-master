@@ -21,6 +21,7 @@ import com.ledger.common.core.page.TableDataInfo;
 import com.ledger.common.core.redis.RedisCache;
 import com.ledger.common.enums.BusinessType;
 import com.ledger.common.utils.StringUtils;
+import com.ledger.framework.web.service.TokenService;
 import com.ledger.system.domain.SysUserOnline;
 import com.ledger.system.service.ISysUserOnlineService;
 
@@ -38,6 +39,9 @@ public class SysUserOnlineController extends BaseController
 
     @Autowired
     private RedisCache redisCache;
+
+    @Autowired
+    private TokenService tokenService;
 
     @PreAuthorize("@ss.hasPermi('monitor:online:list')")
     @GetMapping("/list")
@@ -138,7 +142,7 @@ public class SysUserOnlineController extends BaseController
     @DeleteMapping("/{tokenId}")
     public AjaxResult forceLogout(@PathVariable String tokenId)
     {
-        redisCache.deleteObject(CacheConstants.LOGIN_TOKEN_KEY + tokenId);
+        tokenService.delLoginUser(tokenId);
         return success();
     }
 }
