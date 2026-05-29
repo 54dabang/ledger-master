@@ -45,7 +45,7 @@ public class SysUserOnlineController extends BaseController
     {
         final Map<String, SysUserOnline> latestOnlineUserMap = new LinkedHashMap<String, SysUserOnline>();
         redisCache.scan(CacheConstants.LOGIN_TOKEN_KEY + "*", 1000, key -> {
-            LoginUser user = redisCache.getCacheObject(key);
+            LoginUser user = getLoginUser(key);
             if (StringUtils.isNull(user))
             {
                 return;
@@ -70,6 +70,16 @@ public class SysUserOnlineController extends BaseController
             retainLatestOnlineUser(latestOnlineUserMap, userOnline);
         });
         return getDataTable(sortOnlineUsers(latestOnlineUserMap));
+    }
+
+    private LoginUser getLoginUser(String key)
+    {
+        Object cacheObject = redisCache.getCacheObjectIfValue(key);
+        if (cacheObject instanceof LoginUser)
+        {
+            return (LoginUser) cacheObject;
+        }
+        return null;
     }
 
     private void retainLatestOnlineUser(Map<String, SysUserOnline> latestOnlineUserMap, SysUserOnline userOnline)

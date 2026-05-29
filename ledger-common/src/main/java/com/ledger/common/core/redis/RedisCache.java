@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import com.ledger.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 
@@ -106,6 +107,22 @@ public class RedisCache
     }
 
     /**
+     * 获得缓存的基本对象，仅当Redis key类型为string时读取。
+     *
+     * @param key 缓存键值
+     * @return 缓存键值对应的数据；非string类型返回null
+     */
+    public <T> T getCacheObjectIfValue(final String key)
+    {
+        DataType dataType = redisTemplate.type(key);
+        if (dataType != null && dataType != DataType.NONE && dataType != DataType.STRING)
+        {
+            return null;
+        }
+        return getCacheObject(key);
+    }
+
+    /**
      * 删除单个对象
      *
      * @param key
@@ -148,6 +165,32 @@ public class RedisCache
     public <T> List<T> getCacheList(final String key)
     {
         return redisTemplate.opsForList().range(key, 0, -1);
+    }
+
+    /**
+     * 获得缓存的list对象，仅当Redis key类型为list时读取。
+     *
+     * @param key 缓存的键值
+     * @return 缓存键值对应的数据；非list类型返回空集合
+     */
+    public <T> List<T> getCacheListIfList(final String key)
+    {
+        if (!isCacheList(key))
+        {
+            return Collections.emptyList();
+        }
+        return getCacheList(key);
+    }
+
+    /**
+     * 判断key是否为list类型。
+     *
+     * @param key 缓存的键值
+     * @return true=list类型；false=不存在或其他类型
+     */
+    public boolean isCacheList(final String key)
+    {
+        return DataType.LIST.equals(redisTemplate.type(key));
     }
 
     /**
@@ -353,4 +396,3 @@ public class RedisCache
 
     }
 }
-
