@@ -39,7 +39,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="reimbursementSequenceNo != null "> and reimbursement_sequence_no = #{reimbursementSequenceNo}</if>
             <if test="year != null "> and year = #{year}</if>
         </where>
-        order by reimbursement_sequence_no desc
+        order by year desc, reimbursement_sequence_no desc
     </select>
     
     <select id="selectCtgLedgerProjectExpenseDetailById" parameterType="Long" resultMap="CtgLedgerProjectExpenseDetailResult">
