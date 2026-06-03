@@ -99,7 +99,11 @@ public class TokenService {
     public void delLoginUser(String token) {
         if (StringUtils.isNotEmpty(token)) {
             String userKey = getLoginTokenKey(token);
+            LoginUser loginUser = redisCache.getCacheObjectIfValue(userKey);
             redisCache.deleteObject(userKey);
+            if (loginUser != null) {
+                deleteUsernameUuidIndexIfMatches(loginUser.getUsername(), token);
+            }
         }
     }
 
@@ -419,6 +423,20 @@ public class TokenService {
         String legacyUsernameTokenKey = getLegacyUsernameTokenKey(username);
         if (redisCache.isCacheList(legacyUsernameTokenKey)) {
             redisCache.deleteObject(legacyUsernameTokenKey);
+        }
+    }
+
+    private void deleteUsernameUuidIndexIfMatches(String username, String uuid) {
+        if (StringUtils.isEmpty(username) || StringUtils.isEmpty(uuid)) {
+            return;
+        }
+
+        List<Object> usernameUuids = getUsernameUuids(username);
+        for (Object usernameUuid : usernameUuids) {
+            if (usernameUuid instanceof String && StringUtils.equals(uuid, (String) usernameUuid)) {
+                deleteUsernameUuidIndex(username);
+                return;
+            }
         }
     }
 

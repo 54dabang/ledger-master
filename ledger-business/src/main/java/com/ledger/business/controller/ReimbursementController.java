@@ -231,7 +231,9 @@ public class ReimbursementController extends BaseController {
     @RequestMapping(value = "/getProjectExpenditureLedger", method = RequestMethod.GET)
     @PreAuthorize("@ss.hasPermi('business:expenditure:exportledger')")
     @Log(title = "导出台账", businessType = BusinessType.EXPORT)
-    public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId, @RequestParam("year") Integer year, @RequestParam("maxReimbursementSequenceNo") Long maxReimbursementSequenceNo) {
+    public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId,
+                                                  @RequestParam("year") Integer year,
+                                                  @RequestParam(value = "maxReimbursementSequenceNo", required = false) Long maxReimbursementSequenceNo) {
         reimbursementService.checkPermisson(projectId, SecurityUtils.getUserId());
         // 使用Calendar获取实际年份
         Calendar calendar = Calendar.getInstance();
@@ -239,13 +241,18 @@ public class ReimbursementController extends BaseController {
         if (Objects.isNull(maxReimbursementSequenceNo)) {
             maxReimbursementSequenceNo = projectExpenditureLedgerService.selectMaxReimbursementSequenceNo(projectId, year);
         }
-        maxReimbursementSequenceNo = Optional.ofNullable(maxReimbursementSequenceNo).orElse(0L);
+        if (Objects.isNull(maxReimbursementSequenceNo) || maxReimbursementSequenceNo <= 0) {
+            return AjaxResult.error(String.format("项目ID:%s，年度:%s 暂无报销记录，无法导出台账！", projectId, year));
+        }
 
         CtgLedgerProjectExpenseDetail queryParam = new CtgLedgerProjectExpenseDetail();
         queryParam.setLedgerProjectId(projectId);
         queryParam.setYear(year);
         queryParam.setReimbursementSequenceNo(maxReimbursementSequenceNo);
         List<CtgLedgerProjectExpenseDetail> projectExpenseDetailList = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(queryParam);
+        if (projectExpenseDetailList == null || projectExpenseDetailList.isEmpty()) {
+            return AjaxResult.error(String.format("项目ID:%s，年度:%s，第%s次报销记录不存在，无法导出台账！", projectId, year, maxReimbursementSequenceNo));
+        }
 
         String reimburserLoginName = Optional.ofNullable(projectExpenseDetailList.get(0)).map(e->e.getReimburserLoginName()).orElse(null);
 

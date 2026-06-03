@@ -48,7 +48,13 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
             throw new IllegalStateException("年度预算不存在，请联系负责人新增！");
         }
         List<CtgLedgerProjectExpenseDetail> detailList = ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailListByProjectIdAndYear(projectId, year);
-        detailList = detailList.stream().filter(d -> d.getReimbursementSequenceNo() <= reimbursementSequenceNo).collect(Collectors.toList());
+        detailList = detailList.stream()
+                .filter(d -> Objects.nonNull(d.getReimbursementSequenceNo()))
+                .filter(d -> d.getReimbursementSequenceNo() <= reimbursementSequenceNo)
+                .collect(Collectors.toList());
+        if (CollectionUtils.isEmpty(detailList)) {
+            throw new IllegalStateException(String.format("项目ID:%s，年度:%s，第%s次报销记录不存在，无法导出台账！", projectId, year, reimbursementSequenceNo));
+        }
 
 
         //项目经费执行情况
@@ -431,6 +437,9 @@ public class ProjectExpenditureLedgerServiceImpl implements IProjectExpenditureL
         queryParam.setYear(year);
         queryParam.setReimbursementSequenceNo(reimbursementSequenceNo);
         List<CtgLedgerProjectExpenseDetail> projectExpenseDetailList = ctgLedgerProjectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailList(queryParam);
+        if (CollectionUtils.isEmpty(projectExpenseDetailList)) {
+            return AjaxResult.error(201, String.format("项目ID:%s，年度:%s，第%s次报销记录不存在，请检查！", projectId, year, reimbursementSequenceNo));
+        }
 
         String reimburserLoginName = Optional.ofNullable(projectExpenseDetailList.get(0))
                 .map(e -> e.getReimburserLoginName())

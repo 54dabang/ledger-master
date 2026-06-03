@@ -63,23 +63,27 @@ public class ReimbursementServiceImpl implements IReimbursementService {
     @Override
     public Long syncReimbursementData(ReimbursementDTO reimbursementDTO, CtgLedgerProject ctgLedgerProject) {
 
-        CtgLedgerProjectExpenseDetail maxSequenceNoReimbursement = projectExpenseDetailMapper
-                .selectCtgLedgerProjectExpenseDetailWithMaxReimbursementSequenceNoByProjectId(ctgLedgerProject.getId());
+        Integer reimbursementYear = reimbursementDTO.getCreateTime().getYear() + 1900;
 
         CtgLedgerProjectExpenseDetail expenseDetail = projectExpenseDetailMapper.selectCtgLedgerProjectExpenseDetailByExpenseReportNumber(reimbursementDTO.getBillCode());
         Long currentSequenceNo = null;
         boolean isNewData = false;
         if (Objects.isNull(expenseDetail)) {
             expenseDetail = new CtgLedgerProjectExpenseDetail();
-            currentSequenceNo = Optional.ofNullable(maxSequenceNoReimbursement).map(d -> d.getReimbursementSequenceNo()).map(seq -> seq + 1).orElse(1L);
+            currentSequenceNo = nextReimbursementSequenceNo(ctgLedgerProject.getId(), reimbursementYear);
             expenseDetail.setReimbursementSequenceNo(currentSequenceNo);
             isNewData = true;
+        } else if (!Objects.equals(expenseDetail.getLedgerProjectId(), ctgLedgerProject.getId())
+                || !Objects.equals(expenseDetail.getYear(), reimbursementYear)
+                || Objects.isNull(expenseDetail.getReimbursementSequenceNo())) {
+            currentSequenceNo = nextReimbursementSequenceNo(ctgLedgerProject.getId(), reimbursementYear);
+            expenseDetail.setReimbursementSequenceNo(currentSequenceNo);
         } else {
             currentSequenceNo = expenseDetail.getReimbursementSequenceNo();
         }
 
         //设置同步属性值
-        expenseDetail.setYear(reimbursementDTO.getCreateTime().getYear() + 1900);
+        expenseDetail.setYear(reimbursementYear);
         expenseDetail.setExpenseReportNumber(reimbursementDTO.getBillCode());
         expenseDetail.setFeeType(reimbursementDTO.getFeeType());
         expenseDetail.setSubjectName(reimbursementDTO.getSubjectName());
@@ -100,6 +104,11 @@ public class ReimbursementServiceImpl implements IReimbursementService {
         }
 
         return currentSequenceNo;
+    }
+
+    private Long nextReimbursementSequenceNo(Long projectId, Integer year) {
+        Long maxSequenceNo = projectExpenseDetailMapper.selectMaxReimbursementSequenceNoByProjectIdAndYear(projectId, year);
+        return Optional.ofNullable(maxSequenceNo).map(seq -> seq + 1).orElse(1L);
     }
 
     @Override
