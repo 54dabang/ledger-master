@@ -114,5 +114,16 @@ public class CtgLedgerProjectServiceImpl implements ICtgLedgerProjectService {
         return ctgLedgerProjectMapper.selectCtgLedgerProjectByProjectName(projectName);
     }
 
+    /**
+     * 根据项目编号查询项目管理信息
+     *
+     * @param projectCode 项目编号
+     * @return 项目管理信息
+     */
+    @Override
+    public CtgLedgerProject selectCtgLedgerProjectByProjectCode(String projectCode) {
+        return ctgLedgerProjectMapper.selectCtgLedgerProjectByProjectCode(projectCode);
+    }
+
 
 }
