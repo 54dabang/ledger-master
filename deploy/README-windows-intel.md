@@ -32,6 +32,25 @@ ledger-windows-intel/
 
 `ledger-images-linux-amd64.tar` 已包含所有运行所需镜像，不需要 Windows 机器访问外网拉镜像。
 
+## 打包内容确认
+
+执行 Mac 本机一键打包脚本时，最终离线包会包含完整运行环境：
+
+```bash
+./deploy/scripts/build-local-windows-intel-package.sh
+```
+
+脚本会把以下内容打进 `linux/amd64` Docker 镜像，再统一保存到 `ledger-images-linux-amd64.tar`：
+
+- 后端 jar：`ledger-admin.jar` 会进入 `ledger-app` 镜像。
+- MySQL 数据：本机数据库 dump 会进入 `ledger-mysql` 镜像，首次启动空数据卷时自动导入。
+- 前端静态资产：本机 nginx 当前部署的前端文件会进入 `ledger-nginx` 镜像。
+- Redis：会拉取并保存 `linux/amd64` 的 Redis 镜像。
+
+因此 Windows Intel 电脑离线解压 zip 后，不需要再额外准备 JDK、MySQL、Redis、Nginx、后端 jar、前端静态文件或数据库初始化 SQL。
+
+注意：`ledger-admin.jar`、MySQL dump、前端静态资产和 `dist/` 打包产物都不会提交到 git。它们只存在于本机打包过程和最终生成的离线包中。
+
 ## Windows 部署前准备
 
 1. 使用 Windows Intel/x86_64 电脑。
@@ -415,4 +434,12 @@ ls -lh dist/ledger-windows-intel-docker-3.9.0-linux-amd64.zip
 ./deploy/scripts/sync-local-nginx-assets.sh
 ```
 
-然后提交 `deploy/docker/mysql/initdb/001-ledger-manager.sql.gz` 和 `deploy/docker/nginx/html/` 的变化，再在 GitHub Actions 运行打包 workflow。
+这些文件会被 `.gitignore` 忽略，不需要也不应该提交到 git。
+
+需要生成 Windows Intel 离线包时，直接运行：
+
+```bash
+./deploy/scripts/build-local-windows-intel-package.sh
+```
+
+脚本默认会刷新 MySQL dump 和前端静态资产，并把它们打进最终离线包。如果已经手动刷新过，也可以直接执行同一个打包脚本生成新 zip。
