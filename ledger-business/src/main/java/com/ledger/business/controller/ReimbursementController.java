@@ -15,6 +15,7 @@ import com.ledger.common.constant.Constants;
 import com.ledger.common.core.domain.model.LoginUser;
 import com.ledger.common.utils.MessageUtils;
 import com.ledger.common.utils.StringUtil;
+import com.ledger.common.utils.StringUtils;
 import com.ledger.business.vo.ProjectExpenditureLedgerVo;
 import com.ledger.business.vo.SyncbackVo;
 import com.ledger.business.vo.SysUserVo;
@@ -126,10 +127,15 @@ public class ReimbursementController extends BaseController {
 
 
         String reimbursementProjectName = reimbursementDTO.getRsiContractData().getProjectName();
+        String projectCode = reimbursementDTO.getRsiContractData().getProjectCode();
         CtgLedgerProject ctgLedgerProject = projectService.selectCtgLedgerProjectByProjectName(reimbursementProjectName);
+        if (Objects.isNull(ctgLedgerProject) && StringUtils.isNotEmpty(projectCode)) {
+            ctgLedgerProject = projectService.selectCtgLedgerProjectByProjectCode(projectCode);
+        }
         //数据检查
         if (Objects.isNull(ctgLedgerProject)) {
-            return AjaxResult.error(HttpStatus.DATA_PROJECT_MISSING, String.format("同步的项目信息不存在，请联系管理员添加项目:%s", reimbursementProjectName));
+
+            return AjaxResult.error(HttpStatus.DATA_PROJECT_MISSING, String.format("同步的项目信息不存在,以项目名称和项目编号查找均不存在，请联系管理员添加项目:%s", reimbursementProjectName));
         }
         /*CtgLedgerProjectExpenseDetail expenseDetail = expenseDetailService.selectCtgLedgerProjectExpenseDetailByExpenseReportNumber(reimbursementDTO.getBillCode());
         if (Objects.nonNull(expenseDetail)) {

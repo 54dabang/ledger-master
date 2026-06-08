@@ -66,4 +66,12 @@ public interface CtgLedgerProjectMapper
      * @return 项目管理信息
      */
     public CtgLedgerProject selectCtgLedgerProjectByProjectName(String projectName);
+
+    /**
+     * 根据项目编号查询项目管理信息
+     *
+     * @param projectCode 项目编号
+     * @return 项目管理信息
+     */
+    public CtgLedgerProject selectCtgLedgerProjectByProjectCode(String projectCode);
 }

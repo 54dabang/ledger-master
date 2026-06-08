@@ -264,4 +264,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectCtgLedgerProjectVo"/>
         where project_name = #{projectName}
     </select>
+
+    <select id="selectCtgLedgerProjectByProjectCode" parameterType="String" resultMap="CtgLedgerProjectResult">
+        <include refid="selectCtgLedgerProjectVo"/>
+        where project_code = #{projectCode}
+    </select>
 </mapper>
