@@ -1,0 +1,83 @@
+name: Build Windows Intel Docker Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Docker image tag for the offline package
+        required: true
+        default: 3.9.0-linux-amd64
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set image tag
+        run: |
+          echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> "$GITHUB_ENV"
+          echo "DOCKER_MIRROR=docker.1ms.run" >> "$GITHUB_ENV"
+          echo "REDIS_SOURCE_IMAGE=docker.m.daocloud.io/library/redis:7.2-alpine" >> "$GITHUB_ENV"
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "11"
+          cache: maven
+
+      - name: Build backend jar
+        run: mvn -B -DskipTests clean package
+
+      - name: Prepare app image context
+        run: cp ledger-admin/target/ledger-admin.jar deploy/docker/app/ledger-admin.jar
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build linux/amd64 images
+        run: |
+          docker buildx build --platform linux/amd64 --build-arg "DOCKER_MIRROR=${DOCKER_MIRROR}" --load -t "ledger-app:${IMAGE_TAG}" deploy/docker/app
+          docker buildx build --platform linux/amd64 --build-arg "DOCKER_MIRROR=${DOCKER_MIRROR}" --load -t "ledger-mysql:${IMAGE_TAG}" deploy/docker/mysql
+          docker buildx build --platform linux/amd64 --build-arg "DOCKER_MIRROR=${DOCKER_MIRROR}" --load -t "ledger-nginx:${IMAGE_TAG}" deploy/docker/nginx
+          docker pull --platform linux/amd64 "${REDIS_SOURCE_IMAGE}"
+          docker tag "${REDIS_SOURCE_IMAGE}" redis:7.2-alpine
+
+      - name: Verify image platforms
+        run: |
+          for image in "ledger-app:${IMAGE_TAG}" "ledger-mysql:${IMAGE_TAG}" "ledger-nginx:${IMAGE_TAG}" "redis:7.2-alpine"; do
+            platform="$(docker image inspect "$image" --format '{{.Os}}/{{.Architecture}}')"
+            echo "$image -> $platform"
+            test "$platform" = "linux/amd64"
+          done
+
+      - name: Package deployment files
+        run: |
+          mkdir -p dist/ledger-windows-intel
+          cp -R deploy/windows-intel/. dist/ledger-windows-intel/
+          cp deploy/README-windows-intel.md dist/ledger-windows-intel/README.md
+          sed -i "s/^LEDGER_IMAGE_TAG=.*/LEDGER_IMAGE_TAG=${IMAGE_TAG}/" dist/ledger-windows-intel/.env
+          docker save \
+            -o dist/ledger-windows-intel/ledger-images-linux-amd64.tar \
+            "ledger-app:${IMAGE_TAG}" \
+            "ledger-mysql:${IMAGE_TAG}" \
+            "ledger-nginx:${IMAGE_TAG}" \
+            "redis:7.2-alpine"
+          cd dist
+          zip -r "ledger-windows-intel-docker-${IMAGE_TAG}.zip" ledger-windows-intel
+          sha256sum "ledger-windows-intel-docker-${IMAGE_TAG}.zip" > "ledger-windows-intel-docker-${IMAGE_TAG}.zip.sha256"
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ledger-windows-intel-docker-${{ env.IMAGE_TAG }}
+          path: |
+            dist/ledger-windows-intel-docker-${{ env.IMAGE_TAG }}.zip
+            dist/ledger-windows-intel-docker-${{ env.IMAGE_TAG }}.zip.sha256
+          if-no-files-found: error
