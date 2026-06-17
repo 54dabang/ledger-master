@@ -35,7 +35,7 @@ plugin:
     - env: qinwei
       path: /Users/qinwei/Downloads
     - env: prod
-      path: /home/ledger/html/download
+      path: /root/home_itrc/ledger/html/download
 
 
 # 开发环境配置
