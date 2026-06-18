@@ -8,6 +8,7 @@ import com.ledger.business.domain.CtgLedgerProject;
 import com.ledger.business.domain.CtgLedgerProjectExpenseDetail;
 import com.ledger.business.dto.EncryptDTO;
 import com.ledger.business.dto.ReimbursementDTO;
+import com.ledger.business.dto.ReimburserDTO;
 import com.ledger.business.dto.TokenValidDTO;
 import com.ledger.business.service.*;
 import com.ledger.business.util.InitConstant;
@@ -97,7 +98,6 @@ public class ReimbursementController extends BaseController {
     private TokenService tokenService;
 
 
-
     @ApiOperation("同步台账基本数据信息")
     @RequestMapping(value = "/white/syncReimbursementData", method = RequestMethod.POST)
     @Log(
@@ -121,7 +121,7 @@ public class ReimbursementController extends BaseController {
             log.error("加密信息无效！body:{}", encryptDTO, e);
             return AjaxResult.error(HttpStatus.BAD_REQUEST, "加密信息无效！");
         }
-        if(!reimbursementDTO.checkDataValid()){
+        if (!reimbursementDTO.checkDataValid()) {
             return AjaxResult.error(HttpStatus.BAD_REQUEST, String.format("同步数据信息不完整，请检查更新插件！"));
         }
 
@@ -170,7 +170,7 @@ public class ReimbursementController extends BaseController {
             log.info("reimbursementDTO:{} sync success! syncbackVo：{}", JSON.toJSON(reimbursementDTO), syncbackVo);
             return AjaxResult.success(syncbackVo);
         } catch (Exception e) {
-            log.error("reimbursementDTO:{} sync failed!",JSON.toJSON(reimbursementDTO), e);
+            log.error("reimbursementDTO:{} sync failed!", JSON.toJSON(reimbursementDTO), e);
             return AjaxResult.error(e.getMessage());
         } finally {
             if (locked) {
@@ -239,8 +239,8 @@ public class ReimbursementController extends BaseController {
     @Log(title = "导出台账", businessType = BusinessType.EXPORT)
     public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId,
                                                   @RequestParam("year") Integer year,
-                                                  @RequestParam(value = "maxReimbursementSequenceNo") Long maxReimbursementSequenceNo,
-                                                  @RequestParam(value = "id",required = true) Long id) {
+                                                  @RequestParam(value = "maxReimbursementSequenceNo", required = false) Long maxReimbursementSequenceNo,
+                                                  @RequestParam(value = "reimburserLoginName", required = true) String reimburserLoginName) {
         reimbursementService.checkPermisson(projectId, SecurityUtils.getUserId());
         // 使用Calendar获取实际年份
         Calendar calendar = Calendar.getInstance();
@@ -260,9 +260,7 @@ public class ReimbursementController extends BaseController {
         if (projectExpenseDetailList == null || projectExpenseDetailList.isEmpty()) {
             return AjaxResult.error(String.format("项目ID:%s，年度:%s，第%s次报销记录不存在，无法导出台账！", projectId, year, maxReimbursementSequenceNo));
         }
-        CtgLedgerProjectExpenseDetail currentExpenseDetail = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailById(id);
 
-        String reimburserLoginName = Optional.ofNullable(currentExpenseDetail).map(e->e.getReimburserLoginName()).orElse(null);
 
         CtgLedgerProject ctgLedgerProject = projectService.selectCtgLedgerProjectById(projectId);
         // 项目管理员
@@ -300,10 +298,39 @@ public class ReimbursementController extends BaseController {
     @PreAuthorize("@ss.hasPermi('business:expenditure:exportledger')")
     @Log(title = "检查台账数据完整性", businessType = BusinessType.EXPORT)
     public AjaxResult checkExpenditureLedgerDataValid(@RequestParam("projectId") Long projectId, @RequestParam("year") Integer year, @RequestParam("maxReimbursementSequenceNo") Long maxReimbursementSequenceNo) {
-        return projectExpenditureLedgerService.projectExpenditureLedgerValid(projectId,year,maxReimbursementSequenceNo);
+        return projectExpenditureLedgerService.projectExpenditureLedgerValid(projectId, year, maxReimbursementSequenceNo);
     }
 
+    @ApiOperation("查看所有报销用户")
+    @RequestMapping(value = "/getAllReimbursers", method = RequestMethod.GET)
+    @PreAuthorize("@ss.hasPermi('business:expenditure:exportledger')")
+    @Log(title = "查看所有报销用户", businessType = BusinessType.EXPORT)
+    public AjaxResult getAllReimbursers(@RequestParam("projectId") Long projectId,
+                                        @RequestParam("year") Integer year,
+                                        @RequestParam(value = "maxReimbursementSequenceNo", required = false) Long maxReimbursementSequenceNo) {
+        reimbursementService.checkPermisson(projectId, SecurityUtils.getUserId());
+        // 使用Calendar获取实际年份
+        Calendar calendar = Calendar.getInstance();
+        year = Optional.ofNullable(year).orElse(calendar.get(Calendar.YEAR));
+        if (Objects.isNull(maxReimbursementSequenceNo)) {
+            maxReimbursementSequenceNo = projectExpenditureLedgerService.selectMaxReimbursementSequenceNo(projectId, year);
+        }
+        if (Objects.isNull(maxReimbursementSequenceNo) || maxReimbursementSequenceNo <= 0) {
+            return AjaxResult.error(String.format("项目ID:%s，年度:%s 暂无报销记录，无法导出台账！", projectId, year));
+        }
 
+        CtgLedgerProjectExpenseDetail queryParam = new CtgLedgerProjectExpenseDetail();
+        queryParam.setLedgerProjectId(projectId);
+        queryParam.setYear(year);
+        queryParam.setReimbursementSequenceNo(maxReimbursementSequenceNo);
+        List<CtgLedgerProjectExpenseDetail> projectExpenseDetailList = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailList(queryParam);
+        if (projectExpenseDetailList == null || projectExpenseDetailList.isEmpty()) {
+            return AjaxResult.error(String.format("项目ID:%s，年度:%s，第%s次报销记录不存在！", projectId, year, maxReimbursementSequenceNo));
+        }
+        List<ReimburserDTO> reimburserDTOList = projectExpenseDetailList.stream().map(d -> ReimburserDTO.builder().reimburserName(d.getReimburserName()).reimburserName(d.getReimburserLoginName()).build()).collect(Collectors.toList());
+
+        return AjaxResult.success(reimburserDTOList);
+    }
 
 
     @ApiOperation("获取所有有效用户")
@@ -311,13 +338,13 @@ public class ReimbursementController extends BaseController {
     @PreAuthorize("@ss.hasPermi('business:expenditure:userlist')")
     public AjaxResult loadValidUsers(@RequestParam(name = "name", required = false) String name, @RequestParam(name = "pageSize", required = false, defaultValue = "50") Integer pageSize) {
 
-        
+
         PageUtils.startPage(pageSize);
-        
+
         // 根据名称类型确定查询字段
         String userName = null;
         String nickName = null;
-        
+
         if (name != null && !name.isEmpty()) {
             boolean startEnglish = StringUtil.startWithEnglish(name);
             if (startEnglish) {
@@ -329,17 +356,17 @@ public class ReimbursementController extends BaseController {
 
         // 使用高效查询方法，只查询需要的字段，不关联角色表
         List<SysUser> userList = userService.selectValidUsersBasic(userName, nickName);
-        
+
         // 防止空指针异常
         if (userList == null) {
             userList = java.util.Collections.emptyList();
         }
-        
+
         // 转换为VO对象
         List<SysUserVo> sysUserVoList = userList.stream()
                 .map(SysUserVo::toSysUserVo)
                 .collect(Collectors.toList());
-        
+
         return AjaxResult.success(sysUserVoList);
     }
 
