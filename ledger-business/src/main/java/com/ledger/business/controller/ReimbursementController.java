@@ -239,7 +239,8 @@ public class ReimbursementController extends BaseController {
     @Log(title = "导出台账", businessType = BusinessType.EXPORT)
     public AjaxResult getProjectExpenditureLedger(@RequestParam("projectId") Long projectId,
                                                   @RequestParam("year") Integer year,
-                                                  @RequestParam(value = "maxReimbursementSequenceNo", required = false) Long maxReimbursementSequenceNo) {
+                                                  @RequestParam(value = "maxReimbursementSequenceNo") Long maxReimbursementSequenceNo,
+                                                  @RequestParam(value = "id",required = true) Long id) {
         reimbursementService.checkPermisson(projectId, SecurityUtils.getUserId());
         // 使用Calendar获取实际年份
         Calendar calendar = Calendar.getInstance();
@@ -259,8 +260,9 @@ public class ReimbursementController extends BaseController {
         if (projectExpenseDetailList == null || projectExpenseDetailList.isEmpty()) {
             return AjaxResult.error(String.format("项目ID:%s，年度:%s，第%s次报销记录不存在，无法导出台账！", projectId, year, maxReimbursementSequenceNo));
         }
+        CtgLedgerProjectExpenseDetail currentExpenseDetail = ctgLedgerProjectExpenseDetailService.selectCtgLedgerProjectExpenseDetailById(id);
 
-        String reimburserLoginName = Optional.ofNullable(projectExpenseDetailList.get(0)).map(e->e.getReimburserLoginName()).orElse(null);
+        String reimburserLoginName = Optional.ofNullable(currentExpenseDetail).map(e->e.getReimburserLoginName()).orElse(null);
 
         CtgLedgerProject ctgLedgerProject = projectService.selectCtgLedgerProjectById(projectId);
         // 项目管理员
