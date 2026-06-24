@@ -327,8 +327,20 @@ public class ReimbursementController extends BaseController {
         if (projectExpenseDetailList == null || projectExpenseDetailList.isEmpty()) {
             return AjaxResult.error(String.format("项目ID:%s，年度:%s，第%s次报销记录不存在！", projectId, year, maxReimbursementSequenceNo));
         }
-        List<ReimburserDTO> reimburserDTOList = projectExpenseDetailList.stream().map(d -> ReimburserDTO.builder().reimburserName(d.getReimburserName()).reimburserName(d.getReimburserLoginName()).build()).collect(Collectors.toList());
-
+        List<ReimburserDTO> reimburserDTOList = projectExpenseDetailList.stream()
+                .map(d -> ReimburserDTO.builder()
+                        .reimburserName(d.getReimburserName())
+                        .reimburserLoginName(d.getReimburserLoginName())
+                        .build())
+                // 根据 reimburserLoginName 去重，key为登录名，value取第一条
+                .collect(Collectors.toMap(
+                        ReimburserDTO::getReimburserLoginName,
+                        dto -> dto,
+                        (existing, replacement) -> existing
+                ))
+                .values()
+                .stream()
+                .collect(Collectors.toList());
         return AjaxResult.success(reimburserDTOList);
     }
 
