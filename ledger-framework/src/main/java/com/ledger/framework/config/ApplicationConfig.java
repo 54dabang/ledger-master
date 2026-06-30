@@ -19,12 +19,14 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @MapperScan("com.ledger.**.mapper")
 public class ApplicationConfig
 {
+    private static final String DEFAULT_TIME_ZONE = "Asia/Shanghai";
+
     /**
      * 时区配置
      */
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer jacksonObjectMapperCustomization()
     {
-        return jacksonObjectMapperBuilder -> jacksonObjectMapperBuilder.timeZone(TimeZone.getDefault());
+        return jacksonObjectMapperBuilder -> jacksonObjectMapperBuilder.timeZone(TimeZone.getTimeZone(DEFAULT_TIME_ZONE));
     }
 }
